@@ -1,20 +1,23 @@
-oldwd <- getwd()
-## setwd("~/Migale/Research_Projects/Microbiota")
-setwd("~/Local/Research_Projects/Microbiota")
-source("./R_scripts/graphical_methods.R")
-source("./R_scripts/tree_methods.R")
-source("./R_scripts/plot_merged_trees.R")
-source("./R_scripts/specificity_methods.R")
-source("./R_scripts/ternary_plot.R")
-source("./R_scripts/richness.R")
-source("./R_scripts/edgePCA.R")
-source("./R_scripts/copy_number_correction.R")
-source("./R_scripts/import_frogs.R")
-source("./R_scripts/prevalence.R")
+## Load packages
 library(ggplot2)
 library(phyloseq)
 library(reshape2)
 library(ape)
 library(gridExtra)
 
-setwd(oldwd)
+scripts <- c("graphical_methods.R",
+             "tree_methods.R",
+             "plot_merged_trees.R",
+             "specificity_methods.R",
+             "ternary_plot.R",
+             "richness.R",
+             "edgePCA.R",
+             "copy_number_correction.R",
+             "import_frogs.R",
+             "prevalence.R")
+urls <- paste0("https://raw.githubusercontent.com/mahendra-mariadassou/phyloseq-extended/master/", scripts)
+
+for (url in urls) {
+  source(url)
+}
+
