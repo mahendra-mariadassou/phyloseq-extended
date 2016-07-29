@@ -291,9 +291,9 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
   ## Get mean of each batch of replicate
   if (!is.null(replicate)) { sampleCoordinates <- replicate_means(DF, replicate) }
   ## Mapping section
-  p <- ggplot(DF, aes_string(x = x, y = y))
-  ## Plot building (do not include aes in main figure, allows displays of further layers)
-  p <- p + geom_point(aes_string(color = color, shape = shape), na.rm = TRUE)
+  p <- ggplot(DF, aes_string(x = x, y = y, color = color, shape = shape))
+  ## Plot building
+  p <- p + geom_point(na.rm = TRUE)
   
   ## Add the text labels
   if( !is.null(label) ){
@@ -307,7 +307,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
     if (color == replicate) { ## map color to replicate if color and replicate grouping agree
       rep_map <- aes_string(x=x, y=y, label=replicate, color = replicate, na.rm=TRUE)
     } else { ## don't set color aes
-      rep_map <- aes_string(x=x, y=y, label=replicate, na.rm=TRUE)
+      rep_map <- aes_string(x=x, y=y, label=replicate, color = NULL, na.rm=TRUE)
     }
     p <- p + geom_text(rep_map, data = sampleCoordinates,
                        size=4, vjust=1.5, na.rm=TRUE)
