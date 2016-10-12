@@ -91,9 +91,13 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
     invisible(p)
 }
 
-phylodiv <- function(physeq) {
+phylodiv <- function(physeq, theta = 0) {
     ## Args:
     ## - physeq: phyloseq class object, from which phylogeny and abundance data are extracted
+    ## - theta: parameter that determines the balance in the Balance Weighted Phylogenetic Diversity (see McCoy and Matsen, 2013)
+    ##          Theta = 0 corresponds to Faith's PD
+    count_to_prop <- function(x) {x/sum(x)}
+    physeq <- transform_sample_counts(physeq, count_to_prop)
     x <- as(otu_table(physeq), "matrix")
     if (taxa_are_rows(physeq)) { x <- t(x) }
     phy <- phy_tree(physeq)
@@ -108,7 +112,11 @@ phylodiv <- function(physeq) {
     ## where cpm_{ij} gives the abundance of OTUs originating from branch j in community i. 
     cpm <- x %*% incidence
     ## Convert to incidence matrix (0/1) and multiply by edge length to obtain PD per community.
-    cpm[cpm > 0] <- 1
+    if (theta == 0) {
+      cpm[cpm > 0] <- 1
+    } else {
+      cpm <- pmin(cpm^theta, (1-cpm)^theta)
+    }
     pd <-  cpm %*% phy$edge.length
 
     ## Add sample data information
