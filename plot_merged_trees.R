@@ -599,7 +599,7 @@ plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
     
     ## Potentially normalize counts to frequencies
     if (freq) {
-        physeq <- transform_sample_counts(physeq, function(x) x /sum(x))
+        physeq <- transform_sample_counts(physeq, function(x) {x /sum(x)} )
     }
     
     ## Merge samples by grouping factor, if NULL merge all samples together
