@@ -456,7 +456,33 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     return(mdf)
 }
 
-
+## Plot a distance matrix as a heatmap with samples sorted according to 
+## order vector
+plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL) {
+  ## Args:
+  ## - dist: distance matrix (dist class)
+  ## - order: (optional) ordering of the samples of dist for representation
+  ## - title: (optional) graph title
+  ##
+  ## Returns:
+  ## - a ggplot2 object
+  data <- melt(as(dist, "matrix"))
+  colnames(data) <- c("x", "y", "distance")
+  if (!is.null(order)) {
+    data$x <- factor(data$x, levels = order)
+    data$y <- factor(data$y, levels = order)
+  }
+  p <- ggplot(data, aes(x = x, y = y, fill = distance)) + geom_tile() 
+  p <- p + theme(axis.title.x = element_blank(), 
+                 axis.title.y = element_blank(), 
+                 axis.text.x = element_blank(), 
+                 axis.text.y = element_blank()
+  )
+  if (!is.null(title)) {
+    p <- p + ggtitle(title)
+  }
+  return(p)
+}
 
 ################################################################################
 # Define S3 generic extract_eigenvalue function
