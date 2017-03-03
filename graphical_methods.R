@@ -86,6 +86,8 @@ correct_levels <- function(physeq, DF, map.var) {
   return(DF)
 }
 
+
+
 ## Find numberOfTaxa most abundant taxa at taxaRank level and return their relative
 ## abundance in all sample
 top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
@@ -147,7 +149,6 @@ top_taxa <- function(physeq, taxaRank, numberOfTaxa = 9) {
   topTaxa <- (abundanceByTaxa[ii, taxaRank])[1:min(numberOfTaxa, nrow(abundanceByTaxa))]
   return(as(topTaxa, "character"))
 }
-
 
 ## Find numberOfConditions most abundant conditions in variable 
 top_conditions <- function(physeq, variable, numberOfConditions = 9) {
@@ -483,6 +484,36 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL) {
   }
   return(p)
 }
+
+## Wrapper around hclust to represent clustering tree
+## with leaves colored according to some variables
+plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, title = paste(method, "clustering tree")) {
+  ## Args:
+  ## - physeq: phyloseq class object
+  ## - dist: distance matrix (dist class)
+  ## - method: (character) linkage method used in hclust, defaults to "ward.D2"
+  ## - color: (character) variable name used to color tree leaves. Defaults to NULL
+  ## - title: (character) optional. Plot title, defaults to "method" clustering tree. 
+  ##
+  ## Returns:
+  ## - a plot object
+  if (is.character(color)) {
+    color <- get_variable(physeq, color)
+  } else {
+    color <- rep("black", nsamples(physeq))
+  }
+  color <- as.factor(color)
+  ## automatic color palette: one color per different sample type
+  palette <- hue_pal()(length(levels(color)))
+  tipColor = col_factor(palette, levels = levels(color))(color)
+  ## Change hclust object to phylo object and plot
+  clust <- as.phylo(hclust(dist, method = method))
+  plot(clust, 
+       tip.color = tipColor, 
+       direction = "downwards", 
+       main = paste(method, "linkage"))
+}
+
 
 ################################################################################
 # Define S3 generic extract_eigenvalue function
