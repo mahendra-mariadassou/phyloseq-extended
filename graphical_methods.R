@@ -297,7 +297,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
   
   ## Add the text labels
   if( !is.null(label) ){
-    label_map <- aes_string(x=x, y=y, label=label, color = color, na.rm=TRUE)
+    label_map <- aes_string(x=x, y=y, label=label, color = color)
     p <- p + geom_text(label_map, data=DF[!is.na(DF[ , label]) , ],
                        size=3, vjust=1.5, na.rm=TRUE)
   }
@@ -307,10 +307,10 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
     if (color == replicate) { ## map color to replicate if color and replicate grouping agree
       rep_map <- aes_string(x=x, y=y, label=replicate, color = replicate, na.rm=TRUE)
     } else { ## don't set color aes
-      rep_map <- aes_string(x=x, y=y, label=replicate, color = NULL, na.rm=TRUE)
+      rep_map <- aes_string(x=x, y=y, label=replicate, color = NULL)
     }
     p <- p + geom_text(rep_map, data = sampleCoordinates,
-                       size=4, vjust=1.5, na.rm=TRUE)
+                       size=4, vjust=1.5)
   }
   
   ## Optionally add a title to the plot
