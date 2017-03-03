@@ -306,7 +306,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
   ## Add replicates
   if( !is.null(replicate) ){
     if (color == replicate) { ## map color to replicate if color and replicate grouping agree
-      rep_map <- aes_string(x=x, y=y, label=replicate, color = replicate, na.rm=TRUE)
+      rep_map <- aes_string(x=x, y=y, label=replicate, color = replicate)
     } else { ## don't set color aes
       rep_map <- aes_string(x=x, y=y, label=replicate, color = NULL)
     }
@@ -490,7 +490,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL) {
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, title = paste(method, "clustering tree")) {
   ## Args:
   ## - physeq: phyloseq class object
-  ## - dist: distance matrix (dist class)
+  ## - dist: distance matrix (dist class) or character to be used in phyloseq::distance function
   ## - method: (character) linkage method used in hclust, defaults to "ward.D2"
   ## - color: (character) variable name used to color tree leaves. Defaults to NULL
   ## - title: (character) optional. Plot title, defaults to "method" clustering tree. 
@@ -503,6 +503,11 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, title = p
     color <- rep("black", nsamples(physeq))
   }
   color <- as.factor(color)
+  ## compute distance
+  if (is.character(dist)) {
+   dist <- dist[1]
+   dist <- distance(physeq, method = dist)
+  }
   ## automatic color palette: one color per different sample type
   palette <- hue_pal()(length(levels(color)))
   tipColor = col_factor(palette, levels = levels(color))(color)
