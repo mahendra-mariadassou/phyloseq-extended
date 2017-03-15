@@ -516,7 +516,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, title = p
   plot(clust, 
        tip.color = tipColor, 
        direction = "downwards", 
-       main = paste(method, "linkage"))
+       main = title)
 }
 
 
