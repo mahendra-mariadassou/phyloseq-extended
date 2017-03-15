@@ -519,6 +519,14 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, title = p
        main = title)
 }
 
+## Extract legend from a ggplot object
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  legend
+}
+
 
 ################################################################################
 # Define S3 generic extract_eigenvalue function
