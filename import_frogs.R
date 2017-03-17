@@ -1,5 +1,5 @@
 ## Modification of phyloseq import_biom function to format Function to read the biom file produced by FROGS and load it as a phyloseq object
-library(biom)
+library(biomformat)
 
 import_frogs <- function(biom, treefilename = NULL, refseqfilename = NULL, refseqFunction = readDNAStringSet, refseqArgs = NULL, taxMethod = c("blast", "rdp"), parallel = TRUE, ...) {
     ## Args
