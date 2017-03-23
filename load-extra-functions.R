@@ -14,7 +14,8 @@ scripts <- c("graphical_methods.R",
              "edgePCA.R",
              "copy_number_correction.R",
              "import_frogs.R",
-             "prevalence.R")
+             "prevalence.R", 
+             "compute_niche.R")
 urls <- paste0("https://raw.githubusercontent.com/mahendra-mariadassou/phyloseq-extended/master/", scripts)
 
 for (url in urls) {
