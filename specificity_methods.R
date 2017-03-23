@@ -121,11 +121,10 @@ estimate_specificity <- function(physeq, group,
   ## Get grouping factor 
   if (!is.null(sample_data(physeq, FALSE))) {
     if (class(group) == "character" & length(group) == 1) {
-      x1 <- data.frame(sample_data(physeq))
-      if (!group %in% colnames(x1)) {
+      if (! group %in% sample_variables(physeq)) {
         stop("group not found among sample variable names.")
       }
-      group <- x1[, group]
+      group <- get_variable(physeq, group)
     }
   }
   if (class(group) != "factor") {
