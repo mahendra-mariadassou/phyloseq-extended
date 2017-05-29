@@ -306,9 +306,9 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
   ## Add replicates
   if( !is.null(replicate) ){
     if (color == replicate) { ## map color to replicate if color and replicate grouping agree
-      rep_map <- aes_string(x=x, y=y, label=replicate, color = replicate)
+      rep_map <- aes_string(x=x, y=y, label=replicate, color = replicate, shape = NULL)
     } else { ## don't set color aes
-      rep_map <- aes_string(x=x, y=y, label=replicate, color = NULL)
+      rep_map <- aes_string(x=x, y=y, label=replicate, color = NULL, shape = NULL)
     }
     p <- p + geom_text(rep_map, data = sampleCoordinates,
                        size=4, vjust=1.5)
