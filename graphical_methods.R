@@ -487,12 +487,15 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL) {
 
 ## Wrapper around hclust to represent clustering tree
 ## with leaves colored according to some variables
-plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, title = paste(method, "clustering tree")) {
+plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, 
+                       label = NULL, 
+                       title = paste(method, "clustering tree")) {
   ## Args:
   ## - physeq: phyloseq class object
   ## - dist: distance matrix (dist class) or character to be used in phyloseq::distance function
   ## - method: (character) linkage method used in hclust, defaults to "ward.D2"
   ## - color: (character) variable name used to color tree leaves. Defaults to NULL
+  ## - label: (character) one the sample_variable from physeq
   ## - title: (character) optional. Plot title, defaults to "method" clustering tree. 
   ##
   ## Returns:
@@ -513,6 +516,13 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, title = p
   tipColor = col_factor(palette, levels = levels(color))(color)
   ## Change hclust object to phylo object and plot
   clust <- as.phylo(hclust(dist, method = method))
+  ## change tip label if needed
+  if (!is.null(label)) {
+    tip.dict <- setNames(sample_variable(physeq, label), 
+                         sample.names(physeq))
+    clust$tip.label <- tip.dict[clust$tip.label]
+  }
+  ## plot clustering tree
   plot(clust, 
        tip.color = tipColor, 
        direction = "downwards", 
