@@ -534,7 +534,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## add legend (at figure bottom, over 4 columns)
   legend("bottom", legend = levels(color) , xpd=TRUE, title = legend.title,
          fill = palette, border = palette,cex=0.8, bty="n", 
-         ncol=4,  inset = c(0,-0.05))
+         ncol=4,  inset = c(0,0))
 }
 
 ## Extract legend from a ggplot object
