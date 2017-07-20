@@ -518,7 +518,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   clust <- as.phylo(hclust(dist, method = method))
   ## change tip label if needed
   if (!is.null(label)) {
-    tip.dict <- setNames(sample_variable(physeq, label), 
+    tip.dict <- setNames(get_variable(physeq, label), 
                          sample.names(physeq))
     clust$tip.label <- tip.dict[clust$tip.label]
   }
