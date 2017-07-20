@@ -459,11 +459,13 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
 ## Plot a distance matrix as a heatmap with samples sorted according to 
 ## order vector
-plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL) {
+plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL, 
+                                 low = "#B1F756", high = "#132B13") {
   ## Args:
   ## - dist: distance matrix (dist class)
   ## - order: (optional) ordering of the samples of dist for representation
   ## - title: (optional) graph title
+  ## - low, high: (optional) Colours for low and high ends of the gradient 
   ##
   ## Returns:
   ## - a ggplot2 object
@@ -477,8 +479,8 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL) {
   p <- p + theme(axis.title.x = element_blank(), 
                  axis.title.y = element_blank(), 
                  axis.text.x = element_blank(), 
-                 axis.text.y = element_blank()
-  )
+                 axis.text.y = element_blank()) + 
+    scale_fill_gradient(low = low, high = high)
   if (!is.null(title)) {
     p <- p + ggtitle(title)
   }
@@ -518,7 +520,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   clust <- as.phylo(hclust(dist, method = method))
   ## change tip label if needed
   if (!is.null(label)) {
-    tip.dict <- setNames(get_variable(physeq, label), 
+    tip.dict <- setNames(as.character(get_variable(physeq, label)), 
                          sample.names(physeq))
     clust$tip.label <- tip.dict[clust$tip.label]
   }
