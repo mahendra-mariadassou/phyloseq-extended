@@ -432,7 +432,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ## Add taxonomic information and replace NA and unclassified Unknown
     tax <- as(tax_table(physeq), "matrix")
     tax[is.na(tax)] <- "Unknown"
-    tax[tax %in% c("", "unclassified", "Unclassified")] <- "Unknown"
+    tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
     tax <- data.frame(OTU = rownames(tax), tax)
     mdf <- merge(mdf, tax, by.x = "OTU")
     ## Aggregate by taxaRank2
