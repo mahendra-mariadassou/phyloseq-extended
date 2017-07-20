@@ -503,8 +503,10 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## Returns:
   ## - a plot object
   if (is.character(color)) {
+    legend.title <- color
     color <- get_variable(physeq, color)
   } else {
+    legend.title <- NULL
     color <- rep("black", nsamples(physeq))
   }
   color <- as.factor(color)
@@ -529,6 +531,10 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
        tip.color = tipColor, 
        direction = "downwards", 
        main = title)
+  ## add legend (at figure bottom, over 4 columns)
+  legend("bottom", legend = levels(color) , xpd=TRUE, title = legend.title,
+         fill = palette, border = palette,cex=0.8, bty="n", 
+         ncol=4,  inset = c(0,-0.05))
 }
 
 ## Extract legend from a ggplot object

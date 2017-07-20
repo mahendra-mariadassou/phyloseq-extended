@@ -33,4 +33,5 @@ grid.arrange(plot_dist_as_heatmap(dist.uf, order, low = "#B1F756", high = "#132B
              plot_dist_as_heatmap(dist.uf, order, low = "#457363", high = "#df3d77"),
              ncol = 2)
 
-## 
+## test plot_clust
+plot_clust(food, dist.uf, method = "ward.D2", color = "EnvType")
