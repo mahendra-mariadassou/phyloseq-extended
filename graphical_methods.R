@@ -491,7 +491,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 ## with leaves colored according to some variables
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, 
                        label = NULL, 
-                       title = paste(method, "clustering tree")) {
+                       title = paste(method, "linkage clustering tree")) {
   ## Args:
   ## - physeq: phyloseq class object
   ## - dist: distance matrix (dist class) or character to be used in phyloseq::distance function
