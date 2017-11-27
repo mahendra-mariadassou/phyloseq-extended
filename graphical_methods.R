@@ -81,7 +81,7 @@ correct_levels <- function(physeq, DF, map.var) {
   if (any(DF[ , map.var] == "taxa")) {
     oldLevels <- levels(get_variable(physeq, map.var))
   }
-  newLevels <- setdiff(levels(DF[ , map.var]), oldLevels)
+  newLevels <- setdiff(unique(DF[ , map.var]), oldLevels)
   DF[ , map.var] <- factor(DF[ , map.var], levels = c(oldLevels, newLevels))
   return(DF)
 }
