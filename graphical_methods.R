@@ -75,14 +75,15 @@ plot_composition <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobac
 
 correct_levels <- function(physeq, DF, map.var) {
   oldLevels <- character(0)
-  if (any(DF[ , map.var] == "samples")) {
+  if (any(DF[ , map.var] == "samples", na.rm = TRUE)) {
     oldLevels <- unique(tax_table(physeq)[ , map.var])
   }
-  if (any(DF[ , map.var] == "taxa")) {
+  if (any(DF[ , map.var] == "taxa", na.rm = TRUE)) {
     oldLevels <- levels(get_variable(physeq, map.var))
   }
-  newLevels <- setdiff(unique(DF[ , map.var]), oldLevels)
-  DF[ , map.var] <- factor(DF[ , map.var], levels = c(oldLevels, newLevels))
+  allLevels <- unique(c(DF[, map.var], oldLevels))
+  allLevels <- allLevels[!is.na(allLevels)]
+  DF[ , map.var] <- factor(DF[ , map.var], levels = allLevels)
   return(DF)
 }
 
