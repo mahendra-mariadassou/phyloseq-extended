@@ -81,7 +81,7 @@ correct_levels <- function(physeq, DF, map.var) {
   if (any(DF[ , map.var] == "taxa", na.rm = TRUE)) {
     oldLevels <- levels(get_variable(physeq, map.var))
   }
-  allLevels <- unique(c(DF[, map.var], oldLevels))
+  allLevels <- unique(c(as.character(DF[, map.var]), oldLevels))
   allLevels <- allLevels[!is.na(allLevels)]
   DF[ , map.var] <- factor(DF[ , map.var], levels = allLevels)
   return(DF)
