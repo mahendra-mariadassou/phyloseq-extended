@@ -13,17 +13,17 @@ rarecurve2 <- function (x, step = 1, sample, xlab = "Sample Size", ylab = "Speci
   nr <- nrow(x)
   out <- lapply(seq_len(nr), function(i) {
     n <- seq(1, tot[i], by = step)
-    if (n[length(n)] != tot[i]) 
+    if (n[length(n)] != tot[i])
       n <- c(n, tot[i])
     drop(rarefy(x[i, ], n))
   })
   Nmax <- sapply(out, function(x) max(attr(x, "Subsample")))
   Smax <- sapply(out, max)
-  plot(c(1, max(Nmax)), c(1, max(Smax)), xlab = xlab, ylab = ylab, 
+  plot(c(1, max(Nmax)), c(1, max(Smax)), xlab = xlab, ylab = ylab,
        type = "n", ...)
   if (!missing(sample)) {
     abline(v = sample)
-    rare <- sapply(out, function(z) approx(x = attr(z, "Subsample"), 
+    rare <- sapply(out, function(z) approx(x = attr(z, "Subsample"),
                                            y = z, xout = sample, rule = 1)$y)
     abline(h = rare, lwd = 0.5)
   }
@@ -96,8 +96,8 @@ top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
     ## Args:
     ## - physeq: phyloseq class object
     ## - raw: (Required). Defaults to 'FALSE', logical. Should abundances be transformed to
-    ##        frequencies before sorting otus from most to less abundant. 
-    ## - numberOfTaxa: number of (top) taxa to keep 
+    ##        frequencies before sorting otus from most to less abundant.
+    ## - numberOfTaxa: number of (top) taxa to keep
     ##
     ## Returns:
     ## - x: Data frame with numberOfTaxa rows (one per final otu) and column 'Abundance' standing
@@ -152,7 +152,7 @@ top_taxa <- function(physeq, taxaRank, numberOfTaxa = 9) {
   return(as(topTaxa, "character"))
 }
 
-## Find numberOfConditions most abundant conditions in variable 
+## Find numberOfConditions most abundant conditions in variable
 top_conditions <- function(physeq, variable, numberOfConditions = 9) {
   stopifnot(!is.null(sample_data(physeq, FALSE)))
   var <- get_variable(physeq, variable)
@@ -162,7 +162,7 @@ top_conditions <- function(physeq, variable, numberOfConditions = 9) {
 }
 
 ## Aggregate coordinates by replicate to have "mean" coordinates
-## for a given replicate condition. 
+## for a given replicate condition.
 replicate_means <- function(DF, replicate) {
   Axis1 <- colnames(DF)[1]
   Axis2 <- colnames(DF)[2]
@@ -227,7 +227,7 @@ plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicat
   names(shape.scale) <- shape.names
   shape.scale["samples"] <- 16
   p <- p + scale_shape_manual(values = shape.scale)
-  
+
   ## Add the text labels
   if( !is.null(label) ){
     label_map <- aes_string(x=x, y=y, color = color, label=label, na.rm=TRUE)
@@ -247,7 +247,7 @@ plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicat
                        colour = repcols,
                        size=4, vjust=1.5, na.rm=TRUE)
   }
-  
+
   ## Optionally add a title to the plot
   if( !is.null(title) ){
     p <- p + ggtitle(title)
@@ -270,11 +270,11 @@ plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicat
       ## Update the x-label and y-label
       p = p + xlab(strivar[1]) + ylab(strivar[2])
   }
-  
+
   ## Add outliers attribute
   if ( !is.null(outlier) ) {attr(p, "outliers") <- outliers}
   if ( !is.null(replicate) ) {attr(p, "repcols") <- repcols}
-  
+
   ## return the ggplot object
   return(p)
 }
@@ -297,7 +297,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
   p <- ggplot(DF, aes_string(x = x, y = y, color = color, shape = shape))
   ## Plot building
   p <- p + geom_point(na.rm = TRUE)
-  
+
   ## Add the text labels
   if( !is.null(label) ){
     label_map <- aes_string(x=x, y=y, label=label, color = color)
@@ -315,7 +315,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
     p <- p + geom_text(rep_map, data = sampleCoordinates,
                        size=4, vjust=1.5)
   }
-  
+
   ## Optionally add a title to the plot
   if( !is.null(title) ){
     p <- p + ggtitle(title)
@@ -338,7 +338,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
       ## Update the x-label and y-label
       p = p + xlab(strivar[1]) + ylab(strivar[2])
   }
-  
+
   ## return the ggplot object
   return(p)
 }
@@ -361,7 +361,7 @@ ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
   ##
   ## Returns:
   ## - ggplot2 figure with distribution of normalized log2(counts+1) on left, colored by
-  ##   color and mean/variance function on right panel. 
+  ##   color and mean/variance function on right panel.
   countdf <- counts(cds, normalize = TRUE)
   countdf <- log2(countdf+1)
   countdf[countdf == 0] <- NA
@@ -380,11 +380,11 @@ ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
   ## grid.show.layout(gl)
   ## setup viewports
   vp.1 <- viewport(layout.pos.col=1) # boxplot
-  vp.2 <- viewport(layout.pos.col=2) # mean - sd plot 
+  vp.2 <- viewport(layout.pos.col=2) # mean - sd plot
   ## init layout
   pushViewport(viewport(layout=gl))
   ## Access the first viewport
-  pushViewport(vp.1)  
+  pushViewport(vp.1)
   ## print our ggplot graphics here
   print(p, newpage=FALSE)
   ## done with the viewport
@@ -459,15 +459,15 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     return(mdf)
 }
 
-## Plot a distance matrix as a heatmap with samples sorted according to 
+## Plot a distance matrix as a heatmap with samples sorted according to
 ## order vector
-plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL, 
+plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
                                  low = "#B1F756", high = "#132B13") {
   ## Args:
   ## - dist: distance matrix (dist class)
   ## - order: (optional) ordering of the samples of dist for representation
   ## - title: (optional) graph title
-  ## - low, high: (optional) Colours for low and high ends of the gradient 
+  ## - low, high: (optional) Colours for low and high ends of the gradient
   ##
   ## Returns:
   ## - a ggplot2 object
@@ -477,11 +477,11 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
     data$x <- factor(data$x, levels = order)
     data$y <- factor(data$y, levels = order)
   }
-  p <- ggplot(data, aes(x = x, y = y, fill = distance)) + geom_tile() 
-  p <- p + theme(axis.title.x = element_blank(), 
-                 axis.title.y = element_blank(), 
-                 axis.text.x = element_blank(), 
-                 axis.text.y = element_blank()) + 
+  p <- ggplot(data, aes(x = x, y = y, fill = distance)) + geom_tile()
+  p <- p + theme(axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 axis.text.x = element_blank(),
+                 axis.text.y = element_blank()) +
     scale_fill_gradient(low = low, high = high)
   if (!is.null(title)) {
     p <- p + ggtitle(title)
@@ -491,16 +491,18 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 
 ## Wrapper around hclust to represent clustering tree
 ## with leaves colored according to some variables
-plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL, 
-                       label = NULL, 
-                       title = paste(method, "linkage clustering tree")) {
+plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
+                       label = NULL,
+                       title = paste(method, "linkage clustering tree"),
+                       palette = NULL) {
   ## Args:
   ## - physeq: phyloseq class object
   ## - dist: distance matrix (dist class) or character to be used in phyloseq::distance function
   ## - method: (character) linkage method used in hclust, defaults to "ward.D2"
   ## - color: (character) variable name used to color tree leaves. Defaults to NULL
   ## - label: (character) one the sample_variable from physeq
-  ## - title: (character) optional. Plot title, defaults to "method" clustering tree. 
+  ## - title: (character) optional. Plot title, defaults to "method" clustering tree.
+  ## - palette: (named color vector) optional. Manual color palette
   ##
   ## Returns:
   ## - a plot object
@@ -518,24 +520,28 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
    dist <- distance(physeq, method = dist)
   }
   ## automatic color palette: one color per different sample type
-  palette <- hue_pal()(length(levels(color)))
+  if (is.null(palette)) {
+    palette <- hue_pal()(length(levels(color)))
+  } else {
+    palette <- palette[levels(color)]
+  }
   tipColor = col_factor(palette, levels = levels(color))(color)
   ## Change hclust object to phylo object and plot
   clust <- as.phylo(hclust(dist, method = method))
   ## change tip label if needed
   if (!is.null(label)) {
-    tip.dict <- setNames(as.character(get_variable(physeq, label)), 
-                         sample.names(physeq))
+    tip.dict <- setNames(as.character(get_variable(physeq, label)),
+                         sample_names(physeq))
     clust$tip.label <- tip.dict[clust$tip.label]
   }
   ## plot clustering tree
-  plot(clust, 
-       tip.color = tipColor, 
-       direction = "downwards", 
+  plot(clust,
+       tip.color = tipColor,
+       direction = "downwards",
        main = title)
   ## add legend (at figure bottom, over 4 columns)
   legend("bottom", legend = levels(color) , xpd=NA,
-         fill = palette, border = palette,cex=0.8, bty="n", 
+         fill = palette, border = palette,cex=0.8, bty="n",
          ncol=4,  inset = c(0,-0.05))
 }
 
@@ -553,7 +559,7 @@ g_legend<-function(a.gplot){
 # Function is used by `plot_scree` to get the eigenvalue vector from different
 # types of ordination objects.
 # Used S3 generic in this case because many ordination objects, the input, are
-# not formally-defined S4 classes, but vaguely-/un-defined S3. 
+# not formally-defined S4 classes, but vaguely-/un-defined S3.
 #' @keywords internal
 extract_eigenvalue = function(ordination) UseMethod("extract_eigenvalue", ordination)
 # Default is to return NULL (e.g. for NMDS, or non-supported ordinations/classes).
