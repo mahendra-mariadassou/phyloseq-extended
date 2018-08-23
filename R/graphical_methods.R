@@ -282,14 +282,18 @@ plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicat
 
 ## Custom modification of plot_ordination to  add mean location
 ## of samples aggregated by variable.
-plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicate = color,
-                        shape = NULL, label = NULL, title = NULL) {
+plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
+                         replicate = color,
+                         shape = NULL, label = NULL, title = NULL) {
   DF <- plot_ordination(physeq, ordination, "samples", axes, color, shape, label, title, TRUE)
   ## Retrieve correct levels
   if(!is.null(shape)) { DF <- correct_levels(physeq, DF, shape) }
   if(!is.null(color) & !is.null(replicate)) {
-    if (replicate == color)
+    if (replicate == color) {
+      if (is.numeric(DF[, color]))
+        message("Using quantitative variable as grouping variable, try setting 'replicate = NULL' for better results.")
       DF <- correct_levels(physeq, DF, color)
+    }
   }
   ## Name dimensions
   x <- colnames(DF)[1]
