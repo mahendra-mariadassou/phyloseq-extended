@@ -287,7 +287,10 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL, replica
   DF <- plot_ordination(physeq, ordination, "samples", axes, color, shape, label, title, TRUE)
   ## Retrieve correct levels
   if(!is.null(shape)) { DF <- correct_levels(physeq, DF, shape) }
-  if(!is.null(color)) { DF <- correct_levels(physeq, DF, color) }
+  if(!is.null(color) & !is.null(replicate)) {
+    if (replicate == color)
+      DF <- correct_levels(physeq, DF, color)
+  }
   ## Name dimensions
   x <- colnames(DF)[1]
   y <- colnames(DF)[2]
