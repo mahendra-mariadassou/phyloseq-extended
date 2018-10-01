@@ -490,7 +490,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
   p <- ggplot(data, aes(x = x, y = y, fill = distance)) + geom_tile()
   p <- p + theme(axis.title.x = element_blank(),
                  axis.title.y = element_blank())
-  if (!show.samples) {
+  if (!show.names) {
     p <- p + theme(axis.title.x = element_blank(),
                    axis.title.y = element_blank())
   }
