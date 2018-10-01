@@ -470,12 +470,14 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 ## order vector
 plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
                                  low = "#B1F756", high = "#132B13",
-                                 show.samples = FALSE) {
+                                 show.names = FALSE) {
   ## Args:
   ## - dist: distance matrix (dist class)
   ## - order: (optional) ordering of the samples of dist for representation
   ## - title: (optional) graph title
   ## - low, high: (optional) Colours for low and high ends of the gradient
+  ## - show.names: (optional) Logical. Should sample names be displayed in the heatmap.
+  ##               Defaults to FALSE
   ##
   ## Returns:
   ## - a ggplot2 object
