@@ -469,7 +469,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 ## Plot a distance matrix as a heatmap with samples sorted according to
 ## order vector
 plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
-                                 low = "#B1F756", high = "#132B13") {
+                                 low = "#B1F756", high = "#132B13",
+                                 show.samples = FALSE) {
   ## Args:
   ## - dist: distance matrix (dist class)
   ## - order: (optional) ordering of the samples of dist for representation
@@ -486,10 +487,12 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
   }
   p <- ggplot(data, aes(x = x, y = y, fill = distance)) + geom_tile()
   p <- p + theme(axis.title.x = element_blank(),
-                 axis.title.y = element_blank(),
-                 axis.text.x = element_blank(),
-                 axis.text.y = element_blank()) +
-    scale_fill_gradient(low = low, high = high)
+                 axis.title.y = element_blank())
+  if (!show.samples) {
+    p <- p + theme(axis.title.x = element_blank(),
+                   axis.title.y = element_blank())
+  }
+  p <- p + scale_fill_gradient(low = low, high = high)
   if (!is.null(title)) {
     p <- p + ggtitle(title)
   }
