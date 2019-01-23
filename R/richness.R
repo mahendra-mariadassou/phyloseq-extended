@@ -1,96 +1,6 @@
 require(parallel)
 options(mc.cores= 2)
 
-## Rarefaction curve, ggplot style
-ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, parallel = FALSE, se = TRUE) {
-    ## Args:
-    ## - physeq: phyloseq class object, from which abundance data are extracted
-    ## - step: Step size for sample size in rarefaction curves
-    ## - label: Default `NULL`. Character string. The name of the variable
-    ##          to map to text labels on the plot. Similar to color option
-    ##          but for plotting text.
-    ## - color: (Optional). Default ‘NULL’. Character string. The name of the
-    ##          variable to map to colors in the plot. This can be a sample
-    ##          variable (among the set returned by
-    ##          ‘sample_variables(physeq)’ ) or taxonomic rank (among the set
-    ##          returned by ‘rank_names(physeq)’).
-    ##
-    ##          Finally, The color scheme is chosen automatically by
-    ##          ‘link{ggplot}’, but it can be modified afterward with an
-    ##          additional layer using ‘scale_color_manual’.
-    ## - color: Default `NULL`. Character string. The name of the variable
-    ##          to map to text labels on the plot. Similar to color option
-    ##          but for plotting text.
-    ## - plot:  Logical, should the graphic be plotted.
-    ## - parallel: should rarefaction be parallelized (using parallel framework)
-    ## - se:    Default TRUE. Logical. Should standard errors be computed. 
-    ## require vegan
-    x <- as(otu_table(physeq), "matrix")
-    if (taxa_are_rows(physeq)) { x <- t(x) }
-
-    ## This script is adapted from vegan `rarecurve` function
-    tot <- rowSums(x)
-    S <- rowSums(x > 0)
-    nr <- nrow(x)
-
-    rarefun <- function(i) {
-        cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
-        n <- seq(1, tot[i], by = step)
-        if (n[length(n)] != tot[i]) {
-            n <- c(n, tot[i])
-        }
-        y <- rarefy(x[i, ,drop = FALSE], n, se = se)
-        if (nrow(y) != 1) {
-	    rownames(y) <- c(".S", ".se")
-            return(data.frame(t(y), Size = n, Sample = rownames(x)[i]))
-        } else {
-            return(data.frame(.S = y[1, ], Size = n, Sample = rownames(x)[i]))
-        }
-    }
-    if (parallel) {
-        out <- mclapply(seq_len(nr), rarefun, mc.preschedule = FALSE)
-    } else {
-        out <- lapply(seq_len(nr), rarefun)
-    }
-    df <- do.call(rbind, out)
-    
-    ## Get sample data 
-    if (!is.null(sample_data(physeq, FALSE))) {
-        sdf <- as(sample_data(physeq), "data.frame")
-        sdf$Sample <- rownames(sdf)
-        data <- merge(df, sdf, by = "Sample")
-        labels <- data.frame(x = tot, y = S, Sample = rownames(x))
-        labels <- merge(labels, sdf, by = "Sample")
-    }
-    
-    ## Add, any custom-supplied plot-mapped variables
-    if( length(color) > 1 ){
-        data$color <- color
-        names(data)[names(data)=="color"] <- deparse(substitute(color))
-        color <- deparse(substitute(color))
-    }
-    if( length(label) > 1 ){
-        labels$label <- label
-        names(labels)[names(labels)=="label"] <- deparse(substitute(label))
-        label <- deparse(substitute(label))
-    }
-    
-    p <- ggplot(data = data, aes_string(x = "Size", y = ".S", group = "Sample", color = color))
-    p <- p + labs(x = "Sample Size", y = "Species Richness")
-    if (!is.null(label)) {
-        p <- p + geom_text(data = labels, aes_string(x = "x", y = "y", label = label, color = color),
-                           size = 4, hjust = 0)
-    }
-    p <- p + geom_line()
-    if (se) { ## add standard error if available
-        p <- p + geom_ribbon(aes_string(ymin = ".S - .se", ymax = ".S + .se", color = NULL, fill = color), alpha = 0.2)
-    }
-    if (plot) {
-        plot(p)
-    }
-    invisible(p)
-}
-
 phylodiv <- function(physeq, theta = 0) {
     ## Args:
     ## - physeq: phyloseq class object, from which phylogeny and abundance data are extracted
@@ -101,15 +11,15 @@ phylodiv <- function(physeq, theta = 0) {
     x <- as(otu_table(physeq), "matrix")
     if (taxa_are_rows(physeq)) { x <- t(x) }
     phy <- phy_tree(physeq)
-    
+
     ## Construct incidence matrix of the tree
     incidence <- incidenceMatrix(phy)
 
     ## Order incidence matrix according to community tables
     incidence <- incidence[colnames(x), ]
-    
+
     ## Create community phylogeny matrix by multiplying (community x edge matrix)
-    ## where cpm_{ij} gives the abundance of OTUs originating from branch j in community i. 
+    ## where cpm_{ij} gives the abundance of OTUs originating from branch j in community i.
     cpm <- x %*% incidence
     ## Convert to incidence matrix (0/1) and multiply by edge length to obtain PD per community.
     if (theta == 0) {
@@ -125,7 +35,7 @@ phylodiv <- function(physeq, theta = 0) {
         sdf$pd <- as.vector(pd)
         pd <- sdf
     }
-    
+
     return (pd)
 }
 
@@ -152,11 +62,11 @@ ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
     ## - replace: If TRUE, population are treated as of infinite size, with probabilities of occurence
     ##            of a taxa computed from the (finite size) community data
     ## - se  : Logical, should standard error be computed in addition to expected pd
-    ## - plot:  Logical, should the graphic be plotted. 
+    ## - plot:  Logical, should the graphic be plotted.
     x <- as(otu_table(physeq), "matrix")
     if (taxa_are_rows(physeq)) { x <- t(x) }
     phy <- phy_tree(physeq)
-   
+
     ## Construct incidence matrix of the tree
     incidence <- incidenceMatrix(phy)
 
@@ -175,7 +85,7 @@ ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
             ## union.clade[s, j] is the number of individuals in subtrees
             ## generated by cutting branches i (from outer loop) and j
             ## in sample s
-            return(union.clade) 
+            return(union.clade)
         }
         for (i in seq_len(nedges)) {
             if (i %% 100 == 0) {
@@ -193,18 +103,18 @@ ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
         ## dim(cpm.var) <- c(nedges, nedges, nrow(x))
         dimnames(cpm.var) <- list(phy$edge[, 2], phy$edge[, 2], rownames(x))
     }
-    
+
     ## Compute overall Phylogenetic Diversity
     pd <-  (0 + (cpm > 0) ) %*% phy$edge.length
 
-    
+
     ## Transform community matrices to frequency data
     tot <- rowSums(x)
     nr <- nrow(x)
     ## Rarefy phylogenetic diversity for one sample (i)
     pdrare <- function(i) {
         cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
-        ## Simplify matrices and tree to remove unnecessary computations. 
+        ## Simplify matrices and tree to remove unnecessary computations.
         edges.to.keep <- cpm[i, ] > 0
         branch.lengths <- phy$edge.length[edges.to.keep]
         cpm.i <- cpm[i, edges.to.keep]
@@ -213,7 +123,7 @@ ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
         }
         ## sequence of sample sizes
         n <- seq(1, tot[i], by = step)
-        if (n[length(n)] != tot[i]) 
+        if (n[length(n)] != tot[i])
             n <- c(n, tot[i])
         ## Mean and variance of pd for different sample sizes
         ## Start with mean
@@ -249,15 +159,15 @@ ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
         }
         return(data.frame(pd.rare, Size = n, Sample = rownames(x)[i]))
     }
-        
+
     if (parallel) {
         out <- mclapply(seq_len(nr), pdrare, mc.preschedule = FALSE)
     } else {
         out <- lapply(seq_len(nr), pdrare)
     }
     df <- do.call(rbind, out)
-    
-    ## Get sample data 
+
+    ## Get sample data
     if (!is.null(sample_data(physeq, FALSE))) {
         sdf <- as(sample_data(physeq), "data.frame")
         sdf$Sample <- rownames(sdf)
@@ -265,7 +175,7 @@ ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
         labels <- data.frame(x = tot, y =  pd, Sample = rownames(x))
         labels <- merge(labels, sdf, by = "Sample")
     }
-    
+
     ## Add, any custom-supplied plot-mapped variables
     if( length(color) > 1 ){
         data$color <- color
@@ -277,7 +187,7 @@ ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
         names(labels)[names(labels)=="label"] <- deparse(substitute(label))
         label <- deparse(substitute(label))
     }
-    
+
     p <- ggplot(data = data, aes_string(x = "Size", y = "pd.rare", group = "Sample", color = color))
     if (log) {
         p <- p + scale_x_log10()
