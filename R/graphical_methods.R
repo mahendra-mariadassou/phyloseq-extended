@@ -498,7 +498,7 @@ ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
 ## Return relative abundance of top NumberOfTaxa OTUs at the taxaRank2 level
 ## within taxaSet1 at taxaRank1 level
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
-                     taxaRank2 = "Family", numberOfTaxa = 9) {
+                     taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9) {
     ## Args:
     ## - physeq: phyloseq class object
     ## - taxaRank1: taxonomic level in which to do the first subsetting
@@ -518,7 +518,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     otutab <- as(otutab, "matrix")
     otutab <- apply(otutab, 2, function(x) x / sum(x))
     ## Subset to OTUs belonging to taxaSet1 to fasten process
-    stopifnot(all(c(taxaRank1, taxaRank2) %in% c(rank_names(physeq), "OTU")))
+    if (is.null(fill)) { fill <- taxaRank2 }
+    stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU")))
     otutab <- otutab[tax_table(physeq)[ , taxaRank1] %in% taxaSet1, , drop = FALSE]
     if (nrow(otutab) == 0) {
         stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
@@ -534,7 +535,9 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     tax <- data.frame(OTU = rownames(tax), tax)
     mdf <- merge(mdf, tax, by.x = "OTU")
     ## Aggregate by taxaRank2
-    mdf <- aggregate(as.formula(paste("Abundance ~ Sample +", taxaRank2)), data = mdf, FUN = sum)
+    mdf <- aggregate(as.formula(paste("Abundance ~ Sample +",
+                                      fill, "+", taxaRank2)),
+                     data = mdf, FUN = sum)
     topTaxa <- aggregate(as.formula(paste("Abundance ~ ", taxaRank2)), data = mdf, FUN = sum)
     ## Keep only numberOfTaxa top taxa and aggregate the rest as "Other"
     topTax <- as.character(topTaxa[ order(topTaxa[ , "Abundance"], decreasing = TRUE), taxaRank2])
