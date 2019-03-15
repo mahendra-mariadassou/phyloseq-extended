@@ -518,7 +518,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     otutab <- as(otutab, "matrix")
     otutab <- apply(otutab, 2, function(x) x / sum(x))
     ## Subset to OTUs belonging to taxaSet1 to fasten process
-    stopifnot(all(c(taxaRank1, taxaRank2) %in% colnames(tax_table(physeq))))
+    stopifnot(all(c(taxaRank1, taxaRank2) %in% c(rank_names(physeq), "OTU")))
     otutab <- otutab[tax_table(physeq)[ , taxaRank1] %in% taxaSet1, , drop = FALSE]
     if (nrow(otutab) == 0) {
         stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
