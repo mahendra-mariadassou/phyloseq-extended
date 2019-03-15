@@ -130,9 +130,13 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
 
 ## Plot composition at taxaRank2 level within taxa taxaSet1 at taxaRank1 level
 ## Restricts plot to numberOfTaxa taxa
-plot_composition <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
-                             taxaRank2 = "Family", numberOfTaxa = 9, fill = NULL,
-                             x = "Sample", y = "Abundance", facet_grid = NULL) {
+plot_composition <- function(physeq,
+                             taxaRank1 = "Phylum",
+                             taxaSet1 = "Proteobacteria",
+                             taxaRank2 = "Family",
+                             numberOfTaxa = 9, fill = NULL,
+                             x = "Sample",
+                             y = "Abundance", facet_grid = NULL) {
   ## Args:
   ## - physeq: phyloseq class object
   ## - taxaRank1: taxonomic level in which to do the first subsetting
@@ -142,7 +146,8 @@ plot_composition <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobac
   ##
   ## Returns:
   ## - ggplot2 graphics
-  ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2, numberOfTaxa)
+  ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
+                     fill, numberOfTaxa)
   p <- ggplot(ggdata, aes_string(x = x, y = y, fill = fill, color = fill, group = "Sample"))
   ## Manually change color scale to assign grey to "Unknown" (if any)
   if (!is.null(fill) && any(c("Unknown", "Other") %in% unique(ggdata[, fill]))) {
