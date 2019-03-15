@@ -536,6 +536,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ## Add taxonomic information and replace NA and unclassified Unknown
     tax <- as(tax_table(physeq), "matrix")
     tax[is.na(tax)] <- "Unknown"
+    tax[grepl("unknown", tax)] <- "Unknown"
     tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
     tax <- data.frame(OTU = rownames(tax), tax)
     mdf <- merge(mdf, tax, by.x = "OTU")
@@ -550,16 +551,22 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     topTax <- topTax[1:min(length(topTax), numberOfTaxa)]
     ## Change to character
     mdf[ , taxaRank2] <- as.character(mdf[ , taxaRank2])
+    mdf[ , fill] <- as.character(mdf[ , fill])
     ii <- (mdf[ , taxaRank2] %in% c(topTax, "Unknown"))
     mdf[!ii , taxaRank2] <- "Other"
-    mdf <- aggregate(as.formula(paste("Abundance ~ Sample +", taxaRank2)), data = mdf, FUN = sum)
+    mdf[!ii , fill] <- "Other"
+    mdf <- aggregate(as.formula(paste("Abundance ~ Sample +", fill,
+                                      "+", taxaRank2)), data = mdf, FUN = sum)
     mdf[, taxaRank2] <- factor(mdf[, taxaRank2], levels = c(sort(topTax), "Unknown", "Other"))
+    topFill <- unique(mdf[, fill])
+    topFill <- topFill[!topFill %in% c("Other", "Unknown")]
+    mdf[, fill] <- factor(mdf[, fill], levels = c(sort(topFill), "Unknown", "Other"))
     ## Add sample data.frame
     sdf <- as(sample_data(physeq), "data.frame")
     sdf$Sample <- sample_names(physeq)
     mdf <- merge(mdf, sdf, by.x = "Sample")
     ## Sort the entries by abundance to produce nice stacked bars in ggplot
-    mdf <- mdf[ order(mdf[ , taxaRank2], mdf$Abundance, decreasing = TRUE), ]
+    mdf <- mdf[ order(mdf[ , fill], mdf$Abundance, decreasing = TRUE), ]
     return(mdf)
 }
 
