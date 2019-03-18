@@ -550,6 +550,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     topTax <- topTax[topTax != "Unknown"]
     topTax <- topTax[1:min(length(topTax), numberOfTaxa)]
     ## Change to character
+    # browser()
     mdf[ , taxaRank2] <- as.character(mdf[ , taxaRank2])
     mdf[ , fill] <- as.character(mdf[ , fill])
     ii <- (mdf[ , taxaRank2] %in% c(topTax, "Unknown"))
@@ -558,9 +559,11 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     mdf <- aggregate(as.formula(paste("Abundance ~ Sample +", fill,
                                       "+", taxaRank2)), data = mdf, FUN = sum)
     mdf[, taxaRank2] <- factor(mdf[, taxaRank2], levels = c(sort(topTax), "Unknown", "Other"))
+    mdf[ , fill] <- as.character(mdf[ , fill])
     topFill <- unique(mdf[, fill])
     topFill <- topFill[!topFill %in% c("Other", "Unknown")]
-    mdf[, fill] <- factor(mdf[, fill], levels = c(sort(topFill), "Unknown", "Other"))
+    mdf[, fill] <- factor(mdf[, fill],
+                          levels = c(sort(topFill), "Unknown", "Other"))
     ## Add sample data.frame
     sdf <- as(sample_data(physeq), "data.frame")
     sdf$Sample <- sample_names(physeq)
