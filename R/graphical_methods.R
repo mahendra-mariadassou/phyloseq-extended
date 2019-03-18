@@ -152,9 +152,10 @@ plot_composition <- function(physeq,
   ## Manually change color scale to assign grey to "Unknown" (if any)
   if (!is.null(fill) && any(c("Unknown", "Other") %in% unique(ggdata[, fill]))) {
       ranks <- as.character(unique(ggdata[, fill]))
-      ranks <- ranks[ ! ranks %in% c("Unknown", "Other")]
-      colvals <- c(gg_color_hue(length(ranks)), "grey45", "black")
-      names(colvals) <- c(ranks, "Unknown", "Other")
+      ranks <- ranks[ ! ranks %in% c("Multi-affiliation", "Unknown", "Other")]
+      colvals <- c(gg_color_hue(length(ranks)),
+                   "grey75", "grey45", "black")
+      names(colvals) <- c(ranks, "Multi-affiliation", "Unknown", "Other")
       ## Now add the manually re-scaled layer with Unassigned as grey
       p <- p + scale_fill_manual(values=colvals) + scale_color_manual(values = colvals)
 
@@ -549,8 +550,11 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     topTax <- as.character(topTaxa[ order(topTaxa[ , "Abundance"], decreasing = TRUE), taxaRank2])
     topTax <- topTax[topTax != "Unknown"]
     topTax <- topTax[1:min(length(topTax), numberOfTaxa)]
-    ## Change to character
-    # browser()
+    ## Change to character and correct taxonomic levels
+    correct_taxonomy <- function(x) {
+      c(sort(x[!x %in% c("Multi-affiliation", "Unknown", "Other")]),
+        c("Multi-affiliation", "Unknown", "Other"))
+    }
     mdf[ , taxaRank2] <- as.character(mdf[ , taxaRank2])
     mdf[ , fill] <- as.character(mdf[ , fill])
     ii <- (mdf[ , taxaRank2] %in% c(topTax, "Unknown"))
@@ -558,12 +562,11 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     mdf[!ii , fill] <- "Other"
     mdf <- aggregate(as.formula(paste("Abundance ~ Sample +", fill,
                                       "+", taxaRank2)), data = mdf, FUN = sum)
-    mdf[, taxaRank2] <- factor(mdf[, taxaRank2], levels = c(sort(topTax), "Unknown", "Other"))
+    mdf[, taxaRank2] <- factor(mdf[, taxaRank2],
+                               levels = correct_taxonomy(topTax))
     mdf[ , fill] <- as.character(mdf[ , fill])
-    topFill <- unique(mdf[, fill])
-    topFill <- topFill[!topFill %in% c("Other", "Unknown")]
     mdf[, fill] <- factor(mdf[, fill],
-                          levels = c(sort(topFill), "Unknown", "Other"))
+                          levels = correct_taxonomy(unique(mdf[, fill])))
     ## Add sample data.frame
     sdf <- as(sample_data(physeq), "data.frame")
     sdf$Sample <- sample_names(physeq)
