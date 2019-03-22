@@ -2,16 +2,15 @@
 #'
 #' @description Warning, this function is deprecated and will be phased out at some point.
 #'
-#' @param physeq      A phyloseq class object
+#' @param physeq A phyloseq class object
 #' @param step   Step size for sample sizes in rarefaction curves. Defaults to 1.
 #' @param sample Subsample size for rarefying community, either a single value or a vector.
-#' @param xlab,ylab   Axis labels in plots of rarefaction curves.
-#' @param ylab
-#' @param label       Label rarefaction curves by rownames of x (logical).
-#' @param col         Custom colours for line rarefactions curves.
-#' @param ...         parameters passed to ordilabels
+#' @param xlab   Axis labels in plots of rarefaction curves.
+#' @param ylab   Axis labels in plots of rarefaction curves.
+#' @param label  Label rarefaction curves by rownames of x (logical).
+#' @param col    Custom colours for line rarefactions curves.
+#' @param ...    parameters passed to ordilabels
 #'
-#' @return
 #' @export
 #'
 #' @importFrom vegan specnumber ordilabel
