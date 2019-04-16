@@ -640,7 +640,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## compute distance
   if (is.character(dist)) {
    dist <- dist[1]
-   dist <- distance(physeq, method = dist)
+   dist <- phyloseq::distance(physeq, method = dist)
   }
   ## automatic color palette: one color per different sample type
   if (is.null(palette)) {
