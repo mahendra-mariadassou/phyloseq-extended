@@ -596,7 +596,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## compute distance
   if (is.character(dist)) {
    dist <- dist[1]
-   dist <- distance(physeq, method = dist)
+   dist <- phyloseq::distance(physeq, method = dist)
   }
   ## automatic color palette: one color per different sample type
   if (is.null(palette)) {
@@ -609,7 +609,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   clust <- as.phylo(hclust(dist, method = method))
   ## change tip label if needed
   if (!is.null(label)) {
-    tip.dict <- setNames(as.character(get_variable(physeq, label)),
+    tip.dict <- setNames(as.character(phyloseq::get_variable(physeq, label)),
                          sample_names(physeq))
     clust$tip.label <- tip.dict[clust$tip.label]
   }
