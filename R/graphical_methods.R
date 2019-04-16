@@ -617,6 +617,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
                        label = NULL,
                        title = paste(method, "linkage clustering tree"),
+                       legend = TRUE,
                        palette = NULL) {
   ## Args:
   ## - physeq: phyloseq class object
@@ -626,7 +627,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## - label: (character) one the sample_variable from physeq
   ## - title: (character) optional. Plot title, defaults to "method" clustering tree.
   ## - palette: (named color vector) optional. Manual color palette
-  ##
+  ## - legend: (logical) add legend or not
   ## Returns:
   ## - a plot object
   if (is.character(color)) {
@@ -663,9 +664,11 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
        direction = "downwards",
        main = title)
   ## add legend (at figure bottom, over 4 columns)
-  legend("bottom", legend = levels(color) , xpd=NA,
-         fill = palette, border = palette,cex=0.8, bty="n",
-         ncol=4,  inset = c(0,-0.05))
+  if (legend) {
+    legend("bottom", legend = levels(color) , xpd=NA,
+           fill = palette, border = palette,cex=0.8, bty="n",
+           ncol=4,  inset = c(0,-0.05))
+  }
 }
 
 ## Extract legend from a ggplot object
