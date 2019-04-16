@@ -631,7 +631,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## - a plot object
   if (is.character(color)) {
     legend.title <- NULL
-    color <- get_variable(physeq, color)
+    color <- phyloseq::get_variable(physeq, color)
   } else {
     legend.title <- NULL
     color <- rep("black", nsamples(physeq))
@@ -653,7 +653,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   clust <- as.phylo(hclust(dist, method = method))
   ## change tip label if needed
   if (!is.null(label)) {
-    tip.dict <- setNames(as.character(get_variable(physeq, label)),
+    tip.dict <- setNames(as.character(phyloseq::get_variable(physeq, label)),
                          sample_names(physeq))
     clust$tip.label <- tip.dict[clust$tip.label]
   }
