@@ -631,7 +631,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## - a plot object
   if (is.character(color)) {
     legend.title <- NULL
-    color <- get_variable(physeq, color)
+    color <- phyloseq::get_variable(physeq, color)
   } else {
     legend.title <- NULL
     color <- rep("black", nsamples(physeq))
