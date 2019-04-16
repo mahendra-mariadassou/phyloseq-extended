@@ -1,67 +1,23 @@
-## Set of graphical methods for phyloseq objects (mainly related to ordination,
-## and library size after normalisation)
-require(ggplot2)
-require(scales)
-require(reshape2)
-
-rarecurve2 <- function (x, step = 1, sample, xlab = "Sample Size", ylab = "Species", label = TRUE, col = "black", ...)
-  ## See documentation for vegan rarecurve, col is now used to define
-  ## custom colors for lines and panels
-{
-  tot <- rowSums(x)
-  S <- specnumber(x)
-  nr <- nrow(x)
-  out <- lapply(seq_len(nr), function(i) {
-    n <- seq(1, tot[i], by = step)
-    if (n[length(n)] != tot[i])
-      n <- c(n, tot[i])
-    drop(rarefy(x[i, ], n))
-  })
-  Nmax <- sapply(out, function(x) max(attr(x, "Subsample")))
-  Smax <- sapply(out, max)
-  plot(c(1, max(Nmax)), c(1, max(Smax)), xlab = xlab, ylab = ylab,
-       type = "n", ...)
-  if (!missing(sample)) {
-    abline(v = sample)
-    rare <- sapply(out, function(z) approx(x = attr(z, "Subsample"),
-                                           y = z, xout = sample, rule = 1)$y)
-    abline(h = rare, lwd = 0.5)
-  }
-  for (ln in seq_len(length(out))) {
-    color <- col[((ln-1) %% length(col)) + 1]
-    N <- attr(out[[ln]], "Subsample")
-    lines(N, out[[ln]], col = color, ...)
-  }
-  if (label) {
-    ordilabel(cbind(tot, S), labels = rownames(x), col = col, ...)
-  }
-  invisible(out)
-}
+## Set of graphical methods for phyloseq objects (mainly related to ordination, and library size after normalisation)
 
 ## Rarefaction curve, ggplot style
+#' Title
+#'
+#' @param physeq phyloseq class object, from which abundance data are extracted
+#' @param step Step size for sample size in rarefaction curves
+#' @param label Default `NULL`. Character string. The name of the variable to map to text labels on the plot. Similar to color option but for plotting text.
+#' @param color (Optional). Default `NULL`. Character string. The name of the variable to map to colors in the plot. This can be a sample variable (among the set returned by \code{\link[=sample_variables]{sample_variables(physeq)}} or taxonomic rank (among the set returned by \code{[=rank_names]{rank_names(physeq)}}). Finally, The color scheme is chosen automatically by \link{ggplot}, but it can be modified afterward with an additional layer using \link{scale_color_manual}.
+#' @param plot Logical, should the graphic be plotted.
+#' @param parallel should rarefaction be parallelized (using parallel framework)
+#' @param se Default TRUE. Logical. Should standard errors be computed.
+#'
+#' @import ggplot2 reshape scales
+#' @export
+#'
+#' @examples
+#' data(food)
+#' ggrare(food, step = 100, color = "EnvType", se = FALSE)
 ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, parallel = FALSE, se = TRUE) {
-  ## Args:
-  ## - physeq: phyloseq class object, from which abundance data are extracted
-  ## - step: Step size for sample size in rarefaction curves
-  ## - label: Default `NULL`. Character string. The name of the variable
-  ##          to map to text labels on the plot. Similar to color option
-  ##          but for plotting text.
-  ## - color: (Optional). Default ‘NULL’. Character string. The name of the
-  ##          variable to map to colors in the plot. This can be a sample
-  ##          variable (among the set returned by
-  ##          ‘sample_variables(physeq)’ ) or taxonomic rank (among the set
-  ##          returned by ‘rank_names(physeq)’).
-  ##
-  ##          Finally, The color scheme is chosen automatically by
-  ##          ‘link{ggplot}’, but it can be modified afterward with an
-  ##          additional layer using ‘scale_color_manual’.
-  ## - color: Default `NULL`. Character string. The name of the variable
-  ##          to map to text labels on the plot. Similar to color option
-  ##          but for plotting text.
-  ## - plot:  Logical, should the graphic be plotted.
-  ## - parallel: should rarefaction be parallelized (using parallel framework)
-  ## - se:    Default TRUE. Logical. Should standard errors be computed.
-  ## require vegan
   x <- as(otu_table(physeq), "matrix")
   if (taxa_are_rows(physeq)) { x <- t(x) }
 
@@ -631,7 +587,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## - a plot object
   if (is.character(color)) {
     legend.title <- NULL
-    color <- get_variable(physeq, color)
+    color <- phyloseq::get_variable(physeq, color)
   } else {
     legend.title <- NULL
     color <- rep("black", nsamples(physeq))
