@@ -6,8 +6,8 @@
 \usage{
 plot_composition(physeq, taxaRank1 = "Phylum",
   taxaSet1 = "Proteobacteria", taxaRank2 = "Family",
-  numberOfTaxa = 9, fill = NULL, x = "Sample", y = "Abundance",
-  facet_grid = NULL)
+  numberOfTaxa = 9, fill = NULL, startFrom = 1, x = "Sample",
+  y = "Abundance", facet_grid = NULL)
 }
 \arguments{
 \item{physeq}{phyloseq class object}
@@ -22,11 +22,14 @@ plot_composition(physeq, taxaRank1 = "Phylum",
 
 \item{fill}{Taxonomic rank used for filling (should be between taxaRank1 and taxaRank2 in the hierarchy of ranks)}
 
+\item{startFrom}{\code{startFrom - 1} is the number of (most abundant) taxa to discard before
+selecting the `numberOfTaxa` most abundant taxa.}
+
 \item{x}{Variable mapped to x-axis}
 
 \item{y}{Variable mapped to y-axis}
 
-\item{facet_grid}{}
+\item{facet_grid}{variable used for faceting.}
 }
 \value{
 a ggplot2 graphic
@@ -39,5 +42,5 @@ Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `tax
 }
 \examples{
 data(food)
-plot_composition(food, "Kingdom", "Bacteria", "Family", fill = "Phylum")
+plot_composition(food, "Kingdom", "Bacteria", "Family", fill = "Phylum", facet_grid = "EnvType")
 }

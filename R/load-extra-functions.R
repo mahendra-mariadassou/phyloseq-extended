@@ -19,6 +19,6 @@ scripts <- c("graphical_methods.R",
 urls <- paste0("https://raw.githubusercontent.com/mahendra-mariadassou/phyloseq-extended/master/R/", scripts)
 
 for (url in urls) {
-  source(url)
+  # source(url)
 }
 

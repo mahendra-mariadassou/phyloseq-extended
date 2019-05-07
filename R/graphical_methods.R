@@ -92,10 +92,12 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
 #' @param taxaSet1 subset of level taxaRank1 to use
 #' @param taxaRank2 taxonomic level used to agglomerate
 #' @param numberOfTaxa number of (most abundant) taxa to keep at level taxaRank2
+#' @param startFrom \code{startFrom - 1} is the number of (most abundant) taxa to discard before
+#'                  selecting the `numberOfTaxa` most abundant taxa.
 #' @param fill Taxonomic rank used for filling (should be between taxaRank1 and taxaRank2 in the hierarchy of ranks)
 #' @param x Variable mapped to x-axis
 #' @param y Variable mapped to y-axis
-#' @param facet_grid
+#' @param facet_grid variable used for faceting.
 #'
 #' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
 #'
@@ -104,17 +106,18 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
 #'
 #' @examples
 #' data(food)
-#' plot_composition(food, "Kingdom", "Bacteria", "Family", fill = "Phylum")
+#' plot_composition(food, "Kingdom", "Bacteria", "Family", fill = "Phylum", facet_grid = "EnvType")
 plot_composition <- function(physeq,
                              taxaRank1 = "Phylum",
                              taxaSet1 = "Proteobacteria",
                              taxaRank2 = "Family",
                              numberOfTaxa = 9, fill = NULL,
+                             startFrom = 1,
                              x = "Sample",
                              y = "Abundance", facet_grid = NULL) {
   if (is.null(fill)) fill <- taxaRank2
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
-                     fill, numberOfTaxa)
+                     fill, numberOfTaxa, startFrom)
   p <- ggplot(ggdata, aes_string(x = x, y = y, fill = fill, color = fill, group = "Sample"))
   ## Manually change color scale to assign grey to "Unknown" (if any)
   if (!is.null(fill) && any(c("Unknown", "Other") %in% unique(ggdata[, fill]))) {
@@ -467,21 +470,20 @@ ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
   popViewport()
 }
 
-## return data frame for relative abundance plots in ggplot2
 ## Return relative abundance of top NumberOfTaxa OTUs at the taxaRank2 level
 ## within taxaSet1 at taxaRank1 level
+#' Format phyloseq data for easy composition plots
+#'
+#' @inheritParams plot_composition
+#'
+#' @return A ggplot friendly data frame with the relative abundance of the top `NumberOfTaxa` OTUs (starting from the `startFrom`th most abundant) at the taxaRank2 level within taxaSet1 at taxaRank1 level
 #' @export
+#'
+#' @examples
+#' data(aop28)
+#' ggformat(aop28)
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
-                     taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9) {
-    ## Args:
-    ## - physeq: phyloseq class object
-    ## - taxaRank1: taxonomic level in which to do the first subsetting
-    ## - taxaSet1: subset of level taxaRank1 to use
-    ## - taxaRank2: taxonomic level used to agglomerate
-    ## - numberOfTaxa: number of (top) taxa to keep at level taxaRank2
-    ##
-    ## Returns:
-    ## - data frame with taxonomic, sample and otu counts informations melted together
+                     taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9, startFrom = 1) {
     ## Enforce orientation and transform count to relative abundances
     stopifnot(!is.null(sample_data(physeq, FALSE)),
               !is.null(tax_table(physeq, FALSE)))
@@ -511,45 +513,24 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     tax_table(physeq) <- tax
     physeq <- tax_glom(physeq, taxrank = taxaRank2)
 
-    # otutab <- otu_table(physeq)
-    # if ( !taxa_are_rows(otutab) ) {
-    #   otutab = t(otutab)
-    # }
-    # otutab <- as(otutab, "matrix")
-    # otutab <- apply(otutab, 2, function(x) x / sum(x))
-    # ## Subset to OTUs belonging to taxaSet1 to fasten process
-    # if (is.null(fill)) { fill <- taxaRank2 }
-    # stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU")))
-    # otutab <- otutab[tax_table(physeq)[ , taxaRank1] %in% taxaSet1, , drop = FALSE]
-    # if (nrow(otutab) == 0) {
-    #     stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
-    #                "at taxonomic level", taxaRank1))
-    # }
-    # mdf <- melt(data = otutab, varnames = c("OTU", "Sample"))
-    # colnames(mdf)[3] <- "Abundance"
-    ## mdf <- mdf[mdf$Abundance > 0, ] ## Remove absent taxa
-    ## Add taxonomic information and replace NA and unclassified Unknown
-    # tax <- as(tax_table(physeq), "matrix")
-    # tax[is.na(tax)] <- "Unknown"
-    # tax[grepl("unknown", tax)] <- "Unknown"
-    # tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
-    # tax <- data.frame(OTU = rownames(tax), tax)
-    # mdf <- merge(mdf, tax, by.x = "OTU")
-    ## Aggregate by taxaRank2
-    # mdf <- aggregate(as.formula(paste("Abundance ~ Sample +",
-    #                                   fill, "+", taxaRank2)),
-    #                  data = mdf, FUN = sum)
-    # topTaxa <- aggregate(as.formula(paste("Abundance ~ ", taxaRank2)), data = mdf, FUN = sum)
-
-
     ## Keep only numberOfTaxa top taxa and aggregate the rest as "Other"
     topTaxa <- data.frame(abundance = taxa_sums(physeq),
                           taxa      = taxa_names(physeq),
                           taxonomy  = as(tax_table(physeq), "matrix")[ , taxaRank2],
                           stringsAsFactors = FALSE) %>%
       arrange(desc(abundance)) %>%
-      filter(taxonomy != "Unknown") %>%
-      slice(1:numberOfTaxa)
+      filter(taxonomy != "Unknown")
+
+    if (startFrom > 1) {
+      discarded_taxa <- topTaxa %>% slice(1:(startFrom-1)) %>% pull(taxa)
+      physeq <- prune_taxa(!(taxa_names(physeq) %in% discarded_taxa), physeq)
+    }
+
+    topTaxa <- topTaxa %>% slice((startFrom - 1) + 1:numberOfTaxa)
+    if (nrow(topTaxa) == 0) {
+      stop(paste("Not enough taxa left after discarding the", numberOfTaxa - 1, "most abundant ones.",
+                 "Use a smaller value."))
+    }
 
     ## Change to character and correct taxonomic levels
     correct_taxonomy <- function(x) {
@@ -572,25 +553,6 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     tdf[, fill] <- factor(tdf[, fill],
                           levels = correct_taxonomy(unique(tdf[, fill])))
 
-    # sdf <- psmelt(physeq)
-    # sdf[ , taxaRank2] <- as.character(mdf[ , taxaRank2])
-    # sdf[ , fill] <- as.character(mdf[ , fill])
-    # ii <- (sdf[ , taxaRank2] %in% c(topTax, "Unknown"))
-    # sdf[!ii , taxaRank2] <- "Other"
-    # sdf[!ii , fill] <- "Other"
-    # sdf <- aggregate(as.formula(paste("Abundance ~ Sample +", fill,
-    #                                   "+", taxaRank2)), data = sdf, FUN = sum)
-    # sdf[, taxaRank2] <- factor(mdf[, taxaRank2],
-    #                           levels = correct_taxonomy(topTax))
-    # mdf[ , fill] <- as.character(mdf[ , fill])
-    # mdf[, fill] <- factor(mdf[, fill],
-    #                      levels = correct_taxonomy(unique(mdf[, fill])))
-    ## Add sample data.frame
-    # sdf <- as(sample_data(physeq), "data.frame")
-    # sdf$Sample <- sample_names(physeq)
-    # mdf <- merge(mdf, sdf, by.x = "Sample")
-    ## Sort the entries by abundance to produce nice stacked bars in ggplot
-    ## tdf <- tdf[ order(tdf[ , fill], tdf$Abundance, decreasing = TRUE), ]
     ## tdf <- tdf %>% arrange(desc(!!enquo(fill)), desc(Abundance))
     tdf <- tdf[ order(tdf[ , fill], tdf$Abundance, decreasing = TRUE), ]
     return(tdf)
