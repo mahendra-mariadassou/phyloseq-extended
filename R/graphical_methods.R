@@ -112,6 +112,7 @@ plot_composition <- function(physeq,
                              numberOfTaxa = 9, fill = NULL,
                              x = "Sample",
                              y = "Abundance", facet_grid = NULL) {
+  if (is.null(fill)) fill <- taxaRank2
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa)
   p <- ggplot(ggdata, aes_string(x = x, y = y, fill = fill, color = fill, group = "Sample"))
@@ -469,6 +470,7 @@ ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
 ## return data frame for relative abundance plots in ggplot2
 ## Return relative abundance of top NumberOfTaxa OTUs at the taxaRank2 level
 ## within taxaSet1 at taxaRank1 level
+#' @export
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                      taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9) {
     ## Args:
@@ -483,63 +485,115 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ## Enforce orientation and transform count to relative abundances
     stopifnot(!is.null(sample_data(physeq, FALSE)),
               !is.null(tax_table(physeq, FALSE)))
-    otutab <- otu_table(physeq)
-    if ( !taxa_are_rows(otutab) ) {
-    otutab = t(otutab)
+
+    count_to_prop <- function(x) { x / sum(x) }
+    ## Transform to proportions (if not already)
+    if (any(sample_sums(physeq) > 1)) {
+      physeq <- transform_sample_counts(physeq, count_to_prop)
     }
-    otutab <- as(otutab, "matrix")
-    otutab <- apply(otutab, 2, function(x) x / sum(x))
-    ## Subset to OTUs belonging to taxaSet1 to fasten process
+
+    ## Check that taxaranks and fill are propers ranks
     if (is.null(fill)) { fill <- taxaRank2 }
     stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU")))
-    otutab <- otutab[tax_table(physeq)[ , taxaRank1] %in% taxaSet1, , drop = FALSE]
-    if (nrow(otutab) == 0) {
-        stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
-                   "at taxonomic level", taxaRank1))
+
+    ## Subset at TaxaRank1
+    physeq <- prune_taxa(tax_table(physeq)[ , taxaRank1] %in% taxaSet1, physeq)
+    if (ntaxa(physeq) == 0) {
+      stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
+                 "at taxonomic level", taxaRank1))
     }
-    mdf <- melt(data = otutab, varnames = c("OTU", "Sample"))
-    colnames(mdf)[3] <- "Abundance"
-    ## mdf <- mdf[mdf$Abundance > 0, ] ## Remove absent taxa
-    ## Add taxonomic information and replace NA and unclassified Unknown
+
+    ## Correct taxonomy and agglomerate at TaxaRank2
     tax <- as(tax_table(physeq), "matrix")
     tax[is.na(tax)] <- "Unknown"
     tax[grepl("unknown", tax)] <- "Unknown"
     tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
-    tax <- data.frame(OTU = rownames(tax), tax)
-    mdf <- merge(mdf, tax, by.x = "OTU")
+    tax_table(physeq) <- tax
+    physeq <- tax_glom(physeq, taxrank = taxaRank2)
+
+    # otutab <- otu_table(physeq)
+    # if ( !taxa_are_rows(otutab) ) {
+    #   otutab = t(otutab)
+    # }
+    # otutab <- as(otutab, "matrix")
+    # otutab <- apply(otutab, 2, function(x) x / sum(x))
+    # ## Subset to OTUs belonging to taxaSet1 to fasten process
+    # if (is.null(fill)) { fill <- taxaRank2 }
+    # stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU")))
+    # otutab <- otutab[tax_table(physeq)[ , taxaRank1] %in% taxaSet1, , drop = FALSE]
+    # if (nrow(otutab) == 0) {
+    #     stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
+    #                "at taxonomic level", taxaRank1))
+    # }
+    # mdf <- melt(data = otutab, varnames = c("OTU", "Sample"))
+    # colnames(mdf)[3] <- "Abundance"
+    ## mdf <- mdf[mdf$Abundance > 0, ] ## Remove absent taxa
+    ## Add taxonomic information and replace NA and unclassified Unknown
+    # tax <- as(tax_table(physeq), "matrix")
+    # tax[is.na(tax)] <- "Unknown"
+    # tax[grepl("unknown", tax)] <- "Unknown"
+    # tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
+    # tax <- data.frame(OTU = rownames(tax), tax)
+    # mdf <- merge(mdf, tax, by.x = "OTU")
     ## Aggregate by taxaRank2
-    mdf <- aggregate(as.formula(paste("Abundance ~ Sample +",
-                                      fill, "+", taxaRank2)),
-                     data = mdf, FUN = sum)
-    topTaxa <- aggregate(as.formula(paste("Abundance ~ ", taxaRank2)), data = mdf, FUN = sum)
+    # mdf <- aggregate(as.formula(paste("Abundance ~ Sample +",
+    #                                   fill, "+", taxaRank2)),
+    #                  data = mdf, FUN = sum)
+    # topTaxa <- aggregate(as.formula(paste("Abundance ~ ", taxaRank2)), data = mdf, FUN = sum)
+
+
     ## Keep only numberOfTaxa top taxa and aggregate the rest as "Other"
-    topTax <- as.character(topTaxa[ order(topTaxa[ , "Abundance"], decreasing = TRUE), taxaRank2])
-    topTax <- topTax[topTax != "Unknown"]
-    topTax <- topTax[1:min(length(topTax), numberOfTaxa)]
+    topTaxa <- data.frame(abundance = taxa_sums(physeq),
+                          taxa      = taxa_names(physeq),
+                          taxonomy  = as(tax_table(physeq), "matrix")[ , taxaRank2],
+                          stringsAsFactors = FALSE) %>%
+      arrange(desc(abundance)) %>%
+      filter(taxonomy != "Unknown") %>%
+      slice(1:numberOfTaxa)
+
     ## Change to character and correct taxonomic levels
     correct_taxonomy <- function(x) {
       c(sort(x[!x %in% c("Multi-affiliation", "Unknown", "Other")]),
         c("Multi-affiliation", "Unknown", "Other"))
     }
-    mdf[ , taxaRank2] <- as.character(mdf[ , taxaRank2])
-    mdf[ , fill] <- as.character(mdf[ , fill])
-    ii <- (mdf[ , taxaRank2] %in% c(topTax, "Unknown"))
-    mdf[!ii , taxaRank2] <- "Other"
-    mdf[!ii , fill] <- "Other"
-    mdf <- aggregate(as.formula(paste("Abundance ~ Sample +", fill,
-                                      "+", taxaRank2)), data = mdf, FUN = sum)
-    mdf[, taxaRank2] <- factor(mdf[, taxaRank2],
-                               levels = correct_taxonomy(topTax))
-    mdf[ , fill] <- as.character(mdf[ , fill])
-    mdf[, fill] <- factor(mdf[, fill],
-                          levels = correct_taxonomy(unique(mdf[, fill])))
+
+    ## Replace all levels in taxonomy of non-top/ non-unknown taxa to Other
+    tax <- as(tax_table(physeq), "matrix")
+    ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
+    tax[!ii, ] <- "Other"
+    tax_table(physeq) <- tax
+    physeq <- tax_glom(physeq, taxrank = taxaRank2)
+
+    tdf <- psmelt(physeq)
+    tdf[, taxaRank2] <- as.character(tdf[, taxaRank2])
+    tdf[, taxaRank2] <- factor(tdf[, taxaRank2],
+                               levels = correct_taxonomy(topTaxa$taxonomy))
+    tdf[, fill] <- as.character(tdf[, fill])
+    tdf[, fill] <- factor(tdf[, fill],
+                          levels = correct_taxonomy(unique(tdf[, fill])))
+
+    # sdf <- psmelt(physeq)
+    # sdf[ , taxaRank2] <- as.character(mdf[ , taxaRank2])
+    # sdf[ , fill] <- as.character(mdf[ , fill])
+    # ii <- (sdf[ , taxaRank2] %in% c(topTax, "Unknown"))
+    # sdf[!ii , taxaRank2] <- "Other"
+    # sdf[!ii , fill] <- "Other"
+    # sdf <- aggregate(as.formula(paste("Abundance ~ Sample +", fill,
+    #                                   "+", taxaRank2)), data = sdf, FUN = sum)
+    # sdf[, taxaRank2] <- factor(mdf[, taxaRank2],
+    #                           levels = correct_taxonomy(topTax))
+    # mdf[ , fill] <- as.character(mdf[ , fill])
+    # mdf[, fill] <- factor(mdf[, fill],
+    #                      levels = correct_taxonomy(unique(mdf[, fill])))
     ## Add sample data.frame
-    sdf <- as(sample_data(physeq), "data.frame")
-    sdf$Sample <- sample_names(physeq)
-    mdf <- merge(mdf, sdf, by.x = "Sample")
+    # sdf <- as(sample_data(physeq), "data.frame")
+    # sdf$Sample <- sample_names(physeq)
+    # mdf <- merge(mdf, sdf, by.x = "Sample")
     ## Sort the entries by abundance to produce nice stacked bars in ggplot
-    mdf <- mdf[ order(mdf[ , fill], mdf$Abundance, decreasing = TRUE), ]
-    return(mdf)
+    ## tdf <- tdf[ order(tdf[ , fill], tdf$Abundance, decreasing = TRUE), ]
+    ## tdf <- tdf %>% arrange(desc(!!enquo(fill)), desc(Abundance))
+    tdf <- tdf[ order(tdf[ , fill], tdf$Abundance, decreasing = TRUE), ]
+    return(tdf)
 }
 
 ## Plot a distance matrix as a heatmap with samples sorted according to
