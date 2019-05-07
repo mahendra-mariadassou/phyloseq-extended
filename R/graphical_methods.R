@@ -84,8 +84,27 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
   invisible(p)
 }
 
-## Plot composition at taxaRank2 level within taxa taxaSet1 at taxaRank1 level
-## Restricts plot to numberOfTaxa taxa
+## Versatile function for plotting compositions.
+#' Title
+#'
+#' @param physeq phyloseq class object
+#' @param taxaRank1 taxonomic level in which to do the first subsetting
+#' @param taxaSet1 subset of level taxaRank1 to use
+#' @param taxaRank2 taxonomic level used to agglomerate
+#' @param numberOfTaxa number of (most abundant) taxa to keep at level taxaRank2
+#' @param fill Taxonomic rank used for filling (should be between taxaRank1 and taxaRank2 in the hierarchy of ranks)
+#' @param x Variable mapped to x-axis
+#' @param y Variable mapped to y-axis
+#' @param facet_grid
+#'
+#' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
+#'
+#' @return a ggplot2 graphic
+#' @export
+#'
+#' @examples
+#' data(food)
+#' plot_composition(food, "Kingdom", "Bacteria", "Family", fill = "Phylum")
 plot_composition <- function(physeq,
                              taxaRank1 = "Phylum",
                              taxaSet1 = "Proteobacteria",
@@ -93,15 +112,6 @@ plot_composition <- function(physeq,
                              numberOfTaxa = 9, fill = NULL,
                              x = "Sample",
                              y = "Abundance", facet_grid = NULL) {
-  ## Args:
-  ## - physeq: phyloseq class object
-  ## - taxaRank1: taxonomic level in which to do the first subsetting
-  ## - taxaSet1: subset of level taxaRank1 to use
-  ## - taxaRank2: taxonomic level used to agglomerate
-  ## - numberOfTaxa: number of (top) taxa to keep at level taxaRank2
-  ##
-  ## Returns:
-  ## - ggplot2 graphics
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa)
   p <- ggplot(ggdata, aes_string(x = x, y = y, fill = fill, color = fill, group = "Sample"))
