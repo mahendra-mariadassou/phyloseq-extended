@@ -98,6 +98,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
 #' @param x Variable mapped to x-axis
 #' @param y Variable mapped to y-axis
 #' @param facet_grid variable used for faceting.
+#' @param ... Additional arguments passed on to geom_bar
 #'
 #' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
 #'
@@ -114,7 +115,8 @@ plot_composition <- function(physeq,
                              numberOfTaxa = 9, fill = NULL,
                              startFrom = 1,
                              x = "Sample",
-                             y = "Abundance", facet_grid = NULL) {
+                             y = "Abundance", facet_grid = NULL,
+                             ...) {
   if (is.null(fill)) fill <- taxaRank2
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa, startFrom)
@@ -130,7 +132,7 @@ plot_composition <- function(physeq,
       p <- p + scale_fill_manual(values=colvals) + scale_color_manual(values = colvals)
 
   }
-  p <- p + geom_bar(stat = "identity", position = "stack")
+  p <- p + geom_bar(stat = "identity", position = "stack", ...)
   if ( !is.null(facet_grid)) {
     p <- p + facet_grid(facets = facet_grid, scales = "free_x")
   }

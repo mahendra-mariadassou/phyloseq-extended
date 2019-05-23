@@ -7,7 +7,7 @@
 plot_composition(physeq, taxaRank1 = "Phylum",
   taxaSet1 = "Proteobacteria", taxaRank2 = "Family",
   numberOfTaxa = 9, fill = NULL, startFrom = 1, x = "Sample",
-  y = "Abundance", facet_grid = NULL)
+  y = "Abundance", facet_grid = NULL, ...)
 }
 \arguments{
 \item{physeq}{phyloseq class object}
@@ -30,6 +30,8 @@ selecting the `numberOfTaxa` most abundant taxa.}
 \item{y}{Variable mapped to y-axis}
 
 \item{facet_grid}{variable used for faceting.}
+
+\item{...}{Additional arguments passed on to geom_bar}
 }
 \value{
 a ggplot2 graphic
