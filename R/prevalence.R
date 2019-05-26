@@ -47,9 +47,9 @@ estimate_prevalence <- function(physeq, group, format = c("long", "wide"), raref
     ## Construct relative abundances by sample
     tdf <- as(otu_table(physeq), "matrix")
     if (!taxa_are_rows(physeq)) { tdf <- t(tdf) }
-    btdf <- 0 + (tdf > 0)
+    tdf <- 0 + (tdf > 0)
     ## prevalence
-    frac <- t(rowsum(t(btdf), group, reorder = TRUE)) / matrix(rep(table(group), each = nrow(tdf)),
+    frac <- t(rowsum(t(tdf), group, reorder = TRUE)) / matrix(rep(table(group), each = nrow(tdf)),
                                                               nrow = nrow(tdf))
     ## specificity
     spec <- t(rowsum(t(tdf), group, reorder = TRUE)) / rowSums(tdf)
@@ -69,5 +69,3 @@ estimate_prevalence <- function(physeq, group, format = c("long", "wide"), raref
                    gather(key = "group", value = "specificity", -otu),
                by = c("otu", "group"))
 }
-
-
