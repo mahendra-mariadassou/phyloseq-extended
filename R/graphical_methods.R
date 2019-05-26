@@ -509,6 +509,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
     ## Correct taxonomy and agglomerate at TaxaRank2
     tax <- as(tax_table(physeq), "matrix")
+    tax <- cbind(tax, OTU = taxa_names(physeq))
     tax[is.na(tax)] <- "Unknown"
     tax[grepl("unknown", tax)] <- "Unknown"
     tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
