@@ -40,7 +40,7 @@ labelled. If FALSE, corresponding labels are replaced with ""}
 Defaults to FALSE.}
 
 \item{color.edge.by}{Optional. A single character string matching a variable. If NULL,
-nothing happens. 
+nothing happens.
 name in the corresponding tax_table of `physeq`, or a factor with
 the same length as the number of taxa in `physeq`.
 Defaults to NULL, corresponding to no color.}

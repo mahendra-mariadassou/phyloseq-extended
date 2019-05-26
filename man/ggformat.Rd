@@ -15,7 +15,7 @@ ggformat(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
 \item{taxaSet1}{subset of level taxaRank1 to use}
 
-\item{taxaRank2}{taxonomic level used to agglomerate}
+\item{taxaRank2}{taxonomic level used to agglomerate, use "OTU" or NULL to enforce no aggregation}
 
 \item{fill}{Taxonomic rank used for filling (should be between taxaRank1 and taxaRank2 in the hierarchy of ranks)}
 

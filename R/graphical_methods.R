@@ -90,7 +90,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
 #' @param physeq phyloseq class object
 #' @param taxaRank1 taxonomic level in which to do the first subsetting
 #' @param taxaSet1 subset of level taxaRank1 to use
-#' @param taxaRank2 taxonomic level used to agglomerate
+#' @param taxaRank2 taxonomic level used to agglomerate, use "OTU" or NULL to enforce no aggregation
 #' @param numberOfTaxa number of (most abundant) taxa to keep at level taxaRank2
 #' @param startFrom \code{startFrom - 1} is the number of (most abundant) taxa to discard before
 #'                  selecting the `numberOfTaxa` most abundant taxa.
@@ -117,6 +117,7 @@ plot_composition <- function(physeq,
                              x = "Sample",
                              y = "Abundance", facet_grid = NULL,
                              ...) {
+  if (is.null(taxaRank2) || taxaRank2 == "OTU") taxaRank2 <- "OTU_rank"
   if (is.null(fill)) fill <- taxaRank2
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa, startFrom)
@@ -498,7 +499,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
     ## Check that taxaranks and fill are propers ranks
     if (is.null(fill)) { fill <- taxaRank2 }
-    stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU")))
+    stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU_rank")))
 
     ## Subset at TaxaRank1
     physeq <- prune_taxa(tax_table(physeq)[ , taxaRank1] %in% taxaSet1, physeq)
@@ -509,12 +510,14 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
     ## Correct taxonomy and agglomerate at TaxaRank2
     tax <- as(tax_table(physeq), "matrix")
-    tax <- cbind(tax, OTU = taxa_names(physeq))
+    tax <- cbind(tax, OTU_rank = taxa_names(physeq))
     tax[is.na(tax)] <- "Unknown"
     tax[grepl("unknown", tax)] <- "Unknown"
     tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
     tax_table(physeq) <- tax
-    physeq <- tax_glom(physeq, taxrank = taxaRank2)
+    if (taxaRank2 != "OTU_rank") {
+      physeq <- tax_glom(physeq, taxrank = taxaRank2)
+    }
 
     ## Keep only numberOfTaxa top taxa and aggregate the rest as "Other"
     topTaxa <- data.frame(abundance = taxa_sums(physeq),
@@ -546,7 +549,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
     tax[!ii, ] <- "Other"
     tax_table(physeq) <- tax
-    physeq <- tax_glom(physeq, taxrank = taxaRank2)
+    physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = "Other")
+    ## physeq <- tax_glom(physeq, taxrank = taxaRank2)
 
     tdf <- psmelt(physeq)
     tdf[, taxaRank2] <- as.character(tdf[, taxaRank2])

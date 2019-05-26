@@ -39,3 +39,7 @@ Specificity is defined here as local prevalence / global prevalence,
          and therefore only deals with presence/absence data. Rarefaction is
          therefore recommended.
 }
+\examples{
+data(food)
+estimate_prevalence(food, group = "EnvType", rarefy = TRUE)
+}

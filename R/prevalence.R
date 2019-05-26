@@ -24,7 +24,7 @@
 #' * `m[i, N+g]` is the specificity of otu i to group g
 #' @export
 #'
-#' @example
+#' @examples
 #' data(food)
 #' estimate_prevalence(food, group = "EnvType", rarefy = TRUE)
 estimate_prevalence <- function(physeq, group, format = c("long", "wide"), rarefy = TRUE) {

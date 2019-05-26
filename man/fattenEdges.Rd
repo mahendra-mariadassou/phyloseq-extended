@@ -39,6 +39,8 @@ A list with components
 \item{legend} A named vector featuring edge widths and labels for legend.
 }
 \description{
+Functions for plotting trees with colored edges and tips according to data stored in
+tax_table and otu_table of corresponding phyloseq class object
 Fatten edges of a tree monotonically with the number of reads originating from that edge
 in a community matrix.
 }

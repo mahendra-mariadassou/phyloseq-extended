@@ -16,7 +16,7 @@ plot_composition(physeq, taxaRank1 = "Phylum",
 
 \item{taxaSet1}{subset of level taxaRank1 to use}
 
-\item{taxaRank2}{taxonomic level used to agglomerate}
+\item{taxaRank2}{taxonomic level used to agglomerate, use "OTU" or NULL to enforce no aggregation}
 
 \item{numberOfTaxa}{number of (most abundant) taxa to keep at level taxaRank2}
 

@@ -1,10 +1,8 @@
 #' Functions for plotting trees with colored edges and tips according to data stored in
 #' tax_table and otu_table of corresponding phyloseq class object
 
-library(scales)
-
 #' Fatten edges of a tree monotonically with the number of reads originating from that edge
-#' in a community matrix. 
+#' in a community matrix.
 #'
 #' @title fattenEdges
 #' @param physeq Required. An instance of a \code{phyloseq} class object with otu_table and
@@ -32,7 +30,7 @@ library(scales)
 #' \item{tip.presence} A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
 #'        tip.presence[i, j] is TRUE if taxa j is found in community i.
 #' \item{pendant.edges} A logical vector indicating which edges are pendant (i.e lead to a tip)
-#' \item{legend} A named vector featuring edge widths and labels for legend. 
+#' \item{legend} A named vector featuring edge widths and labels for legend.
 fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
                         width.lim = c(0.1, 4), base = 10, deviation = FALSE) {
     ## Exception handling
@@ -45,13 +43,13 @@ fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
     x <- as(otu_table(physeq), "matrix")
     if (taxa_are_rows(physeq)) { x <- t(x) }
     phy <- phy_tree(physeq)
-    
+
     ## Scale counts to frequencies
     x <- x/rowSums(x)
-    
+
     ## Construct incidence matrix of the tree
     incidence <- incidenceMatrix(phy)
-        
+
     ## Order community table according to edge order and create
     ## community phylogenetic matrix
     x <- x[ , rownames(incidence), drop = FALSE]
@@ -119,7 +117,7 @@ fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
 #'
 #' @title color_edges
 #' @param physeq Required. An instance of a \code{phyloseq} class object that has
-#'               tree slot. 
+#'               tree slot.
 #' @param group  Optional. Either a single character string matching a variable
 #'               name in the corresponding tax_table of `physeq`, or a factor with
 #'               the same length as the number of taxa in `physeq`. Defaults to "Phylum"
@@ -127,7 +125,7 @@ fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
 #'                    'ace' (or an abbrevation of these). Defaults to "majority"
 #' @param tip.only  Optional. Logical. Should colors be computed for tips only? Defaults to FALSE.
 #' @note The function assumes that the tree is rooted. The color palette is constructed
-#'       automatically according to ggplot discrete hue scale 
+#'       automatically according to ggplot discrete hue scale
 #' @return A list with components
 #' \item{edge} A color vector for edges of \code{phy_tree{physeq}}
 #' \item{tip} A color vector for tip labels of \code{phy_tree{physeq}}
@@ -137,7 +135,7 @@ color_edges <- function(physeq,
                         method = c("majority", "ace"),
                         tip.only = FALSE) {
     tree <- phy_tree(physeq)
-    ## Get group factor 
+    ## Get group factor
     if (!is.null(tax_table(physeq, FALSE))) {
         if (class(group) == "character" & length(group) == 1) {
             x1 <- as(tax_table(physeq), "matrix")
@@ -167,8 +165,8 @@ color_edges <- function(physeq,
     if (tip.only) {
         edge.color <- NULL
     } else {
-        method <- match.arg(method) 
-        if (method == "majority") { 
+        method <- match.arg(method)
+        if (method == "majority") {
             node.descendants <- prop.part(tree)
             MostPresentDescendants <- function(x) {
                 descendants.groups <- table(group[x])
@@ -188,7 +186,7 @@ color_edges <- function(physeq,
         ## group[tree$edge[i , 2]] is the group of downstream node of edge i
         edge.color <- color.palette[ group[tree$edge[ , 2]] ]
     }
-    ## Return results 
+    ## Return results
     return(list(edge = edge.color, tip = tip.color, palette = color.palette))
 }
 
@@ -199,22 +197,22 @@ color_edges <- function(physeq,
 #'
 #' @title tree_colored_by
 #' @param physeq Required. An instance of a \code{phyloseq} class object that has
-#'               tree slot. 
+#'               tree slot.
 #' @param group  Optional. Either a single character string matching a variable
 #'               name in the corresponding tax_table of `physeq`, or a factor with
 #'               the same length as the number of taxa in `physeq`. Defaults to "Phylum"
 #' @param legend.title Optional. Character string used for legend title. Defaults to
 #'                     `group`.
 #' @param legend.pos  Optional. keyword used for legend positon. Defaults to "bottomright"
-#'                    and can take any value accepted by legend. "none" removes legend. 
+#'                    and can take any value accepted by legend. "none" removes legend.
 #' @param method      Optional. Ancestral group reconstruction method; either 'majority' or
 #'                    'ace' (or an abbrevation of these). Defaults to "majority"
-#' @param plot        Optional. Logical. Should the tree be plotted or not. 
+#' @param plot        Optional. Logical. Should the tree be plotted or not.
 #' @param ...    Optional. Additional arguments passed on to plot.phylo.
-#' @note The function assumes that the tree is rooted. 
+#' @note The function assumes that the tree is rooted.
 #' @return The function is mainly called for its side effect of plotting a tree
-#'         with colored edges and leaves. 
-tree_colored_by <- function(physeq, group = "Phylum", method = c("majority", "ace"), 
+#'         with colored edges and leaves.
+tree_colored_by <- function(physeq, group = "Phylum", method = c("majority", "ace"),
                             legend.title = deparse(substitute(group)),
                             legend.pos = "bottomright", plot = TRUE, ...) {
     ## Exception handling
@@ -271,7 +269,7 @@ construct_aesthetics <- function(x, color, fatten.edges.by,
         if ("color" %in% fatten.edges.by) {
             if (deviation) {
                 ## Choose diverging palette (brewer.pal(11, "RdYlBu"))
-                ## To do, manually create color scale with different thresholds. 
+                ## To do, manually create color scale with different thresholds.
                 color.palette <- rev(c("#A50026", "#D73027", "#F46D43", "#FDAE61",
                                        "#FEE090", "#FFFFBF", "#E0F3F8", "#ABD9E9",
                                        "#74ADD1", "#4575B4", "#313695"))
@@ -333,7 +331,7 @@ construct_aesthetics <- function(x, color, fatten.edges.by,
 #' Only aesthetics specified in fatten.edges.by fed to plot.phylo. The goal
 #' of this function is to allow the user to feed plot.phylo with custom
 #' aesthetics in addition to those automatically computed by plot_merged_trees
-#' and use only the custom ones or the automatically computed ones. 
+#' and use only the custom ones or the automatically computed ones.
 #'
 #' @title plot_pretty_tree
 #' @param tree Required. A \code{phylo} class object
@@ -348,12 +346,12 @@ construct_aesthetics <- function(x, color, fatten.edges.by,
 #' @param fatten.tips Required. Aesthetics used for tip "fattening", vector with elements in
 #'                   'size', 'alpha', 'color'. Defaults to 'size' only. Determines which
 #'                   of 'tip.color', 'tip.size' are passed on to plot.phylo
-#' @param color.tip Optional. Logical. Should tips be colored even if fatten.tips is set to false. 
-#' @param ... Optional. Additional arguments passed on to plot.phylo. 
+#' @param color.tip Optional. Logical. Should tips be colored even if fatten.tips is set to false.
+#' @param ... Optional. Additional arguments passed on to plot.phylo.
 #' @return Nothing. This function is used for its side effect of plotting a tree.
-#' @note This function is intended for use within plot_merged_tree, no argument checking is performed. 
+#' @note This function is intended for use within plot_merged_tree, no argument checking is performed.
 plot_pretty_tree <- function(tree, edge.size, edge.color,
-                             tip.size, tip.color, 
+                             tip.size, tip.color,
                              fatten.edges.by, fatten.tips, color.tip, ...) {
     ## Prepare arguments for plot.phylo
     args <- list(x = tree)
@@ -389,8 +387,8 @@ plot_pretty_tree <- function(tree, edge.size, edge.color,
 #' @title get_legend_dimension
 #' @param leg Required. A list a produced by 'construct_aesthetics' in its
 #'               'legend' component
-#' @return Dimensions of the legend. 
-#' @note This function is intended for use within plot_merged_tree, no argument checking is performed. 
+#' @return Dimensions of the legend.
+#' @note This function is intended for use within plot_merged_tree, no argument checking is performed.
 get_legend_dimension <- function(leg) {
     ## Legend total dimensions
     leg.dim <- list(x = 0, y = 0)
@@ -474,7 +472,7 @@ get_legend_dimension <- function(leg) {
 #'               centered.
 #' @return Nothing. This function is used for its side effect of plotting
 #'         a legend.
-#' @note This function is intended for use within plot_merged_tree, no argument checking is performed. 
+#' @note This function is intended for use within plot_merged_tree, no argument checking is performed.
 plot_pretty_legend <- function(x, y, leg) {
     res <- get_legend_dimension(leg)
     leg.dim <- res$leg.dim
@@ -516,16 +514,16 @@ plot_pretty_legend <- function(x, y, leg) {
                col  = alpha.scale,
                title = "Frequency",
                bty = "n",
-               xpd = NA)        
+               xpd = NA)
     }
 }
 
 
-#' Merge samples according to group factor and plot taxa diversity for each categrory of the group. 
+#' Merge samples according to group factor and plot taxa diversity for each categrory of the group.
 #'
 #' @title plot_merged_trees
 #' @param physeq Required. An instance of a \code{phyloseq} class object that has
-#'               tree slot. 
+#'               tree slot.
 #' @param group  Required. Either a single character string matching a variable
 #'               name in the corresponding sam_data of `physeq`, or a factor with
 #'               the same length as the number of taxa in `physeq`.
@@ -538,9 +536,9 @@ plot_pretty_legend <- function(x, y, leg) {
 #'                  Defaults to c(0.1, 4). Set to c(0, x) for true linear scaling.
 #' @param missing.color Optional. Color used for tips and edges not present in the sample.
 #'                      Defaults to "gray". If NULL, nothing happens. Use "white", "transparent",
-#'                      or par("bg") to remove them from plot. 
+#'                      or par("bg") to remove them from plot.
 #' @param color.edge.by      Optional. A single character string matching a variable. If NULL,
-#'                           nothing happens. 
+#'                           nothing happens.
 #'                           name in the corresponding tax_table of `physeq`, or a factor with
 #'                           the same length as the number of taxa in `physeq`.
 #'                           Defaults to NULL, corresponding to no color.
@@ -561,16 +559,16 @@ plot_pretty_legend <- function(x, y, leg) {
 #'                  centered around the mean (deviation). If method = "logarithmic", they are
 #'                  divided by the mean (relative deviation)
 #' @param ...    Optional. Additional arguments passed on to plot.phylo.
-#' @note The function assumes that the tree is rooted. 
+#' @note The function assumes that the tree is rooted.
 #' @return The function is mainly called for its side effect of plotting a tree
-#'         with colored edges and leaves. 
+#'         with colored edges and leaves.
 plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
                               missing.color = "gray",
                               show.missing.tip = TRUE,
                               fatten.edges.by = c("size"),
                               fatten.tips = FALSE,
                               color.edge.by = NULL, color.edge.method = "majority",
-                              base = 10, width.lim = c(0.1, 4), deviation = FALSE, 
+                              base = 10, width.lim = c(0.1, 4), deviation = FALSE,
                               legend.title = deparse(substitute(group)), ...) {
     ## Exception handling
     if (is.null(phy_tree(physeq, FALSE))) {
@@ -596,18 +594,18 @@ plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
     if (any(c("size", "alpha") %in% fatten.edges.by) & deviation) {
         warning("Fattening edges by size or alpha when\n using deviation may not be very relevant")
     }
-    
+
     ## Potentially normalize counts to frequencies
     if (freq) {
         physeq <- transform_sample_counts(physeq, function(x) {x /sum(x)} )
     }
-    
+
     ## Merge samples by grouping factor, if NULL merge all samples together
     if (is.null(group)) {
         group <- factor(rep("All", nsamples(physeq)))
     }
     physeq <- merge_samples(physeq, group)
-    
+
     ## Fatten edges for future use in aesthetics
     fattened.edges <- fattenEdges(physeq, method, width.lim, base, deviation)
     ## Color edges and add color to fatten.edges.by for plot_pretty_tree
@@ -620,7 +618,7 @@ plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
 
     ## Construct edge and tip aesthetics
     aesthetics <- construct_aesthetics(fattened.edges, color, fatten.edges.by, deviation)
-    
+
     ## Optionally, update missing edges and tips color and add color to
     ## fatten.edges.by for plot_pretty_tree
     if (!is.null(missing.color)) {
@@ -642,14 +640,14 @@ plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
         ## Get edge and tip size
         sample.edge.size <- aesthetics$edge.size[i, ]
         sample.tip.size <- sample.edge.size[fattened.edges$pendant.edges]
-        
-        ## prepare tree labels        
+
+        ## prepare tree labels
         tree <- phy_tree(physeq)
         if (!show.missing.tip) {
             absent.tips <- which(! fattened.edges$tip.presence[i, ])
             tree$tip.label[ absent.tips ] <- ""
         }
-        
+
         ## Plot tree according to aesthetics
         plot_pretty_tree(tree, sample.edge.size, sample.edge.color,
                          sample.tip.size, sample.tip.color,
@@ -671,7 +669,7 @@ plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
 #' These functions are adapted from plotrix package and simplified here
 #' for our purpose
 color.legend <- function(x, y, h, col.h, col.w, title, rect.col,
-                         legend, values = NULL, 
+                         legend, values = NULL,
                          xpd = NA, ...) {
     if (!missing(xpd)) {
         op <- par("xpd")
@@ -705,7 +703,7 @@ gradient.rect <- function (xleft, ybottom, xright, ytop, col = NULL,
     ybottoms <- seq(ybottom, ytop - yinc, length = nslices)
     ytops <- ybottoms + yinc
     rect(xleft, ybottoms, xright, ytops, col = col, lty = 0)
-    rect(xleft, ybottoms[1], xright, ytops[nslices], 
+    rect(xleft, ybottoms[1], xright, ytops[nslices],
          border = border)
 }
 
@@ -715,7 +713,7 @@ symmetric_log_breaks <- function (n = 5, base = 10) {
         rng <- c(-rng, rng)
         min <- floor(rng[1])
         max <- ceiling(rng[2])
-        if (max == min) 
+        if (max == min)
             return(base^min)
         by <- floor((max - min)/n) + 1
         breaks <- base^seq(min, max, by = by)
