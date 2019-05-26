@@ -14,24 +14,24 @@ specificity <- function(x, index = c("shannon", "simpson", "yanai", "indspec"), 
     ## Note:
     ## - all 0 vectors lead to minimum specificity (unlike in 'diversity' of package 'vegan' where
     ##   they lead to minimum diversity which in turn leads to maximum specificity)
-    ## 
+    ##
     ## Returns
     ## - Div: Specificity vector
     index <- match.arg(index)
-    if (index == "indspec") { stopifnot(!is.null(groupfrac))} 
+    if (index == "indspec") { stopifnot(!is.null(groupfrac))}
     ## Change vector to matrix
     if (is.vector(x)) {
         x <- matrix(x, nrow = 1)
         if (index == "indspec") { groupfrac <- matrix(groupfrac, nrow = 1) }
     }
-    ## change x so that empty sites return minimum specificity 
+    ## change x so that empty sites return minimum specificity
     total <- rowSums(x)
     x[total == 0, ] <- 1
     ## Compute diversity index
     if (index == "yanai") {
         x <- 1 - (x / rowMax(x))
         Div <- rowSums(x, na.rm =TRUE)/(ncol(x) - 1)
-    } else { ## Normalize data 
+    } else { ## Normalize data
         x <- x / rowSums(x)
         if (index == "shannon") {
             x <- -x * log(x)
@@ -67,17 +67,17 @@ local_specificity <- function(x, index = c("fraction", "indspec"), groupfrac = N
     ## Note:
     ## - all 0 vectors lead to minimum specificity (unlike in 'diversity' of package 'vegan' where
     ##   they lead to minimum diversity which in turn leads to maximum specificity)
-    ## 
+    ##
     ## Returns
     ## - Div: Specificity vector
     index <- match.arg(index)
-    if (index == "indspec") { stopifnot(!is.null(groupfrac))} 
+    if (index == "indspec") { stopifnot(!is.null(groupfrac))}
     ## Change vector to matrix
     if (is.vector(x)) {
         x <- matrix(x, nrow = 1)
         if (index == "indspec") { groupfrac <- matrix(groupfrac, nrow = 1) }
     }
-    ## change x so that empty sites return minimum specificity 
+    ## change x so that empty sites return minimum specificity
     total <- rowSums(x)
     x[total == 0, ] <- 1
     ## Compute local specificity index
@@ -87,7 +87,6 @@ local_specificity <- function(x, index = c("fraction", "indspec"), groupfrac = N
     }
     return(Div)
 }
-
 
 ## Estimate specificity of an otu to a given factor
 estimate_specificity <- function(physeq, group,
@@ -101,7 +100,7 @@ estimate_specificity <- function(physeq, group,
   ##           factor with the same length as the number of samples in ‘physeq’.
   ## - freq    Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
   ##           Defaults to TRUE. TRUE corresponding to weighting all samples equally while FALSE
-  ##           weights them with their library size. 
+  ##           weights them with their library size.
   ## - se:     Logical, variability of the computed specificities be assessed
   ##           (by bootstrapping samples within levels of factor). If TRUE, quantiles
   ##           5, 25, 50, 75 and 95 of specificity coefficients are returned. Defaults to TRUE
@@ -109,7 +108,7 @@ estimate_specificity <- function(physeq, group,
   ##           to compute quantiles.
   ## - parallel: Logical, should computations be performed in parallel. Use mclapply and
   ##             parallel HPC framework
-  ## 
+  ##
   ## Returns;
   ## data frame with components
   ## - specificity: observed specificity
@@ -118,7 +117,7 @@ estimate_specificity <- function(physeq, group,
   ## - mean, sd, quantiles 5, 25, 50, 75 and 95% if 'se' is TRUE
   ## Specificity method is used as attribute 'index'
 
-  ## Get grouping factor 
+  ## Get grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
     if (class(group) == "character" & length(group) == 1) {
       if (! group %in% sample_variables(physeq)) {
@@ -130,14 +129,14 @@ estimate_specificity <- function(physeq, group,
   if (class(group) != "factor") {
     group <- factor(group)
   }
-  
+
   ## Construct relative abundances by sample
   tdf <- as(otu_table(physeq), "matrix")
   if (!taxa_are_rows(physeq)) { tdf <- t(tdf) }
   if (freq) {
       tdf <- apply(tdf, 2, function(x) x/sum(x))
   }
-  
+
   ## Specificity after pooling by groups for one sample
   ## Change the default settings so that presence in no sample is
   ## considered as perfect evenness (instead of specificity, as is the case now)
@@ -175,7 +174,7 @@ estimate_specificity <- function(physeq, group,
                     specificity = spec(tdf, index, group),
                     level = domLevel,
                     abundance = rowMeans(meandf))
-  
+
   ## Compute variability of specificity indexes
   if (se) {
       ## Replicate specificity estimates (optionally, in parallel using foreach)
@@ -201,34 +200,41 @@ estimate_specificity <- function(physeq, group,
 
 
 ## Estimate local specificity of an otu to a given factor
+#' Estimate local specificity of an OTU to a group
+#'
+#' @inheritParams estimate_prevalence
+#' @param index Either "fraction" (default) or "indspec".
+#'              Method used for computing local specificity (see details).
+#' @param freq Logical. Defaults to TRUE. Should counts be replaced by frequencies (TRUE)
+#'             or kept as such (FALSE). TRUE corresponding to weighting all samples equally
+#'             while FALSE weights them with their library size.
+#' @param B Only used if se is TRUE, number of bootstrap replicates used
+#'          to compute quantiles.
+#' @param se Logical. Defaults to TRUE. Variability of the computed specificities be assessed
+#'           (by bootstrapping samples within levels of factor). If TRUE, quantiles
+#'           5, 25, 50, 75 and 95 of specificity coefficients are returned.
+#' @param parallel Logical, should computations be performed in parallel using \code{\link{mclapply}}
+#'                 and parallel framework)
+#'
+#' @return  A data frame with components
+#' * specificity: observed local specificity
+#' * group: factor level
+#' * abundance: local relative abundance of otu (all samples of a level are weighted equally)
+#' * mean, sd, quantiles 5, 25, 50, 75 and 95% if 'se' is TRUE
+#' Specificity method is used as attribute 'index' of the data frame.
+#'
+#' @details Method "fraction" correspond to fraction of reads coming from a given group. Method "indspec" corresponds to fraction x local prevalence in that group.
+
+#' @export
+#'
+#' @examples
+#' data(food)
+#' estimate_local_specificity(food, group = "EnvType", index = "indspec", se = FALSE)
 estimate_local_specificity <- function(physeq, group,
                                  index = c("fraction", "indspec"), freq = TRUE,
                                  B = 999, se = TRUE, parallel = FALSE) {
-  ## Args:
-  ## - physeq: phyloseq class object, otu abundances are extracted from this object
-  ## - index:  method used for computing local specificity
-  ## - group:  Either the a single character string matching a
-  ##           variable name in the corresponding sample_data of ‘physeq’, or a
-  ##           factor with the same length as the number of samples in ‘physeq’.
-  ## - freq    Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
-  ##           Defaults to TRUE. TRUE corresponding to weighting all samples equally while FALSE
-  ##           weights them with their library size. 
-  ## - se:     Logical, variability of the computed specificities be assessed
-  ##           (by bootstrapping samples within levels of factor). If TRUE, quantiles
-  ##           5, 25, 50, 75 and 95 of specificity coefficients are returned. Defaults to TRUE
-  ## - B:      Only used if se is TRUE, number of bootstrap replicates used
-  ##           to compute quantiles.
-  ## - parallel: Logical, should computations be performed in parallel. Use mclapply and
-  ##             parallel HPC framework
-  ## 
   ## Returns;
-  ## data frame with components
-  ## - specificity: observed local specificity
-  ## - group: factor level 
-  ## - abundance: local relative abundance of otu (all samples of a level are weighted equally)
-  ## - mean, sd, quantiles 5, 25, 50, 75 and 95% if 'se' is TRUE
-  ## Specificity method is used as attribute 'index'
-  ## Get grouping factor 
+  ## Get grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
     if (class(group) == "character" & length(group) == 1) {
       x1 <- data.frame(sample_data(physeq))
@@ -278,7 +284,7 @@ estimate_local_specificity <- function(physeq, group,
   meandf <- t(rowsum(t(tdf), group, reorder = TRUE))
   relative.abundance <- apply(meandf, 2, function(x) x / sum(x))
   observed.otu <- as.vector(relative.abundance > 0)
-  res <- data.frame(otu = rep(rownames(relative.abundance), ncol(relative.abundance)), 
+  res <- data.frame(otu = rep(rownames(relative.abundance), ncol(relative.abundance)),
                     level = rep(colnames(relative.abundance), each = nrow(relative.abundance)),
                     abundance = as.vector(relative.abundance))
   res <- res[observed.otu, ]
@@ -333,7 +339,7 @@ plot_specificity <- function(specOTUS, y = "specificity", color = "level",
 }
 
 ## Plot local specifity against relative abundance
-plot_local_specificity <- function(specOTUS, y = "specificity", formula = y~x, 
+plot_local_specificity <- function(specOTUS, y = "specificity", formula = y~x,
                                    color = "level", method = "loess",
                                    se = TRUE, plot = TRUE) {
   p <- ggplot(specOTUS, aes_string(x = "abundance", y = y, color = color)) + geom_point(size = 2)
@@ -380,9 +386,9 @@ plot_specificity_distribution <- function(specOTUS, x = "specificity", color = "
   }
   specmin <- ifelse(attr(specOTUS, "index") %in% c("simpson", "shannon"),
                     1/length(levels(specOTUS$level)),
-                    0)  
+                    0)
   p <- p + geom_vline(xintercept = specmin, lty = 2, color = "grey40")
-  if (plot) { 
+  if (plot) {
     plot(p)
   }
   return(invisible(p))
@@ -413,7 +419,7 @@ expected_robust_specificity <- function(group,
 ## Assess significance of observed specificities using permutation tests
 test_specificity <- function(physeq, group,
                              index = c("shannon", "simpson", "yanai", "indspec"),
-                             freq = TRUE, replace = FALSE, 
+                             freq = TRUE, replace = FALSE,
                              B = 999, parallel = FALSE) {
   ## Args:
   ## - physeq: phyloseq class object, otu abundances are extracted from this object
@@ -424,9 +430,9 @@ test_specificity <- function(physeq, group,
   ## - freq    Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
   ##           Defaults to TRUE. TRUE corresponding to weighting all samples equally while FALSE
   ##           weights them with their library size.
-  ## - replace Logical. Should samples be replaced when randomizing samples within group levels. 
+  ## - replace Logical. Should samples be replaced when randomizing samples within group levels.
   ## - B:      Number of permutation tests used to assess significance.
-  ## 
+  ##
   ## Returns;
   ## data frame with components
   ## - specificity: observed specificity
@@ -448,14 +454,14 @@ test_specificity <- function(physeq, group,
   if (class(group) != "factor") {
     group <- factor(group)
   }
-  
+
   ## Construct relative abundances by sample
   tdf <- as(otu_table(physeq), "matrix")
   if (!taxa_are_rows(physeq)) { tdf <- t(tdf) }
   if (freq) {
       tdf <- apply(tdf, 2, function(x) x/sum(x))
   }
-  
+
   ## Specificity after pooling by groups for one sample
   ## Per group averages are computed using rowsum and group size (instead of aggregate)
   ## for speed
@@ -521,10 +527,10 @@ test_local_specificity <- function(physeq, group,
   ## - type    Unambiguous abbreviation of "global" or "local". If "local", specificity of a taxa
   ##           to an environment is compared to random specificities in that environment only. If
   ##           "global", it is compared to the maximum specificity over all environments. "global"
-  ##            is more conservative than "local". Defaults to "local". 
-  ## - replace Logical. Should samples be replaced when randomizing samples within group levels. 
+  ##            is more conservative than "local". Defaults to "local".
+  ## - replace Logical. Should samples be replaced when randomizing samples within group levels.
   ## - B:      Number of permutation tests used to assess significance.
-  ## 
+  ##
   ## Returns;
   ## data frame with components
   ## - specificity: observed specificity
@@ -546,7 +552,7 @@ test_local_specificity <- function(physeq, group,
   if (class(group) != "factor") {
     group <- factor(group)
   }
-  
+
   ## Construct relative abundances by sample
   tdf <- as(otu_table(physeq), "matrix")
   if (!taxa_are_rows(physeq)) { tdf <- t(tdf) }
@@ -556,7 +562,7 @@ test_local_specificity <- function(physeq, group,
 
   ## Get type
   type <- match.arg(type)
-  
+
   ## Local Specificity after pooling by groups for one sample
   ## Per group averages are computed using rowsum and group size (instead of aggregate)
   ## for speed
@@ -580,7 +586,7 @@ test_local_specificity <- function(physeq, group,
   meandf <- t(rowsum(t(tdf), group, reorder = TRUE))
   relative.abundance <- apply(meandf, 2, function(x) x / sum(x))
   observed.otu <- as.vector(relative.abundance > 0)
-  res <- data.frame(otu = rep(rownames(relative.abundance), ncol(relative.abundance)), 
+  res <- data.frame(otu = rep(rownames(relative.abundance), ncol(relative.abundance)),
                     level = rep(colnames(relative.abundance), each = nrow(relative.abundance)),
                     abundance = as.vector(relative.abundance))
   res <- res[observed.otu, ]
@@ -608,10 +614,10 @@ test_local_specificity <- function(physeq, group,
 }
 
 
-## Compare saturation speed of rarefaction curves for specific species against all species. 
+## Compare saturation speed of rarefaction curves for specific species against all species.
 specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction", "indspec"),
-                                 specificity = NULL, threshold = 0.9, pvalue = 0.05, 
-                                 label = NULL, B = 999, 
+                                 specificity = NULL, threshold = 0.9, pvalue = 0.05,
+                                 label = NULL, B = 999,
                                  color = NULL, parallel = FALSE, se = TRUE, plot = TRUE) {
     ## Args:
     ## - physeq: phyloseq class object, from which abundance data are extracted
@@ -619,14 +625,14 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
     ## - group:  Either the a single character string matching a
     ##           variable name in the corresponding sample_data of ‘physeq’, or a
     ##           factor with the same length as the number of samples in ‘physeq’.
-    ## - specifity: Default `NULL`. Data frame with components "specificity" (observed local specificity) and 
-    ##              "group" (factor level). 
+    ## - specifity: Default `NULL`. Data frame with components "specificity" (observed local specificity) and
+    ##              "group" (factor level).
     ## - index: Default "indspec". Used if specifity is `NULL`, argument passed on to
     ##          'link{estimate_local_specificity}' to compute specificity
-    ## - B: (Optional) Default 999. Integer value. Number of replicates used to compute specificity adjusted p-values. 
+    ## - B: (Optional) Default 999. Integer value. Number of replicates used to compute specificity adjusted p-values.
     ## - threshold: Default 0.9. Numeric value used to label an otu as specific when
     ##              constructing rarefaction curve. ‘Specificity’ must be higher
-    ##              than 'threshold'. 
+    ##              than 'threshold'.
     ## - pvalue: Default 0.05. Numeric value used to label an otu as specific when
     ##           constructing rarefaction curve. Used only if threshold is NULL.
     ##           ‘adjp’ must be lower than 'pvalue'.
@@ -648,14 +654,14 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
     x <- as(otu_table(physeq), "matrix")
     if (taxa_are_rows(physeq)) { x <- t(x) }
 
-    ## Get sample data 
+    ## Get sample data
     if (!is.null(sample_data(physeq, FALSE))) {
         sdf <- as(sample_data(physeq), "data.frame")
         sdf$Sample <- rownames(sdf)
     } else {
         stop("Sample data required in phyloseq class argument")
     }
-    
+
     ## Compute specificity, and if necessary adjusted p-values for
     ## local specificity
     if (is.null(specificity)) {
@@ -672,14 +678,14 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
         attr(specificity, "index") <- attr(test_specificity, "index")
         attr(specificity, "group") <- attr(test_specificity, "group")
     }
-    
+
     ## Call specific otus on either p-value or specificity value
     if (is.null(threshold)) {
         specificity$specific <- with(specificity, adjp < pvalue)
     } else {
         specificity$specific <- with(specificity, specificity > threshold)
     }
-    
+
     ## Local modification of vegan 'rarefy' function
     ## Used to compute estimated relative richness when limiting oneself to a
     ## species subset only. Richness is relative
@@ -712,9 +718,9 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
         }
         return(S.rare)
     }
-    
+
     ## This script is adapted from vegan `rarecurve` function
-    ## Computes rarefaction curves (otu richness) and se.     
+    ## Computes rarefaction curves (otu richness) and se.
     tot <- rowSums(x)
     S <- rowSums(x > 0)
     nr <- nrow(x)
@@ -724,7 +730,7 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
         rarefun <- function(i) {
             cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
             n <- seq(1, tot[i], by = step)
-            if (n[length(n)] != tot[i]) 
+            if (n[length(n)] != tot[i])
                 n <- c(n, tot[i])
             y <- .rarefy(x[i, ], n, se = se)
             return(data.frame(t(y), Size = n, Sample = rownames(x)[i], Richness = "Complete"))
@@ -734,7 +740,7 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
         out <- lapply(seq_len(nr), function(i) {
             cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
         n <- seq(1, tot[i], by = step)
-            if (n[length(n)] != tot[i]) 
+            if (n[length(n)] != tot[i])
                 n <- c(n, tot[i])
             y <- .rarefy(x[i, ], n, se = se)
             return(data.frame(t(y), Size = n, Sample = rownames(x)[i], Richness = "Complete"))
@@ -747,7 +753,7 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
         rarefun <- function(i) {
             cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
             n <- seq(1, tot[i], by = step)
-            if (n[length(n)] != tot[i]) 
+            if (n[length(n)] != tot[i])
                 n <- c(n, tot[i])
             i.level <- attr(specificity, "group")[i]
             specific <- subset(specificity,
@@ -762,7 +768,7 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
         out <- lapply(seq_len(nr), function(i) {
             cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
         n <- seq(1, tot[i], by = step)
-            if (n[length(n)] != tot[i]) 
+            if (n[length(n)] != tot[i])
                 n <- c(n, tot[i])
             i.level <- attr(specificity, "group")[i]
             specific <- subset(specificity,
@@ -778,13 +784,13 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
     ## Merge all richnesses
     df <- rbind(df.comp, df.spec)
     df$Richness <- factor(df$Richness, levels = c("Specific", "Complete"))
-    
+
     ## Merge sample data with rarefaction curve
     sdf$Group <- attr(specificity, "group")
     data <- merge(df, sdf, by = "Sample")
     labels <- data.frame(x = tot, y = 1, Sample = rownames(x))
     labels <- merge(labels, sdf, by = "Sample")
-    
+
     ## Add, any custom-supplied plot-mapped variables
     if( length(color) > 1 ){
         data$color <- color
@@ -796,7 +802,7 @@ specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction",
         names(labels)[names(labels)=="label"] <- deparse(substitute(label))
         label <- deparse(substitute(label))
     }
-    
+
     p <- ggplot(data = data, aes_string(x = "Size", y = "S",
                     group = "interaction(Richness, Sample)", color = color))
     p <- p + labs(x = "Sample Size", y = "(Relative) Species Richness")

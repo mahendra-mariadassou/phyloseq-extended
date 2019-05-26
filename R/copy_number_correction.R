@@ -1,7 +1,7 @@
-#' Use information from Vetroský and Baldrian (2013) to correct for 16S rRNA copy number variation. 
+#' Use information from Vetroský and Baldrian (2013) to correct for 16S rRNA copy number variation.
 #' Given a taxonomic level (Phylum or Class within Proteobacteria), returns the average copy number
-#' (CN) within that level in the database constructed by the authors. 
-#' 
+#' (CN) within that level in the database constructed by the authors.
+#'
 #' @title sample_copy_number_internal
 #' @param level Required. Character. Taxonomic level for which the CN is required.
 #' @param dispersion. Optional. Logical. Should the returned CN be the average within
@@ -11,7 +11,7 @@
 #' @note The copy number is truncated to the [1, 15] range observed in the database. Levels
 #'       not observed in the database have CN set to 4.2 or sample from \code{rnorm(1, 4.2, 2.7)}
 #'       which correspond to the global mean and sd in the database.
-#' @return A numeric value corresponding to imputed CN. 
+#' @return A numeric value corresponding to imputed CN.
 #' @references Vetroský, T. and Baldrian, P.(2013). The variability of the 16S rRNA Gene in Bacterial
 #'             Genomes and Its Consequences for Bacterial Community Analyses. _Plos One_ *8*(2):e57923
 #' @seealso \code{\link{sample_copy_number}}
@@ -103,23 +103,25 @@ sample_copy_number_internal <- function(level, dispersion = FALSE) {
     return(copy.number)
 }
 
-#' Use information from Vetroský and Baldrian (2013) to correct for 16S rRNA copy number variation. 
+#' Use information from Vetroský and Baldrian (2013) to correct for 16S rRNA copy number variation.
 #' Given a vector of taxonomic level (Phylum or Class within Proteobacteria), returns the average copy
-#' number (CN) for each level. The average are taken from the database reconstructed by the authors. 
-#' 
+#' number (CN) for each level. The average are taken from the database reconstructed by the authors.
+#'
 #' @title sample_copy_number
 #' @param level Required. Character. Taxonomic level for which the CN is required.
 #' @param dispersion. Optional. Logical. Should the returned CN be the average within
 #'                    the level or sampled according to the distribution within that level.
 #'                    Distribution is approximated by a normal with mean and sd set to those
-#'                    observed in the sample database. Defaults to FALSE. 
+#'                    observed in the sample database. Defaults to FALSE.
 #' @note The copy number is truncated to the [1, 15] range observed in the database. Levels
 #'       not observed in the database have CN set to 4.2 or sample from \code{rnorm(1, 4.2, 2.7)}
 #'       which correspond to the global mean and sd in the database.
-#' @return A numeric vector corresponding to imputed CN. 
+#' @return A numeric vector corresponding to imputed CN.
 #' @references Vetroský, T. and Baldrian, P.(2013). The variability of the 16S rRNA Gene in Bacterial
 #'             Genomes and Its Consequences for Bacterial Community Analyses. _Plos One_ *8*(2):e57923
 #' @seealso \code{\link{sample_copy_number_internal}}, \code{\link{extract_level}}
+#'
+#' @export
 sample_copy_number <- Vectorize(sample_copy_number_internal, "level")
 
 
@@ -147,21 +149,23 @@ extract_level <- function(physeq) {
 #'                of "Phylum" or "Abundance". If "Phylum", The scaling is reconstructed
 #'                as the average copy number within "Phylum" or "Class" for Proteobacteria
 #'                using \code{\link{sample_copy_number}}. If "Abundance", counts are moderated
-#'                within each sample to shrink them towards evenness. See Details. 
+#'                within each sample to shrink them towards evenness. See Details.
 #' @param dispersion Optional. Logical. Should the returned CN be the average within
 #'                   the level or sampled according to the distribution within that level.
 #'                   Distribution is approximated by a normal with mean and sd set to those
-#'                   observed in the sample database. Defaults to FALSE. 
+#'                   observed in the sample database. Defaults to FALSE.
 #' @return a \code{\link{phyloseq}} class objet with scaled \code{otu_table} slot.
 #' @note The copy number inferred under "Phylum" scaling is truncated to the [1, 15] range observed
 #'       in the database. Levels not observed in the database have CN set to 4.2 or sample from
 #'       \code{rnorm(1, 4.2, 2.7)} which correspond to the global mean and sd in the database.
 #'       Under "Abundance" scaling, counts are moderated within each sample by assuming that the most
 #'       abundant taxa has CN of 15, the least abundant has CN of 1 and linear interpolation between
-#'       these extremes. This effectively evens bacterial counts (as opposed to 16S rRNA gene counts). 
+#'       these extremes. This effectively evens bacterial counts (as opposed to 16S rRNA gene counts).
 #' @references Vetroský, T. and Baldrian, P.(2013). The variability of the 16S rRNA Gene in Bacterial
 #'             Genomes and Its Consequences for Bacterial Community Analyses. _Plos One_ *8*(2):e57923
-#' @seealso \code{\link{sample_copy_number}}, \code{\link{extract_level}}
+#' @seealso \code{\link{sample_copy_number}}
+#'
+#' @export
 scale_sample_counts <- function(physeq, scaling = "Phylum", dispersion = FALSE) {
     ## Test scaling and reconstruct it if needed
     if (length(scaling) == 1 && scaling == "Abundance") {

@@ -41,5 +41,5 @@ Vetroský, T. and Baldrian, P.(2013). The variability of the 16S rRNA Gene in Ba
             Genomes and Its Consequences for Bacterial Community Analyses. _Plos One_ *8*(2):e57923
 }
 \seealso{
-\code{\link{sample_copy_number}}, \code{\link{extract_level}}
+\code{\link{sample_copy_number}}
 }

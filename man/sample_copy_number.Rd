@@ -18,7 +18,7 @@ observed in the sample database. Defaults to FALSE.}
 A numeric vector corresponding to imputed CN.
 }
 \description{
-Use information from Vetroský and Baldrian (2013) to correct for 16S rRNA copy number variation. 
+Use information from Vetroský and Baldrian (2013) to correct for 16S rRNA copy number variation.
 Given a vector of taxonomic level (Phylum or Class within Proteobacteria), returns the average copy
 number (CN) for each level. The average are taken from the database reconstructed by the authors.
 }
