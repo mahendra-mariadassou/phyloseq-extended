@@ -427,8 +427,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
 
 ## ggplot hue color scale
 gg_color_hue <- function(n) {
-  hues = seq(15, 375, length=n+1)
-  hcl(h=hues, l=65, c=100)[1:n]
+  scales::hue_pal()(n)
 }
 
 
