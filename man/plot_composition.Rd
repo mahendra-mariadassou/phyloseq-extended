@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphical_methods.R
 \name{plot_composition}
 \alias{plot_composition}
-\title{Title}
+\title{Versatile function for plotting compositions graphs}
 \usage{
 plot_composition(physeq, taxaRank1 = "Phylum",
   taxaSet1 = "Proteobacteria", taxaRank2 = "Family",
@@ -37,7 +37,7 @@ selecting the `numberOfTaxa` most abundant taxa.}
 a ggplot2 graphic
 }
 \description{
-Title
+Versatile function for plotting compositions graphs
 }
 \details{
 Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.

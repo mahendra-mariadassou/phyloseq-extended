@@ -31,6 +31,6 @@ A ggplot friendly data frame with the relative abundance of the top `NumberOfTax
 Format phyloseq data for easy composition plots
 }
 \examples{
-data(aop28)
-ggformat(aop28)
+data(food)
+ggformat(food)
 }
