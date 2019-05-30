@@ -143,6 +143,7 @@ plot_composition <- function(physeq,
 }
 
 #' Internal function to correct levels in plot_samples
+#' @keywords internal
 correct_levels <- function(physeq, DF, map.var) {
   oldLevels <- character(0)
   if (any(DF[ , map.var] == "samples", na.rm = TRUE)) {
@@ -158,7 +159,6 @@ correct_levels <- function(physeq, DF, map.var) {
 }
 
 
-#' Internal function to find the most abundant taxa and return their relative abundances in all samples
 top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
     ## Args:
     ## - physeq: phyloseq class object
@@ -195,28 +195,36 @@ top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
 }
 
 
-## Find numberOfTaxa most abundant taxa at taxaRank level
-top_taxa <- function(physeq, taxaRank, numberOfTaxa = 9) {
-  stopifnot(!is.null(tax_table(physeq, FALSE)))
-  otutab <- otu_table(physeq)
-  if ( !taxa_are_rows(otutab) ) {otutab = t(otutab)}
-  otutab <- as(otutab, "matrix")
-  otutab <- apply(otutab, 2, function(x) x / sum(x))
-  ## Subset to OTUs belonging to taxaSet1 to fasten process
-  stopifnot(taxaRank %in% colnames(tax_table(physeq)))
-  mdf <- melt(data = otutab, varnames = c("OTU", "Sample"))
-  colnames(mdf)[3] <- "Abundance"
-  mdf <- mdf[mdf$Abundance > 0, ]
-  ## Add taxonomic information
-  tax <- as(tax_table(physeq), "matrix")
-  tax <- data.frame(OTU = rownames(tax), tax)
-  mdf <- merge(mdf, tax, by.x = "OTU")
-  ## Aggregate by taxaRank and recover most abundant taxa
-  abundanceByTaxa <- aggregate(as.formula(paste("Abundance ~", taxaRank)), data = mdf, FUN = sum)
-  ii <- order(abundanceByTaxa$Abundance, decreasing = TRUE)
-  ## Keep only numberOfTaxa top taxa
-  topTaxa <- (abundanceByTaxa[ii, taxaRank])[1:min(numberOfTaxa, nrow(abundanceByTaxa))]
-  return(as(topTaxa, "character"))
+#' Find the most abundant taxa at a given taxonomic rank
+#'
+#' @param physeq phyloseq class object
+#' @param taxaRank taxonomic level used for agglomeration. Default NULL, equivalent to \code{taxaRank = "OTU"} and no agglomeration.
+#' @param numberOfTaxa Number of top taxa to return
+#'
+#' @return A character vector the the `numberOfTaxa` most abundant `taxaRank`-level taxa
+#' @export
+#'
+#' @examples
+#' data(food)
+#' top_taxa(food, "Phylum", 10)
+top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
+  if (is.null(taxaRank)) {taxaRank <- "OTU"}
+  tax_table(physeq) <- cbind(as(tax_table(physeq), "matrix"),
+                             OTU = taxa_names(physeq))
+  ## Normalize counts and aggregate at level taxaRank
+  physeq <- physeq %>%
+    transform_sample_counts(function(x) {x / sum(x)})
+  ## Manual tax glom
+  if (taxaRank != "OTU") {
+    physeq <- tax_glom(physeq, taxrank = taxaRank)
+  }
+  ## Most abundant taxa
+  top_taxa <- taxa_sums(physeq) %>%
+    sort(decreasing = TRUE) %>%
+    head(n = min(numberOfTaxa, ntaxa(physeq))) %>%
+    names()
+  ## Corresponding names
+  tax_table(physeq)[top_taxa, taxaRank] %>% as.character()
 }
 
 ## Find numberOfConditions most abundant conditions in variable
