@@ -216,7 +216,7 @@ top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
     transform_sample_counts(function(x) {x / sum(x)})
   ## Manual tax glom
   if (taxaRank != "OTU") {
-    physeq <- tax_glom(physeq, taxrank = taxaRank)
+    physeq <- fast_tax_glom(physeq, taxrank = taxaRank)
   }
   ## Most abundant taxa
   top_taxa <- taxa_sums(physeq) %>%
@@ -225,6 +225,51 @@ top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
     names()
   ## Corresponding names
   tax_table(physeq)[top_taxa, 1:match(taxaRank, rank_names(physeq))] %>% as('matrix')
+}
+
+#' Fast alternative to \code{\link{tax_glom}}
+#'
+#' @param physeq Required. \code{\link{phyloseq-class}} object
+#' @param taxrank A character string specifying the taxonomic level that you want to agglomerate over. Should be among the results of \code{rank_names(physeq)}. The default value is \code{rank_names(physeq)[1]}, which may agglomerate too broadly for a given experiment. You are strongly encouraged to try different values for this argument.
+#' @param bad_empty (Optional). Character vector. Default: c("", " ", "\t"). Defines the bad/empty values that should be replaced by "Unknown".
+#'
+#' @return A taxonomically-agglomerated \code{\link{phyloseq-class}} object.
+#' @export
+#'
+#' @details fast_tax_glom differs from \code{\link{tax_glom}} in three important ways:
+#' * It is based on dplyr function and thus much faster
+#' * It does not preserve the phy_tree and refseq slots
+#' * It only preserves taxonomic ranks up to \code{taxrank} and discard all other ones.
+#'
+#' @seealso \code{\link{tax_glom}}
+#' @importFrom tibble column_to_rownames
+#' @examples
+#' data(food)
+#' fast_tax_glom(food, "Species")
+fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c("", " ", "\t")) {
+  rank_number <- match(taxrank, rank_names(physeq))
+  if (is.na(rank_number)) {
+    stop("Bad taxrank argument. Must be among the values of rank_names(physeq)")
+  }
+  ranks <- rank_names(physeq)[1:rank_number]
+  ## change NA and empty to Unknown before merging
+  tax <- as(tax_table(physeq), "matrix")
+  tax[is.na(tax)] <- "Unknown"
+  tax[tax %in% bad_empty] <- "Unknown"
+  ## create groups
+  tax <- as_tibble(tax) %>% select(one_of(ranks)) %>% group_by_all() %>%
+    mutate(group = group_indices())
+  ## create new_taxonomy
+  new_tax <- tax %>% slice(1) %>% arrange(group) %>%
+    tibble::column_to_rownames(var = "group") %>% as.matrix()
+  ## create new count table
+  otutab <- otu_table(physeq)
+  if (!taxa_are_rows(physeq)) otutab  <- t(otutab)
+  otutab <- rowsum(otutab, group = tax$group, reorder = TRUE)
+  ## return merged phyloseq
+  phyloseq(sample_data(physeq),
+           tax_table(new_tax),
+           otu_table(otutab, taxa_are_rows = TRUE))
 }
 
 ## Find numberOfConditions most abundant conditions in variable
@@ -430,53 +475,6 @@ gg_color_hue <- function(n) {
   scales::hue_pal()(n)
 }
 
-## Plotting fonction once library sizes have been estimated
-ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
-  ## Args:
-  ## - cds: Count data set (class eSet of BioConductor)
-  ## - x:  ggplot x aesthetics, used for plotting
-  ## - color: ggplot color aes, used for plotting
-  ## - title: optional, plot title
-  ## - physeq: phyloseq class object from which metadata are extracted
-  ##
-  ## Returns:
-  ## - ggplot2 figure with distribution of normalized log2(counts+1) on left, colored by
-  ##   color and mean/variance function on right panel.
-  countdf <- counts(cds, normalize = TRUE)
-  countdf <- log2(countdf+1)
-  countdf[countdf == 0] <- NA
-  countdf <- melt(countdf, varnames = c("OTU", "X.SampleID"))
-  countdf <- countdf[!is.na(countdf$value), ]
-  countdf <- merge(countdf, as(sample_data(physeq), "data.frame"))
-  p <- ggplot(countdf, aes_string(x = x, y = "value", color = color)) + geom_boxplot()
-  p <- p + theme(axis.text.x = element_text(angle = 90)) + scale_x_discrete("Sample")
-  p <- p + scale_y_discrete("log2(Normalized counts + 1)")
-  if (!is.null(title)) {  p <- p + ggtitle(title) }
-  ## Open graphical device
-  par(no.readonly=TRUE)
-  plot.new()
-  ## setup layout
-  gl <- grid.layout(nrow=1, ncol=2, widths=unit(c(1,1), 'null'))
-  ## grid.show.layout(gl)
-  ## setup viewports
-  vp.1 <- viewport(layout.pos.col=1) # boxplot
-  vp.2 <- viewport(layout.pos.col=2) # mean - sd plot
-  ## init layout
-  pushViewport(viewport(layout=gl))
-  ## Access the first viewport
-  pushViewport(vp.1)
-  ## print our ggplot graphics here
-  print(p, newpage=FALSE)
-  ## done with the viewport
-  popViewport()
-  ## Move to the second viewport
-  pushViewport(vp.2)
-  ##  start new base graphics in second viewport
-  par(new=TRUE, fig=gridFIG())
-  meanSdPlot(log2(counts(cds, normalized = TRUE)[, ] + 1), ranks = FALSE, main = title)
-  ##  done with the viewport
-  popViewport()
-}
 
 #' Format phyloseq data for easy composition plots
 #'
@@ -519,7 +517,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
     tax_table(physeq) <- tax
     if (taxaRank2 != "OTU_rank") {
-      physeq <- tax_glom(physeq, taxrank = taxaRank2)
+      physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
     }
 
     ## Keep only numberOfTaxa top taxa and aggregate the rest as "Other"

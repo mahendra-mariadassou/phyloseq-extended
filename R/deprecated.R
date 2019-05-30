@@ -53,3 +53,52 @@ rarecurve2 <- function (physeq, step = 1, sample, xlab = "Sample Size", ylab = "
   }
   invisible(out)
 }
+
+
+## Plotting fonction once library sizes have been estimated
+ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
+  ## Args:
+  ## - cds: Count data set (class eSet of BioConductor)
+  ## - x:  ggplot x aesthetics, used for plotting
+  ## - color: ggplot color aes, used for plotting
+  ## - title: optional, plot title
+  ## - physeq: phyloseq class object from which metadata are extracted
+  ##
+  ## Returns:
+  ## - ggplot2 figure with distribution of normalized log2(counts+1) on left, colored by
+  ##   color and mean/variance function on right panel.
+  countdf <- counts(cds, normalize = TRUE)
+  countdf <- log2(countdf+1)
+  countdf[countdf == 0] <- NA
+  countdf <- melt(countdf, varnames = c("OTU", "X.SampleID"))
+  countdf <- countdf[!is.na(countdf$value), ]
+  countdf <- merge(countdf, as(sample_data(physeq), "data.frame"))
+  p <- ggplot(countdf, aes_string(x = x, y = "value", color = color)) + geom_boxplot()
+  p <- p + theme(axis.text.x = element_text(angle = 90)) + scale_x_discrete("Sample")
+  p <- p + scale_y_discrete("log2(Normalized counts + 1)")
+  if (!is.null(title)) {  p <- p + ggtitle(title) }
+  ## Open graphical device
+  par(no.readonly=TRUE)
+  plot.new()
+  ## setup layout
+  gl <- grid.layout(nrow=1, ncol=2, widths=unit(c(1,1), 'null'))
+  ## grid.show.layout(gl)
+  ## setup viewports
+  vp.1 <- viewport(layout.pos.col=1) # boxplot
+  vp.2 <- viewport(layout.pos.col=2) # mean - sd plot
+  ## init layout
+  pushViewport(viewport(layout=gl))
+  ## Access the first viewport
+  pushViewport(vp.1)
+  ## print our ggplot graphics here
+  print(p, newpage=FALSE)
+  ## done with the viewport
+  popViewport()
+  ## Move to the second viewport
+  pushViewport(vp.2)
+  ##  start new base graphics in second viewport
+  par(new=TRUE, fig=gridFIG())
+  meanSdPlot(log2(counts(cds, normalized = TRUE)[, ] + 1), ranks = FALSE, main = title)
+  ##  done with the viewport
+  popViewport()
+}
