@@ -201,7 +201,7 @@ top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
 #' @param taxaRank taxonomic level used for agglomeration. Default NULL, equivalent to \code{taxaRank = "OTU"} and no agglomeration.
 #' @param numberOfTaxa Number of top taxa to return
 #'
-#' @return A character vector the the `numberOfTaxa` most abundant `taxaRank`-level taxa
+#' @return A matrix corresponding to the `numberOfTaxa` most abundant taxa at level `taxaRank`-level
 #' @export
 #'
 #' @examples
@@ -224,7 +224,7 @@ top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
     head(n = min(numberOfTaxa, ntaxa(physeq))) %>%
     names()
   ## Corresponding names
-  tax_table(physeq)[top_taxa, taxaRank] %>% as.character()
+  tax_table(physeq)[top_taxa, 1:match(taxaRank, rank_names(physeq))] %>% as('matrix')
 }
 
 ## Find numberOfConditions most abundant conditions in variable
@@ -429,7 +429,6 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
 gg_color_hue <- function(n) {
   scales::hue_pal()(n)
 }
-
 
 ## Plotting fonction once library sizes have been estimated
 ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
