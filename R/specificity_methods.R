@@ -3,6 +3,7 @@
 ## Compute specificity of a vector
 ## x represents (possibly not normalised) distribution of quantity
 ## of interest across conditions
+#' @keywords internal
 specificity <- function(x, index = c("shannon", "simpson", "yanai", "indspec"), groupfrac = NULL) {
     ## Args:
     ## - x: matrix (vectors are automatically coerced to 1-row matrices), specificity
@@ -54,6 +55,7 @@ specificity <- function(x, index = c("shannon", "simpson", "yanai", "indspec"), 
 ## Compute local specificity of a vector
 ## x represents (possibly not normalised) distribution of quantity
 ## of interest across conditions
+#' @keywords internal
 local_specificity <- function(x, index = c("fraction", "indspec"), groupfrac = NULL) {
     ## Args:
     ## - x: matrix (vectors are automatically coerced to 1-row matrices), specificity

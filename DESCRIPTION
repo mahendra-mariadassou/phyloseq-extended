@@ -3,10 +3,10 @@ Title: PhyloseqExtended
 Version: 0.1.0.9000
 Authors@R: 
     person(given = "Mahendra",
-           family = "Mahendra",
+           family = "Mariadassou",
            role = c("aut", "cre"),
            email = "mahendra.mariadassou@inra.fr")
-Description: Adds severals additional functions to phyloseq, mainly used for training.
+Description: Adds severals additional functions to phyloseq (rarefaction curves, phylogenetic diversities, specificity and prevalence indices, nice composition plots, etc). Mostly used during training sessions. 
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

@@ -1,6 +1,3 @@
-require(parallel)
-options(mc.cores= 2)
-
 #' Phylogenetic diversity
 #'
 #' @param physeq phyloseq class object, from which phylogeny and abundance data are extracted
@@ -45,7 +42,6 @@ phylodiv <- function(physeq, theta = 0) {
 
     return(pd)
 }
-
 
 #' Rarefaction curves for phylogenetic diversity, ggplot-style
 #'
