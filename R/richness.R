@@ -1,11 +1,18 @@
 require(parallel)
 options(mc.cores= 2)
 
+#' Phylogenetic diversity
+#'
+#' @param physeq phyloseq class object, from which phylogeny and abundance data are extracted
+#' @param theta parameter that determines the balance in the Balance Weighted Phylogenetic Diversity. See McCoy and Matsen (2013) for details on BWPD. Faih's PD correspond to theta = 0 (default).
+#'
+#' @return A data.frame that collates \code{sample_data(physeq)} and an additional \code{pd} column with phylogenetic diversities.
+#' @export
+#'
+#' @examples
+#' data(food)
+#' phylodiv(food)
 phylodiv <- function(physeq, theta = 0) {
-    ## Args:
-    ## - physeq: phyloseq class object, from which phylogeny and abundance data are extracted
-    ## - theta: parameter that determines the balance in the Balance Weighted Phylogenetic Diversity (see McCoy and Matsen, 2013)
-    ##          Theta = 0 corresponds to Faith's PD
     count_to_prop <- function(x) {x/sum(x)}
     physeq <- transform_sample_counts(physeq, count_to_prop)
     x <- as(otu_table(physeq), "matrix")
@@ -36,31 +43,30 @@ phylodiv <- function(physeq, theta = 0) {
         pd <- sdf
     }
 
-    return (pd)
+    return(pd)
 }
 
 
+#' Rarefaction curves for phylogenetic diversity, ggplot-style
+#'
+#' @inheritParams ggrare
+#' @param log (Otional). Default 'TRUE'. Logical value. Should sample size
+#'            be represented using a log10 scale? Can be modified with
+#'            \code{scale_x_*} functions from \link{ggplot2}
+#' @param replace Logical. If TRUE (default), population are treated as of infinite size,
+#'                with probabilities of occurence of a taxa computed from
+#'                the (finite size) community data.
+#'
+#' @return a ggplot2 object
+#' @export
+#'
+#' @examples
+#' data(food)
+#' ggpdrare(food, se = FALSE, step = 100, color = "EnvType")
 ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
                      log = TRUE,
                      replace = FALSE, se = TRUE, plot = TRUE, parallel = FALSE) {
-    ## Args:
-    ## - physeq: phyloseq class object, from which abundance data are extracted
-    ## - step: Step size for sample size in rarefaction curves
-    ## - label: Default `NULL`. Character string. The name of the variable
-    ##          to map to text labels on the plot. Similar to color option
-    ##          but for plotting text.
-    ## - color: (Optional). Default ‘NULL’. Character string. The name of the
-    ##          variable to map to colors in the plot. This can be a sample
-    ##          variable (among the set returned by
-    ##          ‘sample_variables(physeq)’ ) or taxonomic rank (among the set
-    ##          returned by ‘rank_names(physeq)’).
-    ##          Finally, The color scheme is chosen automatically by
-    ##          ‘link{ggplot}’, but it can be modified afterward with an
-    ##          additional layer using ‘scale_color_manual’.
-    ## - log:   (Otional). Default 'TRUE'. Logical value. Should sample size
-    ##          be represented using a log10 scale?
-    ## - replace: If TRUE, population are treated as of infinite size, with probabilities of occurence
-    ##            of a taxa computed from the (finite size) community data
+    ## - replace:
     ## - se  : Logical, should standard error be computed in addition to expected pd
     ## - plot:  Logical, should the graphic be plotted.
     x <- as(otu_table(physeq), "matrix")
