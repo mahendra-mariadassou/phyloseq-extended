@@ -3,5 +3,5 @@
 #' @docType package
 #' @name phyloseq.extended
 #'
-#' @import dplyr tidyr phyloseq scales
+#' @import dplyr tidyr phyloseq ggplot2 scales
 NULL

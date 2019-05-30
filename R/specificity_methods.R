@@ -613,7 +613,6 @@ test_local_specificity <- function(physeq, group,
   return(res)
 }
 
-
 ## Compare saturation speed of rarefaction curves for specific species against all species.
 specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction", "indspec"),
                                  specificity = NULL, threshold = 0.9, pvalue = 0.05,
