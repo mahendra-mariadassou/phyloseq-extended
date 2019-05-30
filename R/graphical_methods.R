@@ -1,7 +1,7 @@
 ## Set of graphical methods for phyloseq objects (mainly related to ordination, and library size after normalisation)
 
-## Rarefaction curve, ggplot style
-#' Title
+
+#' Rarefaction curves, ggplot styles
 #'
 #' @param physeq phyloseq class object, from which abundance data are extracted
 #' @param step Step size for sample size in rarefaction curves
@@ -17,7 +17,8 @@
 #' @examples
 #' data(food)
 #' ggrare(food, step = 100, color = "EnvType", se = FALSE)
-ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, parallel = FALSE, se = TRUE) {
+ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
+                   plot = TRUE, parallel = FALSE, se = TRUE) {
   x <- as(otu_table(physeq), "matrix")
   if (taxa_are_rows(physeq)) { x <- t(x) }
 
@@ -84,8 +85,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL, plot = TRUE, p
   invisible(p)
 }
 
-## Versatile function for plotting compositions.
-#' Title
+#' Versatile function for plotting compositions graphs
 #'
 #' @param physeq phyloseq class object
 #' @param taxaRank1 taxonomic level in which to do the first subsetting
@@ -123,12 +123,12 @@ plot_composition <- function(physeq,
                      fill, numberOfTaxa, startFrom)
   p <- ggplot(ggdata, aes_string(x = x, y = y, fill = fill, color = fill, group = "Sample"))
   ## Manually change color scale to assign grey to "Unknown" (if any)
-  if (!is.null(fill) && any(c("Unknown", "Other") %in% unique(ggdata[, fill]))) {
-      ranks <- as.character(unique(ggdata[, fill]))
-      ranks <- ranks[ ! ranks %in% c("Multi-affiliation", "Unknown", "Other")]
-      colvals <- c(gg_color_hue(length(ranks)),
+  if (!is.null(fill) && any(c("Unknown", "Other") %in% levels(ggdata[, fill]))) {
+      levels <- levels(ggdata[, fill])
+      levels <- levels[ ! levels %in% c("Multi-affiliation", "Unknown", "Other")]
+      colvals <- c(gg_color_hue(length(levels)),
                    "grey75", "grey45", "black")
-      names(colvals) <- c(ranks, "Multi-affiliation", "Unknown", "Other")
+      names(colvals) <- c(levels, "Multi-affiliation", "Unknown", "Other")
       ## Now add the manually re-scaled layer with Unassigned as grey
       p <- p + scale_fill_manual(values=colvals) + scale_color_manual(values = colvals)
 
@@ -142,6 +142,7 @@ plot_composition <- function(physeq,
   return(p)
 }
 
+#' Internal function to correct levels in plot_samples
 correct_levels <- function(physeq, DF, map.var) {
   oldLevels <- character(0)
   if (any(DF[ , map.var] == "samples", na.rm = TRUE)) {
@@ -157,9 +158,7 @@ correct_levels <- function(physeq, DF, map.var) {
 }
 
 
-
-## Find numberOfTaxa most abundant taxa at taxaRank level and return their relative
-## abundance in all sample
+#' Internal function to find the most abundant taxa and return their relative abundances in all samples
 top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
     ## Args:
     ## - physeq: phyloseq class object
@@ -473,8 +472,6 @@ ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
   popViewport()
 }
 
-## Return relative abundance of top NumberOfTaxa OTUs at the taxaRank2 level
-## within taxaSet1 at taxaRank1 level
 #' Format phyloseq data for easy composition plots
 #'
 #' @inheritParams plot_composition
@@ -483,8 +480,8 @@ ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
 #' @export
 #'
 #' @examples
-#' data(aop28)
-#' ggformat(aop28)
+#' data(food)
+#' ggformat(food)
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                      taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9, startFrom = 1) {
     ## Enforce orientation and transform count to relative abundances
@@ -549,7 +546,9 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
     tax[!ii, ] <- "Other"
     tax_table(physeq) <- tax
-    physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = "Other")
+    archetype <- taxa_names(physeq)[!ii][1]
+    physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = archetype)
+    taxa_names(physeq)[taxa_names(physeq) == archetype] <- "Other"
     ## physeq <- tax_glom(physeq, taxrank = taxaRank2)
 
     tdf <- psmelt(physeq)
@@ -565,21 +564,26 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     return(tdf)
 }
 
-## Plot a distance matrix as a heatmap with samples sorted according to
-## order vector
+#' Plot a distance matrix as a heatmap
+#'
+#' @param dist Distance matrix between the samples
+#' @param order Optional. Sample order used for plotting
+#' @param title Optional. Plot title.
+#' @param low Optional. Default "#B1F756". Color for low values
+#' @param high Optional. Default "#132B13". Color for high values
+#' @param show.names Optional. Default FALSE. Show sample names in heatmap. Use only
+#'                   if there are not too many samples.
+#'
+#' @return A ggplot2 object
+#' @export
+#'
+#' @examples
+#' data(food)
+#' dist.bc <- distance(food, "bray")
+#' plot_dist_as_heatmap(dist.bc)
 plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
                                  low = "#B1F756", high = "#132B13",
                                  show.names = FALSE) {
-  ## Args:
-  ## - dist: distance matrix (dist class)
-  ## - order: (optional) ordering of the samples of dist for representation
-  ## - title: (optional) graph title
-  ## - low, high: (optional) Colours for low and high ends of the gradient
-  ## - show.names: (optional) Logical. Should sample names be displayed in the heatmap.
-  ##               Defaults to FALSE
-  ##
-  ## Returns:
-  ## - a ggplot2 object
   data <- melt(as(dist, "matrix"))
   colnames(data) <- c("x", "y", "distance")
   if (!is.null(order)) {
@@ -603,21 +607,27 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 
 ## Wrapper around hclust to represent clustering tree
 ## with leaves colored according to some variables
+## TODO update using ggtree syntax
+#' Wrapper around hclust to represent clustering tree with leaves colored according to a factor.
+#'
+#' @param physeq phyloseq class object
+#' @param dist distance matrix (dist class) or character to be used in phyloseq::distance function
+#' @param method (character) linkage method used in hclust, defaults to "ward.D2"
+#' @param color (character) variable name used to color tree leaves. Defaults to NULL
+#' @param label (character) variable name used to label tree leaves. Defaults to NULL
+#' @param title (character) optional. Plot title, defaults to "method" clustering tree.
+#' @param palette (named color vector) optional. Manual color palette
+#'
+#' @return Nothing, used for its plotting side effect
+#' @export
+#'
+#' @examples
+#' data(food)
+#' plot_clust(food, dist = "unifrac", color = "EnvType")
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
                        label = NULL,
                        title = paste(method, "linkage clustering tree"),
                        palette = NULL) {
-  ## Args:
-  ## - physeq: phyloseq class object
-  ## - dist: distance matrix (dist class) or character to be used in phyloseq::distance function
-  ## - method: (character) linkage method used in hclust, defaults to "ward.D2"
-  ## - color: (character) variable name used to color tree leaves. Defaults to NULL
-  ## - label: (character) one the sample_variable from physeq
-  ## - title: (character) optional. Plot title, defaults to "method" clustering tree.
-  ## - palette: (named color vector) optional. Manual color palette
-  ##
-  ## Returns:
-  ## - a plot object
   if (is.character(color)) {
     legend.title <- NULL
     color <- phyloseq::get_variable(physeq, color)
