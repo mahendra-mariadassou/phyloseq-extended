@@ -17,7 +17,7 @@ phylodiv <- function(physeq, theta = 0) {
     phy <- phy_tree(physeq)
 
     ## Construct incidence matrix of the tree
-    incidence <- incidenceMatrix(phy)
+    incidence <- incidence_matrix(phy)
 
     ## Order incidence matrix according to community tables
     incidence <- incidence[colnames(x), ]
@@ -62,15 +62,12 @@ phylodiv <- function(physeq, theta = 0) {
 ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
                      log = TRUE,
                      replace = FALSE, se = TRUE, plot = TRUE, parallel = FALSE) {
-    ## - replace:
-    ## - se  : Logical, should standard error be computed in addition to expected pd
-    ## - plot:  Logical, should the graphic be plotted.
     x <- as(otu_table(physeq), "matrix")
     if (taxa_are_rows(physeq)) { x <- t(x) }
     phy <- phy_tree(physeq)
 
     ## Construct incidence matrix of the tree
-    incidence <- incidenceMatrix(phy)
+    incidence <- incidence_matrix(phy)
 
     nedges <- nrow(phy$edge)
     ## Order incidence matrix according to community tables and create

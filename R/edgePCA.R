@@ -1,20 +1,20 @@
-require(vegan)
-require(scales)
-require(ape)
-require(phyloseq)
-
-
 #' Compute incidence matrix of a tree
 #'
-#' @title incidenceMatrix
+#' @title incidence_matrix
 #' @param phy Required. A \code{phylo} class object
 #' @return An incidence matrix M of size nedges(tree) x ntaxa(tree) where
 #'         M[i,j] is set to 1 if taxa derives from edge i and 0 otherwise.
-#' @note incidenceMatrix assumes that the tree is rooted. If not, it roots it
-#'       it at an arbitrary taxa (taxa 1). 
-incidenceMatrix <- function(phy) {
-    if (!is.rooted(phy)) {
-        warning("Tree is not rooted, incidence matrix may be meaningless")        
+#' @note incidence_matrix assumes that the tree is rooted. If not, it roots it
+#'       it at an arbitrary taxa (taxa 1).
+#'
+#' @export
+#'
+#' @examples
+#' data(food)
+#' incidence_matrix(phy_tree(food))
+incidence_matrix <- function(phy) {
+    if (!ape::is.rooted(phy)) {
+        warning("Tree is not rooted, incidence matrix may be meaningless")
     }
     ## Construct incidence matrix of the tree (taxa x edge matrix)
     ## All taxa descending from an edge are set to 1, all others to -1
@@ -25,13 +25,13 @@ incidenceMatrix <- function(phy) {
                          ncol = nedges,
                          dimnames = list(phy$tip.label, phy$edge[, 2]))
     ## Incidence of internal edges
-    phy.part <- prop.part(phy) ## clade composition indexed by (shifted) node number
+    phy.part <- ape::prop.part(phy) ## clade composition indexed by (shifted) node number
     for (i in 2:length(phy.part)) { ## first clade corresponds to root node
-        edge <- which(phy$edge[, 2] == i + ntaxa) ## node numbers are shifted by ntaxa 
+        edge <- which(phy$edge[, 2] == i + ntaxa) ## node numbers are shifted by ntaxa
         incidence[phy.part[[i]] , edge] <- 1
     }
     ## Incidence of pendant edges
-    ## pendant.edges[i] is the edge leading to tip i. 
+    ## pendant.edges[i] is the edge leading to tip i.
     pendant.edges <- match(seq_len(ntaxa), phy$edge[ , 2])
     for (i in seq_len(ntaxa)) {
         incidence[i, pendant.edges[i]] <- 1
@@ -61,7 +61,7 @@ incidenceMatrix <- function(phy) {
 #' - \item{scores}: The score of the samples
 #' - \item{values}: A date frame with components eigenvalues, relative eigenvalues and
 #'                  cumulative eigenvalues.
-#' @note scores and extract_eigenvalues methods are associated with 'edgepca'. 
+#' @note scores and extract_eigenvalues methods are associated with 'edgepca'.
 #' @references Shen, H. and Huang, J. Z. (2008). Sparse principal component
 #' analysis via regularized low rank matrix approximation. _Journal
 #' of Multivariate Analysis_ *99*, 1015-1034.
@@ -79,14 +79,14 @@ edgePCA <- function(physeq,
     x <- as(otu_table(physeq), "matrix")
     if (taxa_are_rows(physeq)) { x <- t(x) }
     phy <- phy_tree(physeq)
-    
+
     ## Scale counts to frequencies
     x <- x/rowSums(x)
 
     ## Construct incidence matrix of the tree and transform it to contrasts
-    incidence <- incidenceMatrix(phy)
+    incidence <- incidence_matrix(phy)
     incidence <- 2 * (incidence - 0.5)
-            
+
     ## Order community table according to edge order and create
     ## mass difference matrix
     x <- x[ , rownames(incidence), drop = FALSE]
@@ -101,7 +101,7 @@ edgePCA <- function(physeq,
         number.edges <- rep(number.edges[1], number.components)
     }
 
-    
+
     ## Compute number.component first axis from the mass difference matrix
     method <- match.arg(method)
     results <- switch(method,
@@ -154,7 +154,7 @@ pca <- function(x, number.components = NULL, center = TRUE, scale. = FALSE) {
     x <- scale(x, center = center, scale = scale.)
     cen <- attr(x, "scaled:center")
     sc <- attr(x, "scaled:scale")
-    if (any(sc == 0)) 
+    if (any(sc == 0))
         stop("cannot rescale a constant/zero column to unit variance")
     ## Check for missing values
     if (any(is.na(x))) {
@@ -190,13 +190,13 @@ pca <- function(x, number.components = NULL, center = TRUE, scale. = FALSE) {
 
 
 #' Perform a regularized principal component analysis on a given data matrix using
-#' Singular Value Decomposition and regularization. 
+#' Singular Value Decomposition and regularization.
 #'
 #' @title regularizedPca
 #' @param x Required. Numeric matrix.
 #' @param number.components Optional. Integer. Number of components used for denoising.
 #'                          Defaults to 10 and is automatically reduced to max(dim(x)) - 1
-#'                          if 10 is too high. 
+#'                          if 10 is too high.
 #' @param center Optional. Logical. Should x be shifted to be (column-wise) 0-centered?
 #'               Defaults to TRUE. Alternatively, a vector of length equal to the
 #'               number of columns in x. The value is passed on to scale.
@@ -231,7 +231,7 @@ regularizedPca <- function(x, number.components = 10, center = TRUE, scale. = FA
     x <- scale(x, center = center, scale = scale.)
     cen <- attr(x, "scaled:center")
     sc <- attr(x, "scaled:scale")
-    if (any(sc == 0)) 
+    if (any(sc == 0))
         stop("cannot rescale a constant/zero column to unit variance")
     ## Check for missing values
     if (any(is.na(x))) {
@@ -275,13 +275,13 @@ regularizedPca <- function(x, number.components = 10, center = TRUE, scale. = FA
 
 
 #' Perform a sparse principal component analysis on a given data matrix using
-#' NIPALS algorithm. 
+#' NIPALS algorithm.
 #'
 #' @title sparsePca
 #' @param x Required. Numeric matrix.
 #' @param number.components Optional. Integer. Number of components used for denoising.
 #'                          Defaults to 10 and is automatically reduced to max(dim(x)) - 1
-#'                          if 10 is too high. 
+#'                          if 10 is too high.
 #' @param center Optional. Logical. Should x be shifted to be (column-wise) 0-centered?
 #'               Defaults to TRUE. Alternatively, a vector of length equal to the
 #'               number of columns in x. The value is passed on to scale.
@@ -292,9 +292,9 @@ regularizedPca <- function(x, number.components = 10, center = TRUE, scale. = FA
 #'                         the number of non-zero loadings for each component. By default, all
 #'                         loadings can be different from 0 (no sparsity).
 #' @param iter.max Optional. Integer. The maximum number of iterations used in NIPALS for each
-#'                 each component. Defaults to 500. 
+#'                 each component. Defaults to 500.
 #' @param tol    Optional. A (small) positive numeric used to check convergence of loadings
-#'               for each component. Defaults to 1e-09. 
+#'               for each component. Defaults to 1e-09.
 #' @return A list with components
 #' - \item{number.components}: The number of components used
 #' - \item{loadings}: The matrix of variable loadings
@@ -306,7 +306,7 @@ regularizedPca <- function(x, number.components = 10, center = TRUE, scale. = FA
 #' - \item{center, scale}: centering and scaling vectors, used, if any.
 #'                         Otherwise, FALSE.
 #' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}},
-sparsePca <- function(x, number.components = 10, 
+sparsePca <- function(x, number.components = 10,
                       number.variables = rep(ncol(x), number.components),
                       center = TRUE, scale. = FALSE,
                       iter.max = 500, tol = 1e-09) {
@@ -326,7 +326,7 @@ sparsePca <- function(x, number.components = 10,
     x <- scale(x, center = center, scale = scale.)
     cen <- attr(x, "scaled:center")
     sc <- attr(x, "scaled:scale")
-    if (any(sc == 0)) 
+    if (any(sc == 0))
         stop("cannot rescale a constant/zero column to unit variance")
     ## Check for missing values
     if (any(is.na(x))) {
@@ -354,7 +354,7 @@ sparsePca <- function(x, number.components = 10,
     mat.v <- matrix(NA, nrow = p, ncol = number.components)
     x.new <- x
     for (h in 1:number.components) {
-        ## Initialization 
+        ## Initialization
         x.svd <- svd(x.new, nu = 1, nv = 1)
         u.new <- x.svd$u[ , 1]
         v.new <- x.svd$d[1] * x.svd$v[ , 1]
@@ -413,7 +413,7 @@ sparsePca <- function(x, number.components = 10,
     ## Extract eigenvectors (loadings), eigenvalues and scores
     loadings <- mat.v
     scores <- mat.u
-    eigenvalues <- -diff(c(0, vect.d)) 
+    eigenvalues <- -diff(c(0, vect.d))
     ## Add sensible names to loadings and scores
     dimnames(loadings) <- list(variable.names,
                                paste("Axis", 1:ncol(loadings), sep = "."))
@@ -435,13 +435,13 @@ sparsePca <- function(x, number.components = 10,
 }
 
 #' Perform a sparse principal component analysis on a given data matrix using
-#' iterative algorithm from Shen and Huang. 
+#' iterative algorithm from Shen and Huang.
 #'
 #' @title sparsePca
 #' @param x Required. Numeric matrix.
 #' @param number.components Optional. Integer. Number of components used for denoising.
 #'                          Defaults to 10 and is automatically reduced to max(dim(x)) - 1
-#'                          if 10 is too high. 
+#'                          if 10 is too high.
 #' @param center Optional. Logical. Should x be shifted to be (column-wise) 0-centered?
 #'               Defaults to TRUE. Alternatively, a vector of length equal to the
 #'               number of columns in x. The value is passed on to scale.
@@ -451,7 +451,7 @@ sparsePca <- function(x, number.components = 10,
 #' @param lambda Required. Regularization parameter.
 #' @param iter.max Optional. Integer. The maximum number of iterations used in iterative step
 #'                 for each
-#'                 each component. Defaults to 500. 
+#'                 each component. Defaults to 500.
 #' @param tol    Optional. A (small) positive numeric used to check convergence of loadings
 #'               for each component. Defaults to 1e-09.
 #' @references Shen, H. and Huang, J. Z. (2008). Sparse principal component
@@ -468,7 +468,7 @@ sparsePca <- function(x, number.components = 10,
 #' - \item{center, scale}: centering and scaling vectors, used, if any.
 #'                         Otherwise, FALSE.
 #' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}},
-sparsePca.lambda <- function(x, number.components = 10, 
+sparsePca.lambda <- function(x, number.components = 10,
                              lambda,
                              center = TRUE, scale. = FALSE,
                              iter.max = 500, tol = 1e-09) {
@@ -488,7 +488,7 @@ sparsePca.lambda <- function(x, number.components = 10,
     x <- scale(x, center = center, scale = scale.)
     cen <- attr(x, "scaled:center")
     sc <- attr(x, "scaled:scale")
-    if (any(sc == 0)) 
+    if (any(sc == 0))
         stop("cannot rescale a constant/zero column to unit variance")
     ## Check for missing values
     if (any(is.na(x))) {
@@ -516,7 +516,7 @@ sparsePca.lambda <- function(x, number.components = 10,
     mat.v <- matrix(NA, nrow = p, ncol = number.components)
     x.new <- x
     for (h in 1:number.components) {
-        ## Initialization 
+        ## Initialization
         x.svd <- svd(x.new, nu = 1, nv = 1)
         ## u and v solutions of unpenalized approximation problem
         ## u %*% t(v) is the best rank one approximation of x
@@ -534,7 +534,7 @@ sparsePca.lambda <- function(x, number.components = 10,
             v.new <- ifelse(abs(z) > lambda, sign(z) * (abs(z) - lambda), 0)
             ## Update and normalize u
             u.new <- as.vector(x.new %*% v.new)
-            u.new <- u.new / sqrt(sum(u.new^2))            
+            u.new <- u.new / sqrt(sum(u.new^2))
             ## Check convergence
             if (sum( (u.new - u.old)^2 ) < tol) {
                 u.conv <- TRUE
@@ -548,9 +548,9 @@ sparsePca.lambda <- function(x, number.components = 10,
         convergence[h] <- (v.conv && u.conv)
         ## Norm v (?) and update mat.u, mat.v
         ## v.new <- v.new / sqrt(sum(v.new^2))
-        mat.v[ , h] <- v.new 
+        mat.v[ , h] <- v.new
         mat.u[ , h] <- u.new
-        ## Deflate x.new with rank one approximation 
+        ## Deflate x.new with rank one approximation
         x.new <- x.new - tcrossprod(u.new, v.new)
         ## Compute percentage of variance explained
         ## for x reconstructed with first h components
@@ -560,7 +560,7 @@ sparsePca.lambda <- function(x, number.components = 10,
     ## Extract eigenvectors (loadings), eigenvalues and scores
     loadings <- mat.v
     scores <- mat.u
-    eigenvalues <- diff(c(0, vect.d, 1)) 
+    eigenvalues <- diff(c(0, vect.d, 1))
     ## Add sensible names to loadings and scores
     dimnames(loadings) <- list(variable.names,
                                paste("Axis", 1:ncol(loadings), sep = "."))
@@ -572,7 +572,7 @@ sparsePca.lambda <- function(x, number.components = 10,
                    Cumul_eig = cumsum(eigenvalues) / sum(eigenvalues))
     ## Construct results and return it
     result <- list(number.components = number.components,
-                   lambda = lambda, 
+                   lambda = lambda,
                    scores = scores,
                    loadings = loadings,
                    values = values,
@@ -614,14 +614,14 @@ scores.pca <- function(pca, choices,
 #' Extract supporting taxa from an edge pca
 #'
 #' @title support_taxa
-#' @param physeq Required. A \code{\link{phyloseq-class}} class instance. 
+#' @param physeq Required. A \code{\link{phyloseq-class}} class instance.
 #' @param epca Required. An \code{\link{edgepca}} class object
 #' @param choices Optional. Ordination axis for which support taxa are extracted.
-#'                Defaults to all axis. 
+#'                Defaults to all axis.
 #' @param threshold Optional. Numeric. Threshold that a taxa loading
-#'                  must pass to be extracted. Defaults to 0. 
+#'                  must pass to be extracted. Defaults to 0.
 #' @param number  Optional. Integer. Number of taxa to extract from each axis.
-#'                Defaults to all taxa.  
+#'                Defaults to all taxa.
 #' @note  If number and threshold are specified, extracts at most \code{number} taxa whose loadings
 #'        exceed threshold for each axis.
 #' @return A character vector ot taxa names.
@@ -654,10 +654,10 @@ support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
 
 
 #' Function for plotting a tree with edge fattened and colored according to
-#' the loadings of an edgePCA results.  
+#' the loadings of an edgePCA results.
 #'
 #' @title plotLoadings
-#' @param physeq Required. A \code{\link{phyloseq-class}} class instance. 
+#' @param physeq Required. A \code{\link{phyloseq-class}} class instance.
 #' @param epca Required. An \code{\link{edgepca}} class object
 #' @param choices Required. Ordination axes.
 #' @param width.lim Optional. Numeric. Minimum and maximal edge after fattening.
@@ -665,7 +665,7 @@ support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
 #' @param fatten.edges.by Required. Aesthetics that will be used for fattening.
 #'                        Subset of 'size' and 'alpha'.
 #' @param fatten.tips Optional. Logical. Should tips be fattened like pendant edges.
-#'                    Defaults to FALSE. 
+#'                    Defaults to FALSE.
 #' @param color Optional. Color vector of length 2 used to distinguish positive
 #'              loading edges (color[1]) and negative loading edges (color[2]).
 #'              Defaults to c("#EF8A62", "#67A9CF")
@@ -676,12 +676,12 @@ support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
 #'                      Defaults to NULL. If NULL, nothing happens. Use "white", "transparent",
 #'                      or par("bg") to remove them from plot.
 #' @param ... Additional arguments passed on to plot.phylo
-#' 
+#'
 #' @return Nothing, this function is used for its side effect of plotting a tree
 #' @seealso \code{\link{edgePCA}}
-plotLoadings <- function(physeq, epca, choices, fatten.by = c("size"), fatten.tips = FALSE, 
+plotLoadings <- function(physeq, epca, choices, fatten.by = c("size"), fatten.tips = FALSE,
                          width.lim = c(0.1, 4), color = c("#EF8A62", "#67A9CF"),
-                         color.tip.by = NULL, missing.color = NULL, 
+                         color.tip.by = NULL, missing.color = NULL,
                          ...) {
     ## Check fatten.by
     if (any( !fatten.by %in% c("size", "alpha"))) {
@@ -697,7 +697,7 @@ plotLoadings <- function(physeq, epca, choices, fatten.by = c("size"), fatten.ti
     tip.loadings <- x[pendant.edges, , drop = FALSE]
     ## Get edge.color
     edge.color <- ifelse(x > 0, color[1], color[2])
-    ## Get tip.color 
+    ## Get tip.color
     tip.color <- edge.color[pendant.edges, , drop = FALSE]
     ## Get fattening factor
     fattening.factor <- rescale(abs(x), to = width.lim)
@@ -788,7 +788,7 @@ extract_eigenvalue.pca = function(ordination) ordination$values$Eigenvalues
 #' @title plot_edgepca
 #' @param physeq Required. A \code{\link{phyloseq-class}} object
 #' @param epca Required. A \code{\link{edgepca}} class object
-#' @param axes Optional. Ordination axes. Defaults to c(1, 2). 
+#' @param axes Optional. Ordination axes. Defaults to c(1, 2).
 #' @param type Required. Unambiguous abbreviation of 'variables' or 'samples'.
 #'                For compatibility with vegan and phyloseq, 'variables' can be replaced
 #'                by 'species' or 'taxa' and 'samples' can be replaced by 'sites'.
@@ -796,7 +796,7 @@ extract_eigenvalue.pca = function(ordination) ordination$values$Eigenvalues
 #' @param widths Optional. A vector of 2 values for the widths of columns. Defaults to c(1, 1)
 #' @param heights Optional. A vector of 2 values for the heights of rows. Defaults to c(1, 1)
 #' @param ... Optional. Additional argument passed on to plot_ordination
-#' @return Nothing. The function is called for its side effect. 
+#' @return Nothing. The function is called for its side effect.
 #' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}},
 plot_edgepca <- function(physeq, epca, axes = c(1, 2),
                          widths = c(1, 1), heights = c(1, 1),
