@@ -257,7 +257,8 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   tax[is.na(tax)] <- "Unknown"
   tax[tax %in% bad_empty] <- "Unknown"
   ## create groups
-  tax <- as_tibble(tax) %>% select(one_of(ranks)) %>% group_by_all() %>%
+  tax <- tax[ , ranks] %>% as_tibble(tax) %>%
+    group_by_all() %>%
     mutate(group = group_indices())
   ## create new_taxonomy
   new_tax <- tax %>% slice(1) %>% arrange(group) %>%
