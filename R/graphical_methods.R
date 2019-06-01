@@ -542,8 +542,13 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
     ## Change to character and correct taxonomic levels
     correct_taxonomy <- function(x) {
-      c(sort(x[!x %in% c("Multi-affiliation", "Unknown", "Other")]),
+      res <- c(sort(x[!x %in% c("Multi-affiliation", "Unknown", "Other")]),
         c("Multi-affiliation", "Unknown", "Other"))
+      if (any(duplicated(res))) {
+        warning(paste0("Please check upper ranks of ", res[duplicated(res)], "as they may have typos.\n"))
+        res <- unique(res)
+      }
+      res
     }
 
     ## Replace all levels in taxonomy of non-top/ non-unknown taxa to Other
