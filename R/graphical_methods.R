@@ -545,7 +545,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
       res <- c(sort(x[!x %in% c("Multi-affiliation", "Unknown", "Other")]),
         c("Multi-affiliation", "Unknown", "Other"))
       if (any(duplicated(res))) {
-        warning(paste0("Please check upper ranks of ", res[duplicated(res)], "as they may have typos.\n"))
+        warning(paste("Please check upper ranks of", res[duplicated(res)], "as they may have typos.\n"))
         res <- unique(res)
       }
       res
