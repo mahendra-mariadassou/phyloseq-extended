@@ -240,8 +240,10 @@ top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
 #' * It is based on dplyr function and thus much faster
 #' * It does not preserve the phy_tree and refseq slots
 #' * It only preserves taxonomic ranks up to \code{taxrank} and discard all other ones.
+#' The "archetype" (OTU name) for each group is chosen as the most abundant taxa
+#' within that group (for compatibility with \code{\link{tax_glom}})
 #'
-#' @seealso \code{\link{tax_glom}}
+#' @seealso \code{\link{tax_glom}}, \code{\link{merge_taxa}}
 #' @importFrom tibble column_to_rownames
 #' @examples
 #' data(food)
@@ -254,19 +256,24 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   ranks <- rank_names(physeq)[1:rank_number]
   ## change NA and empty to Unknown before merging
   tax <- as(tax_table(physeq), "matrix")
-  tax[is.na(tax)] <- "Unknown"
-  tax[tax %in% bad_empty] <- "Unknown"
+  tax[is.na(tax) | tax %in% bad_empty] <- "Unknown"
   ## create groups
-  tax <- tax[ , ranks] %>% as_tibble(tax) %>%
-    group_by_all() %>%
+  tax <- tax[ , ranks, drop = FALSE] %>%
+    as_tibble(tax) %>%
+    mutate(Abundance = taxa_sums(physeq),
+           archetype = taxa_names(physeq)) %>%
+    group_by_at(vars(one_of(ranks))) %>%
     mutate(group = group_indices())
   ## create new_taxonomy
-  new_tax <- tax %>% slice(1) %>% arrange(group) %>%
-    tibble::column_to_rownames(var = "group") %>% as.matrix()
+  new_tax <- tax %>% arrange(desc(Abundance)) %>%
+    slice(1) %>% arrange(group) %>%
+    select(-group, -Abundance) %>%
+    tibble::column_to_rownames(var = "archetype") %>% as.matrix()
   ## create new count table
   otutab <- otu_table(physeq)
   if (!taxa_are_rows(physeq)) otutab  <- t(otutab)
   otutab <- rowsum(otutab, group = tax$group, reorder = TRUE)
+  rownames(otutab) <- rownames(new_tax)
   ## return merged phyloseq
   phyloseq(sample_data(physeq),
            tax_table(new_tax),
