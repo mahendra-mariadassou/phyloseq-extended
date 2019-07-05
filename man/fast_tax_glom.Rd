@@ -25,11 +25,13 @@ fast_tax_glom differs from \code{\link{tax_glom}} in three important ways:
 * It is based on dplyr function and thus much faster
 * It does not preserve the phy_tree and refseq slots
 * It only preserves taxonomic ranks up to \code{taxrank} and discard all other ones.
+The "archetype" (OTU name) for each group is chosen as the most abundant taxa
+within that group (for compatibility with \code{\link{tax_glom}})
 }
 \examples{
 data(food)
 fast_tax_glom(food, "Species")
 }
 \seealso{
-\code{\link{tax_glom}}
+\code{\link{tax_glom}}, \code{\link{merge_taxa}}
 }
