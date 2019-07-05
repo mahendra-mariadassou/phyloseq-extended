@@ -2,20 +2,20 @@
 
 #' Import function to read FROGS format OTU table
 #'
-#' @param biom A character string indicating the file location of the BIOM formatted file. This is a JSON formatted file, specific to biological datasets, as described in http://www.qiime.org/svn_documentation/documentation/biom_format.htmlthe biom-format home page.
-#' @param treefilename Default value is NULL. A file representing a phylogenetic tree or a phylo object. Files can be NEXUS or Newick format.
-#' @param refseqfilename Default NULL. The file path of the biological sequence file that contains at a minimum a sequence for each OTU in the dataset. Alternatively, you may provide an already-imported XStringSet object that satisfies this condition. In either case, the names of each OTU need to match exactly the taxa_names of the other components of your data.
-#' @param refseqFunction Default is readDNAStringSet, which expects to read a fasta-formatted DNA sequence file. If your reference sequences for each OTU are amino acid, RNA, or something else, then you will need to specify a different function here. This is the function used to read the file connection provided as the the previous argument, refseqfilename. This argument is ignored if refseqfilename is already a XStringSet class.
-#' @param refseqArgs Default NULL. Additional arguments to refseqFunction. See XStringSet-io for details about additional arguments to the standard read functions in the Biostrings package.
+#' @inheritParams phyloseq::import_biom
+#' @inheritDotParams phyloseq::import_biom
 #' @param taxMethod Default "blast". Either blast or RDP, the method used for taxonomy affiliation.
-#' @param parallel Logical. Wrapper option for .parallel parameter in plyr-package functions. If TRUE, apply parsing functions in parallel, using parallel backend provided by foreach and its supporting backend packages. One caveat, plyr-parallelization currently works most-cleanly with multicore-like backends (Mac OS X, Unix?), and may throw warnings for SNOW-like backends. See the example below for code invoking multicore-style backend within the doParallel package.
-#' @param ... Additional parameters passed on to read_tree.
 #'
-#' @return A phyloseq class object
+#' @return A \code{\link{phyloseq-class}} object
 #' @export
 #'
 #' @importFrom biomformat read_biom biom_data sample_metadata
 #' @importFrom plyr rbind.fill.matrix
+#'
+#' @examples
+#' biom_file <- system.file("extdata", "frogs_data.biom", package = "phyloseq.extended")
+#' data <- import_frogs(biom_file)
+#' data
 import_frogs <- function(biom,
                          treefilename = NULL,
                          refseqfilename = NULL,
