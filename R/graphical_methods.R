@@ -137,9 +137,13 @@ plot_composition <- function(physeq,
   if ( !is.null(facet_grid)) {
     p <- p + facet_grid(facets = facet_grid, scales = "free_x")
   }
-  p <- p + theme(axis.text.x=element_text(angle=90), axis.title.x=element_blank())
-  p <- p + ggtitle(paste("Composition within", taxaSet1, "(", numberOfTaxa, "top", taxaRank2, ")"))
-  return(p)
+  p <- p + theme(axis.text.x=element_text(angle = 90),
+                 axis.title.x=element_blank()) +
+    ggtitle(paste("Composition within", taxaSet1,
+                  "(", taxaRank2, startFrom, "to",
+                  startFrom + numberOfTaxa - 1, ")")
+            )
+  p
 }
 
 #' Internal function to correct levels in plot_samples
