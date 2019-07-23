@@ -88,9 +88,9 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' Versatile function for plotting compositions graphs
 #'
 #' @param physeq phyloseq class object
-#' @param taxaRank1 taxonomic level in which to do the first subsetting
-#' @param taxaSet1 subset of level taxaRank1 to use
-#' @param taxaRank2 taxonomic level used to agglomerate, use "OTU" or NULL to enforce no aggregation
+#' @param taxaRank1 Taxonomic rank used for subsetting. If NULL, \code{taxaSet1} is ignored and no subsetting of taxa is performed.
+#' @param taxaSet1 Subset of taxa (at rank \code{taxaRank1}) to keep for the plots. If NULL, no subsetting is applied.
+#' @param taxaRank2 taxonomic level used to agglomerate, use "OTU", "ASV" or NULL to enforce no aggregation
 #' @param numberOfTaxa number of (most abundant) taxa to keep at level taxaRank2
 #' @param startFrom \code{startFrom - 1} is the number of (most abundant) taxa to discard before
 #'                  selecting the `numberOfTaxa` most abundant taxa.
@@ -112,16 +112,27 @@ plot_composition <- function(physeq,
                              taxaRank1 = "Phylum",
                              taxaSet1 = "Proteobacteria",
                              taxaRank2 = "Family",
-                             numberOfTaxa = 9, fill = NULL,
+                             numberOfTaxa = 9,
+                             fill = NULL,
                              startFrom = 1,
                              x = "Sample",
                              y = "Abundance", facet_grid = NULL,
                              ...) {
-  if (is.null(taxaRank2) || taxaRank2 == "OTU") taxaRank2 <- "OTU_rank"
+  if (is.null(taxaRank2) || taxaRank2 %in% c("OTU", "ASV")) {
+    taxaRank2 <- "OTU_rank"
+  }
+  if (is.null(taxaRank1) || is.null(taxaSet1)) {
+    taxaRank1 <- rank_names(physeq)[1]
+    taxaSet1  <- NULL
+  }
+
   if (is.null(fill)) fill <- taxaRank2
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa, startFrom)
-  p <- ggplot(ggdata, aes_string(x = x, y = y, fill = fill, color = fill, group = "Sample"))
+  p <- ggplot(ggdata,
+              aes_string(x = x, y = y, fill = fill,
+                         # color = fill,
+                         group = "Sample"))
   ## Manually change color scale to assign grey to "Unknown" (if any)
   if (!is.null(fill) && any(c("Unknown", "Other") %in% levels(ggdata[, fill]))) {
       levels <- levels(ggdata[, fill])
@@ -130,7 +141,9 @@ plot_composition <- function(physeq,
                    "grey75", "grey45", "black")
       names(colvals) <- c(levels, "Multi-affiliation", "Unknown", "Other")
       ## Now add the manually re-scaled layer with Unassigned as grey
-      p <- p + scale_fill_manual(values=colvals) + scale_color_manual(values = colvals)
+      p <- p +
+        scale_fill_manual(values = colvals) +
+        scale_color_manual(values = colvals)
 
   }
   p <- p + geom_bar(stat = "identity", position = "stack", ...)
@@ -139,10 +152,15 @@ plot_composition <- function(physeq,
   }
   p <- p + theme(axis.text.x=element_text(angle = 90),
                  axis.title.x=element_blank()) +
-    ggtitle(paste("Composition within", taxaSet1,
-                  "(", taxaRank2, startFrom, "to",
-                  startFrom + numberOfTaxa - 1, ")")
-            )
+    ggtitle(paste0("Composition",
+                   ## Filter or not
+                   ifelse(!is.null(taxaSet1),
+                          paste0("within ", taxaSet1, collapse = ", "),
+                          ""),
+                   ## number of taxa represented on the plot
+                   " (", taxaRank2, " ", startFrom, " to ",
+                   startFrom + numberOfTaxa - 1, ")")
+    )
   p
 }
 
@@ -515,10 +533,12 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU_rank")))
 
     ## Subset at TaxaRank1
-    physeq <- prune_taxa(tax_table(physeq)[ , taxaRank1] %in% taxaSet1, physeq)
-    if (ntaxa(physeq) == 0) {
-      stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
-                 "at taxonomic level", taxaRank1))
+    if (!is.null(taxaSet1)) {
+      physeq <- prune_taxa(tax_table(physeq)[ , taxaRank1] %in% taxaSet1, physeq)
+      if (ntaxa(physeq) == 0) {
+        stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
+                   "at taxonomic level", taxaRank1))
+      }
     }
 
     ## Correct taxonomy and agglomerate at TaxaRank2

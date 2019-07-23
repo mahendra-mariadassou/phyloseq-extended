@@ -11,11 +11,11 @@ ggformat(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 \arguments{
 \item{physeq}{phyloseq class object}
 
-\item{taxaRank1}{taxonomic level in which to do the first subsetting}
+\item{taxaRank1}{Taxonomic rank used for subsetting. If NULL, \code{taxaSet1} is ignored and no subsetting of taxa is performed.}
 
-\item{taxaSet1}{subset of level taxaRank1 to use}
+\item{taxaSet1}{Subset of taxa (at rank \code{taxaRank1}) to keep for the plots. If NULL, no subsetting is applied.}
 
-\item{taxaRank2}{taxonomic level used to agglomerate, use "OTU" or NULL to enforce no aggregation}
+\item{taxaRank2}{taxonomic level used to agglomerate, use "OTU", "ASV" or NULL to enforce no aggregation}
 
 \item{fill}{Taxonomic rank used for filling (should be between taxaRank1 and taxaRank2 in the hierarchy of ranks)}
 
