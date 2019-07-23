@@ -22,13 +22,14 @@ for efficiency.}
 A phyloseq object that has had its sample indices merged according to the factor indicated by the group argument. The output class matches x.
 }
 \description{
-The purpose of this method is to merge/agglomerate the sample indices of a phyloseq object according to a categorical variable contained in a sample_data or a provided factor. Unlike the original \code{\link{phyloseq::merge_samples}}, sample metada are not coerced to factors. Instead, the metadata from the first sample in each group is kept.
+The purpose of this method is to merge/agglomerate the sample indices of a phyloseq object according to a categorical variable contained in a sample_data or a provided factor. Unlike the original \code{\link{merge_samples}}, sample metada are not coerced to factors. Instead, the metadata from the first sample in each group is kept.
 }
 \examples{
 data(food)
 merge_group(food, "EnvType")
-
+## Note that sample data are preserved
+sample_data(food)
 }
 \seealso{
-\code{\link{phyloseq::merge_samples}}
+\code{\link{merge_samples}}
 }
