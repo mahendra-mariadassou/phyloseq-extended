@@ -155,7 +155,7 @@ plot_composition <- function(physeq,
     ggtitle(paste0("Composition",
                    ## Filter or not
                    ifelse(!is.null(taxaSet1),
-                          paste0("within ", taxaSet1, collapse = ", "),
+                          paste0(" within ", paste0(taxaSet1, collapse = ", ")),
                           ""),
                    ## number of taxa represented on the plot
                    " (", taxaRank2, " ", startFrom, " to ",
@@ -709,7 +709,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
 }
 
 ## Extract legend from a ggplot object
-g_legend<-function(a.gplot){
+g_legend <- function(a.gplot){
   tmp <- ggplot_gtable(ggplot_build(a.gplot))
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
   legend <- tmp$grobs[[leg]]
