@@ -20,12 +20,14 @@ a divergent color scale is used, if FALSE, a sequential one.}
 }
 \value{
 A list with components
-\item{edge.size} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
-        with fattened edge widths
-\item{edge.color} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
-        with colored edge widths
-\item{legend} A named list with components \item{size}, \item{alpha} and \item{color}
-              used for constructing a legend.
+\itemize{
+\item edge.size A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+with fattened edge widths
+\item edge.color A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+with colored edge widths
+\item legend A named list with components \code{size}, \code{alpha} and \code{color}
+used for constructing a legend.
+}
 }
 \description{
 Subsidiary function for plot_merged_trees. Transforms a list as returned by fattenEdges

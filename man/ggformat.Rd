@@ -22,10 +22,10 @@ ggformat(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 \item{numberOfTaxa}{number of (most abundant) taxa to keep at level taxaRank2}
 
 \item{startFrom}{\code{startFrom - 1} is the number of (most abundant) taxa to discard before
-selecting the `numberOfTaxa` most abundant taxa.}
+selecting the \code{numberOfTaxa} most abundant taxa.}
 }
 \value{
-A ggplot friendly data frame with the relative abundance of the top `NumberOfTaxa` OTUs (starting from the `startFrom`th most abundant) at the taxaRank2 level within taxaSet1 at taxaRank1 level
+A ggplot friendly data frame with the relative abundance of the top \code{NumberOfTaxa} OTUs (starting from the \code{startFrom}th most abundant) at the taxaRank2 level within taxaSet1 at taxaRank1 level
 }
 \description{
 Format phyloseq data for easy composition plots

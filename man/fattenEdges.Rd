@@ -27,16 +27,18 @@ divided by the mean (relative deviation)}
 }
 \value{
 A list with components
-\item{edge.width} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
-        with fattened edge widths
-\item{edge.raw.width} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
-        with raw edge widths (untransformed counts, frequencies or deviations)
-\item{edge.presence} A logical matrix of size nsamples(physeq) x number of edges in
-       \code{phy_tree(physeq)}. edge.presence[i, j] is TRUE if edge j is found in community i.
-\item{tip.presence} A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
-       tip.presence[i, j] is TRUE if taxa j is found in community i.
-\item{pendant.edges} A logical vector indicating which edges are pendant (i.e lead to a tip)
-\item{legend} A named vector featuring edge widths and labels for legend.
+\itemize{
+\item edge.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+with fattened edge widths
+\item edge.raw.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+with raw edge widths (untransformed counts, frequencies or deviations)
+\item edge.presence A logical matrix of size nsamples(physeq) x number of edges in
+\code{phy_tree(physeq)}. edge.presence\link{i, j} is TRUE if edge j is found in community i.
+\item tip.presence A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
+tip.presence\link{i, j} is TRUE if taxa j is found in community i.
+\item pendant.edges A logical vector indicating which edges are pendant (i.e lead to a tip)
+\item legend A named vector featuring edge widths and labels for legend.
+}
 }
 \description{
 Functions for plotting trees with colored edges and tips according to data stored in
@@ -46,6 +48,6 @@ in a community matrix.
 }
 \note{
 width.lim behaves differently in "linear" and "logarithmic" modes. In linear mode, it is
-      used to scale edges widths. In logarithmic mode, widths are only scaled if they
-      go out of the range specified by `width.lim`.
+used to scale edges widths. In logarithmic mode, widths are only scaled if they
+go out of the range specified by \code{width.lim}.
 }

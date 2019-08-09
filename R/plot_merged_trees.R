@@ -21,16 +21,16 @@
 #'       used to scale edges widths. In logarithmic mode, widths are only scaled if they
 #'       go out of the range specified by `width.lim`.
 #' @return A list with components
-#' \item{edge.width} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+#' - edge.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 #'         with fattened edge widths
-#' \item{edge.raw.width} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+#' - edge.raw.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 #'         with raw edge widths (untransformed counts, frequencies or deviations)
-#' \item{edge.presence} A logical matrix of size nsamples(physeq) x number of edges in
+#' - edge.presence A logical matrix of size nsamples(physeq) x number of edges in
 #'        \code{phy_tree(physeq)}. edge.presence[i, j] is TRUE if edge j is found in community i.
-#' \item{tip.presence} A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
+#' - tip.presence A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
 #'        tip.presence[i, j] is TRUE if taxa j is found in community i.
-#' \item{pendant.edges} A logical vector indicating which edges are pendant (i.e lead to a tip)
-#' \item{legend} A named vector featuring edge widths and labels for legend.
+#' - pendant.edges A logical vector indicating which edges are pendant (i.e lead to a tip)
+#' - legend A named vector featuring edge widths and labels for legend.
 fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
                         width.lim = c(0.1, 4), base = 10, deviation = FALSE) {
     ## Exception handling
@@ -127,9 +127,9 @@ fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
 #' @note The function assumes that the tree is rooted. The color palette is constructed
 #'       automatically according to ggplot discrete hue scale
 #' @return A list with components
-#' \item{edge} A color vector for edges of \code{phy_tree{physeq}}
-#' \item{tip} A color vector for tip labels of \code{phy_tree{physeq}}
-#' \item{palette} The named color palette color, useful for the legend
+#' - edge A color vector for edges of \code{phy_tree{physeq}}
+#' - tip A color vector for tip labels of \code{phy_tree{physeq}}
+#' - palette The named color palette color, useful for the legend
 color_edges <- function(physeq,
                         group = "Phylum",
                         method = c("majority", "ace"),
@@ -254,11 +254,11 @@ tree_colored_by <- function(physeq, group = "Phylum", method = c("majority", "ac
 #' @param deviation Required. Logical. Used to construct an automatic color scale. If TRUE,
 #'                  a divergent color scale is used, if FALSE, a sequential one.
 #' @return A list with components
-#' \item{edge.size} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+#' - edge.size A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 #'         with fattened edge widths
-#' \item{edge.color} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+#' - edge.color A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 #'         with colored edge widths
-#' \item{legend} A named list with components \item{size}, \item{alpha} and \item{color}
+#' - legend A named list with components \code{size}, \code{alpha} and \code{color}
 #'               used for constructing a legend.
 construct_aesthetics <- function(x, color, fatten.edges.by,
                                  deviation = FALSE) {

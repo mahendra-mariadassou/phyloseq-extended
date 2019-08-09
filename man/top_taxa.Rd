@@ -14,7 +14,7 @@ top_taxa(physeq, taxaRank = NULL, numberOfTaxa = 9)
 \item{numberOfTaxa}{Number of top taxa to return}
 }
 \value{
-A matrix corresponding to the `numberOfTaxa` most abundant taxa at level `taxaRank`-level
+A matrix corresponding to the \code{numberOfTaxa} most abundant taxa at level \code{taxaRank}-level
 }
 \description{
 Find the most abundant taxa at a given taxonomic rank

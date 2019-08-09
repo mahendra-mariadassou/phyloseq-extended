@@ -10,15 +10,16 @@
 #' @param plot Logical, should the graphic be plotted.
 #' @param parallel should rarefaction be parallelized (using parallel framework)
 #' @param se Default TRUE. Logical. Should standard errors be computed.
+#' @param verbose (Optional). Verbose (TRUE, default) or silent (FALSE) output
 #'
-#' @import ggplot2 reshape scales
+#' @import ggplot2 scales dplyr
 #' @export
 #'
 #' @examples
 #' data(food)
 #' ggrare(food, step = 100, color = "EnvType", se = FALSE)
 ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
-                   plot = TRUE, parallel = FALSE, se = TRUE) {
+                   plot = TRUE, parallel = FALSE, se = TRUE, verbose = TRUE) {
   x <- as(otu_table(physeq), "matrix")
   if (taxa_are_rows(physeq)) { x <- t(x) }
 
@@ -28,7 +29,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
   nr <- nrow(x)
 
   rarefun <- function(i) {
-    cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
+    if (verbose) cat(paste("rarefying sample", rownames(x)[i]), sep = "\n")
     n <- seq(1, tot[i], by = step)
     if (n[length(n)] != tot[i]) {
       n <- c(n, tot[i])
@@ -46,38 +47,28 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
   } else {
     out <- lapply(seq_len(nr), rarefun)
   }
-  df <- do.call(rbind, out)
+  df <- dplyr::bind_rows(out)
 
   ## Get sample data
   if (!is.null(sample_data(physeq, FALSE))) {
-    sdf <- as(sample_data(physeq), "data.frame")
-    sdf$Sample <- rownames(sdf)
-    data <- merge(df, sdf, by = "Sample")
-    labels <- data.frame(x = tot, y = S, Sample = rownames(x))
-    labels <- merge(labels, sdf, by = "Sample")
+    sdf <- as(sample_data(physeq), "data.frame") %>%
+      dplyr::mutate(Sample = sample_names(physeq))
+    data <- dplyr::inner_join(df, sdf, by = "Sample")
+    labels <- dplyr::tibble(x = tot, y = S, Sample = sample_names(physeq)) %>%
+      inner_join(sdf, by = "Sample")
   }
 
-  ## Add, any custom-supplied plot-mapped variables
-  if( length(color) > 1 ){
-    data$color <- color
-    names(data)[names(data)=="color"] <- deparse(substitute(color))
-    color <- deparse(substitute(color))
-  }
-  if( length(label) > 1 ){
-    labels$label <- label
-    names(labels)[names(labels)=="label"] <- deparse(substitute(label))
-    label <- deparse(substitute(label))
-  }
-
-  p <- ggplot(data = data, aes_string(x = "Size", y = ".S", group = "Sample", color = color))
+  p <- ggplot(data = data, aes(x = Size, y = .S, group = Sample))
+  if (!is.null(color)) p <- p + aes(color = !!sym(color), fill = !!sym(color))
   p <- p + labs(x = "Sample Size", y = "Species Richness")
   if (!is.null(label)) {
-    p <- p + geom_text(data = labels, aes_string(x = "x", y = "y", label = label, color = color),
+    p <- p + geom_text(data = labels, aes(x = x, y = y, label = !!sym(label)),
                        size = 4, hjust = 0)
   }
   p <- p + geom_line()
+
   if (se) { ## add standard error if available
-    p <- p + geom_ribbon(aes_string(ymin = ".S - .se", ymax = ".S + .se", color = NULL, fill = color), alpha = 0.2)
+    p <- p + geom_ribbon(aes(ymin = .S - .se, ymax = .S + .se, color = NULL), alpha = 0.2)
   }
   if (plot) {
     plot(p)
@@ -98,6 +89,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' @param x Variable mapped to x-axis
 #' @param y Variable mapped to y-axis
 #' @param facet_grid variable used for faceting.
+#' @param sampleOrder Sample order (ignored if \code{x} is different from "Samples")
 #' @param ... Additional arguments passed on to geom_bar
 #'
 #' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
@@ -116,7 +108,9 @@ plot_composition <- function(physeq,
                              fill = NULL,
                              startFrom = 1,
                              x = "Sample",
-                             y = "Abundance", facet_grid = NULL,
+                             y = "Abundance",
+                             sampleOrder = NULL,
+                             facet_grid = NULL,
                              ...) {
   if (is.null(taxaRank2) || taxaRank2 %in% c("OTU", "ASV")) {
     taxaRank2 <- "OTU_rank"
@@ -129,6 +123,8 @@ plot_composition <- function(physeq,
   if (is.null(fill)) fill <- taxaRank2
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa, startFrom)
+  if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
+
   p <- ggplot(ggdata,
               aes_string(x = x, y = y, fill = fill,
                          # color = fill,
@@ -253,7 +249,7 @@ top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
 #'
 #' @param physeq Required. \code{\link{phyloseq-class}} object
 #' @param taxrank A character string specifying the taxonomic level that you want to agglomerate over. Should be among the results of \code{rank_names(physeq)}. The default value is \code{rank_names(physeq)[1]}, which may agglomerate too broadly for a given experiment. You are strongly encouraged to try different values for this argument.
-#' @param bad_empty (Optional). Character vector. Default: c("", " ", "\t"). Defines the bad/empty values that should be replaced by "Unknown".
+#' @param bad_empty (Optional). Character vector. Default to empty white spaces and tabs. Defines the bad/empty values that should be replaced by "Unknown".
 #'
 #' @return A taxonomically-agglomerated \code{\link{phyloseq-class}} object.
 #' @export

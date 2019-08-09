@@ -13,8 +13,8 @@ ggtree(physeq, group = NULL, freq = TRUE, method = "linear",
 tree slot.}
 
 \item{group}{Optional. Either a single character string matching a variable
-name in the corresponding sam_data of `physeq`, or a factor with
-the same length as the number of taxa in `physeq`. If provided, the samples
+name in the corresponding sam_data of \code{physeq}, or a factor with
+the same length as the number of taxa in \code{physeq}. If provided, the samples
 are aggregated by factor levels before being plotted}
 
 \item{freq}{Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
@@ -27,8 +27,8 @@ weights them with their library size.}
 \item{base}{Optional. Numeric. Base used for logarithmic scaling. Defaults to 10.}
 
 \item{edge.group}{Optional. Either a single character string matching a variable
-name in the corresponding tax_table of `physeq`, or a factor with
-the same length as the number of taxa in `physeq`. Defaults to "Phylum"}
+name in the corresponding tax_table of \code{physeq}, or a factor with
+the same length as the number of taxa in \code{physeq}. Defaults to "Phylum"}
 
 \item{edge.method}{Optional. Ancestral group reconstruction method; either 'majority' or
 'ace' (or an abbrevation of these). Defaults to "majority"}

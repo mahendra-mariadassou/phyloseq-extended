@@ -10,7 +10,7 @@ support_taxa(physeq, epca, choices = seq(epca$number.components),
 \arguments{
 \item{physeq}{Required. A \code{\link{phyloseq-class}} class instance.}
 
-\item{epca}{Required. An \code{\link{edgepca}} class object}
+\item{epca}{Required. An \code{\link{edge_pca}} class object}
 
 \item{choices}{Optional. Ordination axis for which support taxa are extracted.
 Defaults to all axis.}
@@ -29,5 +29,5 @@ Extract supporting taxa from an edge pca
 }
 \note{
 If number and threshold are specified, extracts at most \code{number} taxa whose loadings
-       exceed threshold for each axis.
+exceed threshold for each axis.
 }

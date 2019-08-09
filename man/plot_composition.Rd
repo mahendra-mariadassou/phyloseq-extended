@@ -7,7 +7,7 @@
 plot_composition(physeq, taxaRank1 = "Phylum",
   taxaSet1 = "Proteobacteria", taxaRank2 = "Family",
   numberOfTaxa = 9, fill = NULL, startFrom = 1, x = "Sample",
-  y = "Abundance", facet_grid = NULL, ...)
+  y = "Abundance", sampleOrder = NULL, facet_grid = NULL, ...)
 }
 \arguments{
 \item{physeq}{phyloseq class object}
@@ -23,11 +23,13 @@ plot_composition(physeq, taxaRank1 = "Phylum",
 \item{fill}{Taxonomic rank used for filling (should be between taxaRank1 and taxaRank2 in the hierarchy of ranks)}
 
 \item{startFrom}{\code{startFrom - 1} is the number of (most abundant) taxa to discard before
-selecting the `numberOfTaxa` most abundant taxa.}
+selecting the \code{numberOfTaxa} most abundant taxa.}
 
 \item{x}{Variable mapped to x-axis}
 
 \item{y}{Variable mapped to y-axis}
+
+\item{sampleOrder}{Sample order (ignored if \code{x} is different from "Samples")}
 
 \item{facet_grid}{variable used for faceting.}
 
@@ -40,7 +42,7 @@ a ggplot2 graphic
 Versatile function for plotting compositions graphs
 }
 \details{
-Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
+Allows the user to restrict the plot to taxa in the set \code{taxaSet1} at level \code{taxaRank1} and aggregate taxa at level \code{taxaRank2} in the plot. The plot is limited to \code{numberOfTaxa} taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
 }
 \examples{
 data(food)

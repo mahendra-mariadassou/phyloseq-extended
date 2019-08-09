@@ -42,11 +42,11 @@ incidence_matrix <- function(phy) {
 
 
 #' Compute edge PCA components of a metagenomic sample
-#' using the edgePCA idea developed in Matsen and Evans (2012)
+#' using the edge_pca idea developed in Matsen and Evans (2012)
 #' with regularization of the edges for the PCA part as proposed in
 #' Shen, H. and Huang, J. Z. (2008).
 #'
-#' @title edgePCA
+#' @title edge_pca
 #' @param physeq Required. A \code{\link{phyloseq-class}} class object
 #' @param number.components Optional. Numeric. Number of components used in the PCA, defaults to 2.
 #' @param method. Optional. PCA method. Any unambiguous abbreviation of 'normal',
@@ -56,24 +56,28 @@ incidence_matrix <- function(phy) {
 #' @param ...  Optional. Additional parameters passed on to sparcePca,
 #'             regularizedPca and pca, such as number of iterations and
 #'             convergence criterion.
-#' @return An \code{edgepca} class object with components:
-#' - \item{loadings}: The loadings of the principal component axis
-#' - \item{scores}: The score of the samples
-#' - \item{values}: A date frame with components eigenvalues, relative eigenvalues and
+#' @return An \code{edge_pca} class object with components:
+#' - loadings: The loadings of the principal component axis
+#' - scores: The score of the samples
+#' - values: A date frame with components eigenvalues, relative eigenvalues and
 #'                  cumulative eigenvalues.
-#' @note scores and extract_eigenvalues methods are associated with 'edgepca'.
+#' @note scores and extract_eigenvalues methods are associated with 'edge_pca'.
 #' @references Shen, H. and Huang, J. Z. (2008). Sparse principal component
 #' analysis via regularized low rank matrix approximation. _Journal
 #' of Multivariate Analysis_ *99*, 1015-1034.
 #' @references Matsen, F. A. and Evans, S. (2012). Edge Principal Components
 #' and Squash Clustering: Using the Special Structure of Phylogenetic
 #' Placement Data for Sample Comparison. _Plos One_ *8*(3):e56859.
-#' @seealso \code{\link{pca}}, \code{\link{sparsePca}}, \code{\link{regularizedPca}},
-edgePCA <- function(physeq,
-                    number.components = 2,
-                    method = c("normal", "sparse", "regularized"),
-                    number.edges = 50,
-                    ...) {
+#' @export
+#' @seealso \code{\link{pca}}, \code{\link{sparsePca}}, \code{\link{regularizedPca}}
+#' @examples
+#' data(food)
+#' epca <- edge_pca(food)
+edge_pca <- function(physeq,
+                     number.components = 2,
+                     method = c("normal", "sparse", "regularized"),
+                     number.edges = 50,
+                     ...) {
 
     ## Extract otu_table matrix
     x <- as(otu_table(physeq), "matrix")
@@ -108,7 +112,7 @@ edgePCA <- function(physeq,
                       sparse = sparsePca(mdm, number.components, number.edges, ...),
                       normal = pca(mdm, number.components, ...),
                       regularized = regularizedPca(mdm, number.components, ...))
-    class(results) <- c("edgepca", class(results))
+    class(results) <- c("edge_pca", class(results))
     return(results)
 }
 
@@ -129,16 +133,16 @@ edgePCA <- function(physeq,
 #'               variance. Defaults to TRUE. Alternatively, a vector of length
 #'               equal to the number of columns in x. The value is passed on to scale.
 #' @return A list with components
-#' - \item{number.components}: The number of components used
-#' - \item{loadings}: The matrix of variable loadings
-#' - \item{scores}: The matrix of sample scores
-#' - \item{values}: A list with components
-#'     - \item{Eigenvalues}: the eigenvalues of the covariance/correlation
-#'     - \item{Relative_eig}: the normalized eigenvalues (sum up to 1)
-#'     - \item{Cumul_eig}: the cumulative eigenvalues (useful for scree plot)
-#' - \item{center, scale}: centering and scaling vectors, used, if any.
+#' - number.components: The number of components used
+#' - loadings: The matrix of variable loadings
+#' - scores: The matrix of sample scores
+#' - values: A list with components
+#'     - Eigenvalues: the eigenvalues of the covariance/correlation
+#'     - Relative_eig: the normalized eigenvalues (sum up to 1)
+#'     - Cumul_eig: the cumulative eigenvalues (useful for scree plot)
+#' - center, scale: centering and scaling vectors, used, if any.
 #'                         Otherwise, FALSE.
-#' @seealso \code{\link{edgepca}}, \code{\link{sparsePca}}, \code{\link{regularizedPca}},
+#' @seealso \code{\link{edge_pca}}, \code{\link{sparsePca}}, \code{\link{regularizedPca}}
 pca <- function(x, number.components = NULL, center = TRUE, scale. = FALSE) {
     x <- as.matrix(x)
     ## Construct variable and sample names
@@ -204,16 +208,16 @@ pca <- function(x, number.components = NULL, center = TRUE, scale. = FALSE) {
 #'               variance. Defaults to TRUE. Alternatively, a vector of length
 #'               equal to the number of columns in x. The value is passed on to scale.
 #' @return A list with components
-#' - \item{number.components}: The number of components used
-#' - \item{loadings}: The matrix of variable loadings
-#' - \item{scores}: The matrix of sample scores
-#' - \item{values}: A list with components
-#'     - \item{Eigenvalues}: the eigenvalues of the covariance/correlation
-#'     - \item{Relative_eig}: the normalized eigenvalues (sum up to 1)
-#'     - \item{Cumul_eig}: the cumulative eigenvalues (useful for scree plot)
-#' - \item{center, scale}: centering and scaling vectors, used, if any.
+#' - number.components: The number of components used
+#' - loadings: The matrix of variable loadings
+#' - scores: The matrix of sample scores
+#' - values: A list with components
+#'     - Eigenvalues: the eigenvalues of the covariance/correlation
+#'     - Relative_eig: the normalized eigenvalues (sum up to 1)
+#'     - Cumul_eig: the cumulative eigenvalues (useful for scree plot)
+#' - center, scale: centering and scaling vectors, used, if any.
 #'                         Otherwise, FALSE.
-#' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}}
+#' @seealso \code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}
 regularizedPca <- function(x, number.components = 10, center = TRUE, scale. = FALSE) {
     x <- as.matrix(x)
     n <- nrow(x)
@@ -296,16 +300,16 @@ regularizedPca <- function(x, number.components = 10, center = TRUE, scale. = FA
 #' @param tol    Optional. A (small) positive numeric used to check convergence of loadings
 #'               for each component. Defaults to 1e-09.
 #' @return A list with components
-#' - \item{number.components}: The number of components used
-#' - \item{loadings}: The matrix of variable loadings
-#' - \item{scores}: The matrix of sample scores
-#' - \item{values}: A list with components
-#'     - \item{Eigenvalues}: the eigenvalues of the covariance/correlation
-#'     - \item{Relative_eig}: the normalized eigenvalues (sum up to 1)
-#'     - \item{Cumul_eig}: the cumulative eigenvalues (useful for scree plot)
-#' - \item{center, scale}: centering and scaling vectors, used, if any.
+#' - number.components: The number of components used
+#' - loadings: The matrix of variable loadings
+#' - scores: The matrix of sample scores
+#' - values: A list with components
+#'     - Eigenvalues: the eigenvalues of the covariance/correlation
+#'     - Relative_eig: the normalized eigenvalues (sum up to 1)
+#'     - Cumul_eig: the cumulative eigenvalues (useful for scree plot)
+#' - center, scale: centering and scaling vectors, used, if any.
 #'                         Otherwise, FALSE.
-#' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}},
+#' @seealso \code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}
 sparsePca <- function(x, number.components = 10,
                       number.variables = rep(ncol(x), number.components),
                       center = TRUE, scale. = FALSE,
@@ -458,16 +462,16 @@ sparsePca <- function(x, number.components = 10,
 #' analysis via regularized low rank matrix approximation. _Journal
 #' of Multivariate Analysis_ *99*, 1015-1034.
 #' @return A list with components
-#' - \item{number.components}: The number of components used
-#' - \item{loadings}: The matrix of variable loadings
-#' - \item{scores}: The matrix of sample scores
-#' - \item{values}: A list with components
-#'     - \item{Eigenvalues}: the eigenvalues of the covariance/correlation
-#'     - \item{Relative_eig}: the normalized eigenvalues (sum up to 1)
-#'     - \item{Cumul_eig}: the cumulative eigenvalues (useful for scree plot)
-#' - \item{center, scale}: centering and scaling vectors, used, if any.
+#' - number.components: The number of components used
+#' - loadings: The matrix of variable loadings
+#' - scores: The matrix of sample scores
+#' - values: A list with components
+#'     - Eigenvalues: the eigenvalues of the covariance/correlation
+#'     - Relative_eig: the normalized eigenvalues (sum up to 1)
+#'     - Cumul_eig: the cumulative eigenvalues (useful for scree plot)
+#' - center, scale: centering and scaling vectors, used, if any.
 #'                         Otherwise, FALSE.
-#' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}},
+#' @seealso \code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}},
 sparsePca.lambda <- function(x, number.components = 10,
                              lambda,
                              center = TRUE, scale. = FALSE,
@@ -593,7 +597,7 @@ sparsePca.lambda <- function(x, number.components = 10,
 #'                by 'species' or 'taxa' and 'samples' can be replaced by 'sites'.
 #' @param ... Optional. Additional argument passed on from scores.default. Unused
 #' @return A matrix of scores for axes in 'choices'
-#' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}},
+#' @seealso \code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}},
 scores.pca <- function(pca, choices,
                        display = c("sites", "species", "samples", "variables", "taxa"),
                        ...) {
@@ -615,7 +619,7 @@ scores.pca <- function(pca, choices,
 #'
 #' @title support_taxa
 #' @param physeq Required. A \code{\link{phyloseq-class}} class instance.
-#' @param epca Required. An \code{\link{edgepca}} class object
+#' @param epca Required. An \code{\link{edge_pca}} class object
 #' @param choices Optional. Ordination axis for which support taxa are extracted.
 #'                Defaults to all axis.
 #' @param threshold Optional. Numeric. Threshold that a taxa loading
@@ -654,11 +658,11 @@ support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
 
 
 #' Function for plotting a tree with edge fattened and colored according to
-#' the loadings of an edgePCA results.
+#' the loadings of an edge_pca results.
 #'
-#' @title plotLoadings
+#' @title plot_loadings
 #' @param physeq Required. A \code{\link{phyloseq-class}} class instance.
-#' @param epca Required. An \code{\link{edgepca}} class object
+#' @param epca Required. An \code{\link{edge_pca}} class object
 #' @param choices Required. Ordination axes.
 #' @param width.lim Optional. Numeric. Minimum and maximal edge after fattening.
 #'                  Defaults to c(0.1, 4). Set to c(0, x) for true linear scaling.
@@ -676,10 +680,10 @@ support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
 #'                      Defaults to NULL. If NULL, nothing happens. Use "white", "transparent",
 #'                      or par("bg") to remove them from plot.
 #' @param ... Additional arguments passed on to plot.phylo
-#'
+#' @export
 #' @return Nothing, this function is used for its side effect of plotting a tree
-#' @seealso \code{\link{edgePCA}}
-plotLoadings <- function(physeq, epca, choices, fatten.by = c("size"), fatten.tips = FALSE,
+#' @seealso \code{\link{edge_pca}}
+plot_loadings <- function(physeq, epca, choices, fatten.by = c("size"), fatten.tips = FALSE,
                          width.lim = c(0.1, 4), color = c("#EF8A62", "#67A9CF"),
                          color.tip.by = NULL, missing.color = NULL,
                          ...) {
@@ -776,18 +780,25 @@ plotLoadings <- function(physeq, epca, choices, fatten.by = c("size"), fatten.ti
 # Define S3 method extract_eigenvalue function for pca class
 # Function is used by `plot_scree` to get the eigenvalue vector from different
 # types of ordination objects.
+
 #' @keywords internal
+extract_eigenvalue <- function(object, type) {
+    UseMethod("extract_eigenvalue", object)
+}
+
+#' @keywords internal
+#'
 # for pca (pca) objects
 extract_eigenvalue.pca = function(ordination) ordination$values$Eigenvalues
 ################################################################################
 
 
-#' Method for plotting an edgepca object with enhanced axes. Expands
-#' \code{\link{plotLoadings}} and \code{\link{plot_ordination}}
+#' Method for plotting an edge_pca object with enhanced axes. Expands
+#' \code{\link{plot_loadings}} and \code{\link{plot_ordination}}
 #'
-#' @title plot_edgepca
+#' @title plot_edge_pca
 #' @param physeq Required. A \code{\link{phyloseq-class}} object
-#' @param epca Required. A \code{\link{edgepca}} class object
+#' @param epca Required. A \code{\link{edge_pca}} class object
 #' @param axes Optional. Ordination axes. Defaults to c(1, 2).
 #' @param type Required. Unambiguous abbreviation of 'variables' or 'samples'.
 #'                For compatibility with vegan and phyloseq, 'variables' can be replaced
@@ -797,8 +808,18 @@ extract_eigenvalue.pca = function(ordination) ordination$values$Eigenvalues
 #' @param heights Optional. A vector of 2 values for the heights of rows. Defaults to c(1, 1)
 #' @param ... Optional. Additional argument passed on to plot_ordination
 #' @return Nothing. The function is called for its side effect.
-#' @seealso \code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}},
-plot_edgepca <- function(physeq, epca, axes = c(1, 2),
+#'
+#' @importFrom grid grid.draw pushViewport upViewport
+#' @importFrom gridBase baseViewports
+#' @export
+#'
+#' @seealso \code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}}
+#'
+#' @examples
+#' data(food)
+#' epca <- edge_pca(food)
+#' plot_edge_pca(food, epca)
+plot_edge_pca <- function(physeq, epca, axes = c(1, 2),
                          widths = c(1, 1), heights = c(1, 1),
                          args.loadings = NULL, ...) {
     ## Setup graphic devices
@@ -806,17 +827,17 @@ plot_edgepca <- function(physeq, epca, axes = c(1, 2),
     ## Plot first loading
     args1 <- list(physeq = physeq, epca = epca, choices = axes[1])
     args.loadings <- c(args1, args.loadings)
-    do.call("plotLoadings", args = args.loadings)
+    do.call("plot_loadings", args = args.loadings)
     ## Plot second loading
     args.loadings[["choices"]] <- axes[2]
-    do.call("plotLoadings", args = args.loadings)
+    do.call("plot_loadings", args = args.loadings)
     ## Plot ordination using plot_ordination and ggplot2
     plot.new()
-    vps <- baseViewports()
-    pushViewport(vps$figure)
+    vps <- gridBase::baseViewports()
+    grid::pushViewport(vps$figure)
     p <- plot_ordination(physeq = physeq, ordination = epca, axes = axes, ...)
     g <- ggplot_gtable(ggplot_build(p))
-    grid.draw(g)
-    upViewport()
+    grid::grid.draw(g)
+    grid::upViewport()
 }
 

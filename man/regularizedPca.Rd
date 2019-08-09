@@ -24,20 +24,24 @@ equal to the number of columns in x. The value is passed on to scale.}
 }
 \value{
 A list with components
-- \item{number.components}: The number of components used
-- \item{loadings}: The matrix of variable loadings
-- \item{scores}: The matrix of sample scores
-- \item{values}: A list with components
-    - \item{Eigenvalues}: the eigenvalues of the covariance/correlation
-    - \item{Relative_eig}: the normalized eigenvalues (sum up to 1)
-    - \item{Cumul_eig}: the cumulative eigenvalues (useful for scree plot)
-- \item{center, scale}: centering and scaling vectors, used, if any.
-                        Otherwise, FALSE.
+\itemize{
+\item number.components: The number of components used
+\item loadings: The matrix of variable loadings
+\item scores: The matrix of sample scores
+\item values: A list with components
+\itemize{
+\item Eigenvalues: the eigenvalues of the covariance/correlation
+\item Relative_eig: the normalized eigenvalues (sum up to 1)
+\item Cumul_eig: the cumulative eigenvalues (useful for scree plot)
+}
+\item center, scale: centering and scaling vectors, used, if any.
+Otherwise, FALSE.
+}
 }
 \description{
 Perform a regularized principal component analysis on a given data matrix using
 Singular Value Decomposition and regularization.
 }
 \seealso{
-\code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}}
+\code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}
 }

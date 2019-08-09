@@ -11,8 +11,8 @@ estimate_prevalence(physeq, group, format = c("long", "wide"),
 \item{physeq}{phyloseq class object, otu abundances are extracted from this object}
 
 \item{group}{Either the a single character string matching a variable name in
-the corresponding sample_data of `physeq`, or a factor with the same
-length as the number of samples in `physeq`.}
+the corresponding sample_data of \code{physeq}, or a factor with the same
+length as the number of samples in \code{physeq}.}
 
 \item{format}{long (default) or wide. Should the result be organised as a long data.frame
 with columns "otu", "group", "prevalence" and "specificity" or a numeric matrix
@@ -22,22 +22,24 @@ with otus in rows and group specificty/group prevalence in column.}
 }
 \value{
 A tibble with components
-* prevalence: observed prevalence in group
-* specifity : specifity (prevalence / global prevalence) in group
-* group: factor level
-* otu: otu
-or a matrix m of size `ntaxa(physeq)` times 2*N where
-N is the number of levels (groups) in `group` and
-* `m[i, g]` is the prevalence of otu i in group g
-* `m[i, N+g]` is the specificity of otu i to group g
+\itemize{
+\item prevalence: observed prevalence in group
+\item specifity : specifity (prevalence / global prevalence) in group
+\item group: factor level
+\item otu: otu
+or a matrix m of size \code{ntaxa(physeq)} times 2*N where
+N is the number of levels (groups) in \code{group} and
+\item \code{m[i, g]} is the prevalence of otu i in group g
+\item \code{m[i, N+g]} is the specificity of otu i to group g
+}
 }
 \description{
 Compute local prevalence and specificity of an OTU in different levels of a group
 }
 \details{
 Specificity is defined here as local prevalence / global prevalence,
-         and therefore only deals with presence/absence data. Rarefaction is
-         therefore recommended.
+and therefore only deals with presence/absence data. Rarefaction is
+therefore recommended.
 }
 \examples{
 data(food)

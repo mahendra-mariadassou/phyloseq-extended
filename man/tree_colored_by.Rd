@@ -13,14 +13,14 @@ tree_colored_by(physeq, group = "Phylum", method = c("majority",
 tree slot.}
 
 \item{group}{Optional. Either a single character string matching a variable
-name in the corresponding tax_table of `physeq`, or a factor with
-the same length as the number of taxa in `physeq`. Defaults to "Phylum"}
+name in the corresponding tax_table of \code{physeq}, or a factor with
+the same length as the number of taxa in \code{physeq}. Defaults to "Phylum"}
 
 \item{method}{Optional. Ancestral group reconstruction method; either 'majority' or
 'ace' (or an abbrevation of these). Defaults to "majority"}
 
 \item{legend.title}{Optional. Character string used for legend title. Defaults to
-`group`.}
+\code{group}.}
 
 \item{legend.pos}{Optional. keyword used for legend positon. Defaults to "bottomright"
 and can take any value accepted by legend. "none" removes legend.}
@@ -31,10 +31,10 @@ and can take any value accepted by legend. "none" removes legend.}
 }
 \value{
 The function is mainly called for its side effect of plotting a tree
-        with colored edges and leaves.
+with colored edges and leaves.
 }
 \description{
-Plot tree with edges colored by `group`. `group` should give a class for all leaves.
+Plot tree with edges colored by \code{group}. \code{group} should give a class for all leaves.
 The class of inner nodes is inferred using majority rule or ancestral character
 estimation (via ape::ace function, used with ER model)
 }

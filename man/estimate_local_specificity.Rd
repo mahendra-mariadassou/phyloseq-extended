@@ -11,8 +11,8 @@ estimate_local_specificity(physeq, group, index = c("fraction",
 \item{physeq}{phyloseq class object, otu abundances are extracted from this object}
 
 \item{group}{Either the a single character string matching a variable name in
-the corresponding sample_data of `physeq`, or a factor with the same
-length as the number of samples in `physeq`.}
+the corresponding sample_data of \code{physeq}, or a factor with the same
+length as the number of samples in \code{physeq}.}
 
 \item{index}{Either "fraction" (default) or "indspec".
 Method used for computing local specificity (see details).}
@@ -33,11 +33,13 @@ and parallel framework)}
 }
 \value{
 A data frame with components
-* specificity: observed local specificity
-* group: factor level
-* abundance: local relative abundance of otu (all samples of a level are weighted equally)
-* mean, sd, quantiles 5, 25, 50, 75 and 95% if 'se' is TRUE
+\itemize{
+\item specificity: observed local specificity
+\item group: factor level
+\item abundance: local relative abundance of otu (all samples of a level are weighted equally)
+\item mean, sd, quantiles 5, 25, 50, 75 and 95% if 'se' is TRUE
 Specificity method is used as attribute 'index' of the data frame.
+}
 }
 \description{
 Estimate local specificity of an OTU to a group

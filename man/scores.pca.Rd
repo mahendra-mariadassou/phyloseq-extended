@@ -25,5 +25,5 @@ A matrix of scores for axes in 'choices'
 S3 Method for extracting scores from pca object
 }
 \seealso{
-\code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}},
+\code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}},
 }

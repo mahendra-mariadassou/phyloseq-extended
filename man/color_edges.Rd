@@ -12,8 +12,8 @@ color_edges(physeq, group = "Phylum", method = c("majority", "ace"),
 tree slot.}
 
 \item{group}{Optional. Either a single character string matching a variable
-name in the corresponding tax_table of `physeq`, or a factor with
-the same length as the number of taxa in `physeq`. Defaults to "Phylum"}
+name in the corresponding tax_table of \code{physeq}, or a factor with
+the same length as the number of taxa in \code{physeq}. Defaults to "Phylum"}
 
 \item{method}{Optional. Ancestral group reconstruction method; either 'majority' or
 'ace' (or an abbrevation of these). Defaults to "majority"}
@@ -22,16 +22,18 @@ the same length as the number of taxa in `physeq`. Defaults to "Phylum"}
 }
 \value{
 A list with components
-\item{edge} A color vector for edges of \code{phy_tree{physeq}}
-\item{tip} A color vector for tip labels of \code{phy_tree{physeq}}
-\item{palette} The named color palette color, useful for the legend
+\itemize{
+\item edge A color vector for edges of \code{phy_tree{physeq}}
+\item tip A color vector for tip labels of \code{phy_tree{physeq}}
+\item palette The named color palette color, useful for the legend
+}
 }
 \description{
-Color edges and leaves of a tree according to a `group` factor. `group` should give a class
+Color edges and leaves of a tree according to a \code{group} factor. \code{group} should give a class
 for all leaves. The class of inner nodes is inferred using majority rule or ancestral character
 estimation (via ape::ace function, used with ER model)
 }
 \note{
 The function assumes that the tree is rooted. The color palette is constructed
-      automatically according to ggplot discrete hue scale
+automatically according to ggplot discrete hue scale
 }

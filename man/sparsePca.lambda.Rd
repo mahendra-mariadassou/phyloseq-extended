@@ -33,15 +33,19 @@ for each component. Defaults to 1e-09.}
 }
 \value{
 A list with components
-- \item{number.components}: The number of components used
-- \item{loadings}: The matrix of variable loadings
-- \item{scores}: The matrix of sample scores
-- \item{values}: A list with components
-    - \item{Eigenvalues}: the eigenvalues of the covariance/correlation
-    - \item{Relative_eig}: the normalized eigenvalues (sum up to 1)
-    - \item{Cumul_eig}: the cumulative eigenvalues (useful for scree plot)
-- \item{center, scale}: centering and scaling vectors, used, if any.
-                        Otherwise, FALSE.
+\itemize{
+\item number.components: The number of components used
+\item loadings: The matrix of variable loadings
+\item scores: The matrix of sample scores
+\item values: A list with components
+\itemize{
+\item Eigenvalues: the eigenvalues of the covariance/correlation
+\item Relative_eig: the normalized eigenvalues (sum up to 1)
+\item Cumul_eig: the cumulative eigenvalues (useful for scree plot)
+}
+\item center, scale: centering and scaling vectors, used, if any.
+Otherwise, FALSE.
+}
 }
 \description{
 Perform a sparse principal component analysis on a given data matrix using
@@ -49,9 +53,9 @@ iterative algorithm from Shen and Huang.
 }
 \references{
 Shen, H. and Huang, J. Z. (2008). Sparse principal component
-analysis via regularized low rank matrix approximation. _Journal
-of Multivariate Analysis_ *99*, 1015-1034.
+analysis via regularized low rank matrix approximation. \emph{Journal
+of Multivariate Analysis} \emph{99}, 1015-1034.
 }
 \seealso{
-\code{\link{pca}}, \code{\link{edgePCA}}, \code{\link{regularizedPca}},
+\code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}},
 }

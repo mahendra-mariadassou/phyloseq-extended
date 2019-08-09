@@ -16,8 +16,8 @@ plot_merged_trees(physeq, group, freq = TRUE, method = "linear",
 tree slot.}
 
 \item{group}{Required. Either a single character string matching a variable
-name in the corresponding sam_data of `physeq`, or a factor with
-the same length as the number of taxa in `physeq`.}
+name in the corresponding sam_data of \code{physeq}, or a factor with
+the same length as the number of taxa in \code{physeq}.}
 
 \item{freq}{Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
 Defaults to TRUE. TRUE corresponding to weighting all samples equally while FALSE
@@ -41,8 +41,8 @@ Defaults to FALSE.}
 
 \item{color.edge.by}{Optional. A single character string matching a variable. If NULL,
 nothing happens.
-name in the corresponding tax_table of `physeq`, or a factor with
-the same length as the number of taxa in `physeq`.
+name in the corresponding tax_table of \code{physeq}, or a factor with
+the same length as the number of taxa in \code{physeq}.
 Defaults to NULL, corresponding to no color.}
 
 \item{color.edge.method}{Optional. Ancestral group reconstruction method; either 'majority' or
@@ -60,13 +60,13 @@ centered around the mean (deviation). If method = "logarithmic", they are
 divided by the mean (relative deviation)}
 
 \item{legend.title}{Optional. Character string used for legend title. Defaults to
-`group`.}
+\code{group}.}
 
 \item{...}{Optional. Additional arguments passed on to plot.phylo.}
 }
 \value{
 The function is mainly called for its side effect of plotting a tree
-        with colored edges and leaves.
+with colored edges and leaves.
 }
 \description{
 Merge samples according to group factor and plot taxa diversity for each categrory of the group.

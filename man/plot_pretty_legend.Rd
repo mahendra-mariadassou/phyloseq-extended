@@ -18,7 +18,7 @@ centered.}
 }
 \value{
 Nothing. This function is used for its side effect of plotting
-        a legend.
+a legend.
 }
 \description{
 Wrapper around legend that constructs automatic legend for the graph.

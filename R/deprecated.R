@@ -11,7 +11,6 @@
 #' @param col    Custom colours for line rarefactions curves.
 #' @param ...    parameters passed to ordilabels
 #'
-#' @export
 #'
 #' @importFrom vegan specnumber ordilabel
 #' @examples

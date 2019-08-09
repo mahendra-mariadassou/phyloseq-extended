@@ -11,14 +11,14 @@ incidence_matrix(phy)
 }
 \value{
 An incidence matrix M of size nedges(tree) x ntaxa(tree) where
-        M[i,j] is set to 1 if taxa derives from edge i and 0 otherwise.
+M\link{i,j} is set to 1 if taxa derives from edge i and 0 otherwise.
 }
 \description{
 Compute incidence matrix of a tree
 }
 \note{
 incidence_matrix assumes that the tree is rooted. If not, it roots it
-      it at an arbitrary taxa (taxa 1).
+it at an arbitrary taxa (taxa 1).
 }
 \examples{
 data(food)

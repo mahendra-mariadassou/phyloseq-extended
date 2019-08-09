@@ -12,9 +12,9 @@ ggpdrare(physeq, step = 10, label = NULL, color = NULL, log = TRUE,
 
 \item{step}{Step size for sample size in rarefaction curves}
 
-\item{label}{Default `NULL`. Character string. The name of the variable to map to text labels on the plot. Similar to color option but for plotting text.}
+\item{label}{Default \code{NULL}. Character string. The name of the variable to map to text labels on the plot. Similar to color option but for plotting text.}
 
-\item{color}{(Optional). Default `NULL`. Character string. The name of the variable to map to colors in the plot. This can be a sample variable (among the set returned by \code{\link[=sample_variables]{sample_variables(physeq)}} or taxonomic rank (among the set returned by \code{[=rank_names]{rank_names(physeq)}}). Finally, The color scheme is chosen automatically by \link{ggplot}, but it can be modified afterward with an additional layer using \link{scale_color_manual}.}
+\item{color}{(Optional). Default \code{NULL}. Character string. The name of the variable to map to colors in the plot. This can be a sample variable (among the set returned by \code{\link[=sample_variables]{sample_variables(physeq)}} or taxonomic rank (among the set returned by \code{[=rank_names]{rank_names(physeq)}}). Finally, The color scheme is chosen automatically by \link{ggplot}, but it can be modified afterward with an additional layer using \link{scale_color_manual}.}
 
 \item{log}{(Otional). Default 'TRUE'. Logical value. Should sample size
 be represented using a log10 scale? Can be modified with

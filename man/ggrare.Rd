@@ -5,22 +5,24 @@
 \title{Rarefaction curves, ggplot styles}
 \usage{
 ggrare(physeq, step = 10, label = NULL, color = NULL, plot = TRUE,
-  parallel = FALSE, se = TRUE)
+  parallel = FALSE, se = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{physeq}{phyloseq class object, from which abundance data are extracted}
 
 \item{step}{Step size for sample size in rarefaction curves}
 
-\item{label}{Default `NULL`. Character string. The name of the variable to map to text labels on the plot. Similar to color option but for plotting text.}
+\item{label}{Default \code{NULL}. Character string. The name of the variable to map to text labels on the plot. Similar to color option but for plotting text.}
 
-\item{color}{(Optional). Default `NULL`. Character string. The name of the variable to map to colors in the plot. This can be a sample variable (among the set returned by \code{\link[=sample_variables]{sample_variables(physeq)}} or taxonomic rank (among the set returned by \code{[=rank_names]{rank_names(physeq)}}). Finally, The color scheme is chosen automatically by \link{ggplot}, but it can be modified afterward with an additional layer using \link{scale_color_manual}.}
+\item{color}{(Optional). Default \code{NULL}. Character string. The name of the variable to map to colors in the plot. This can be a sample variable (among the set returned by \code{\link[=sample_variables]{sample_variables(physeq)}} or taxonomic rank (among the set returned by \code{[=rank_names]{rank_names(physeq)}}). Finally, The color scheme is chosen automatically by \link{ggplot}, but it can be modified afterward with an additional layer using \link{scale_color_manual}.}
 
 \item{plot}{Logical, should the graphic be plotted.}
 
 \item{parallel}{should rarefaction be parallelized (using parallel framework)}
 
 \item{se}{Default TRUE. Logical. Should standard errors be computed.}
+
+\item{verbose}{(Optional). Verbose (TRUE, default) or silent (FALSE) output}
 }
 \description{
 Rarefaction curves, ggplot styles

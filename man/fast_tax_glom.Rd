@@ -12,7 +12,7 @@ fast_tax_glom(physeq, taxrank = rank_names(physeq)[1],
 
 \item{taxrank}{A character string specifying the taxonomic level that you want to agglomerate over. Should be among the results of \code{rank_names(physeq)}. The default value is \code{rank_names(physeq)[1]}, which may agglomerate too broadly for a given experiment. You are strongly encouraged to try different values for this argument.}
 
-\item{bad_empty}{(Optional). Character vector. Default: c("", " ", "\t"). Defines the bad/empty values that should be replaced by "Unknown".}
+\item{bad_empty}{(Optional). Character vector. Default to empty white spaces and tabs. Defines the bad/empty values that should be replaced by "Unknown".}
 }
 \value{
 A taxonomically-agglomerated \code{\link{phyloseq-class}} object.
@@ -22,11 +22,13 @@ Fast alternative to \code{\link{tax_glom}}
 }
 \details{
 fast_tax_glom differs from \code{\link{tax_glom}} in three important ways:
-* It is based on dplyr function and thus much faster
-* It does not preserve the phy_tree and refseq slots
-* It only preserves taxonomic ranks up to \code{taxrank} and discard all other ones.
+\itemize{
+\item It is based on dplyr function and thus much faster
+\item It does not preserve the phy_tree and refseq slots
+\item It only preserves taxonomic ranks up to \code{taxrank} and discard all other ones.
 The "archetype" (OTU name) for each group is chosen as the most abundant taxa
 within that group (for compatibility with \code{\link{tax_glom}})
+}
 }
 \examples{
 data(food)
