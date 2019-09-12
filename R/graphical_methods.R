@@ -119,8 +119,12 @@ plot_composition <- function(physeq,
     taxaRank1 <- rank_names(physeq)[1]
     taxaSet1  <- NULL
   }
+  if (is.null(fill)) {
+    fill <- taxaRank2
+  }
+  if (taxaRank2 %in% c("OTU", "ASV")) taxaRank2 <- "OTU_rank"
 
-  if (is.null(fill)) fill <- taxaRank2
+
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa, startFrom)
   if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
