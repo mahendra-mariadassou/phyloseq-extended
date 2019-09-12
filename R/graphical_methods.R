@@ -122,7 +122,7 @@ plot_composition <- function(physeq,
   if (is.null(fill)) {
     fill <- taxaRank2
   }
-  if (taxaRank2 %in% c("OTU", "ASV")) taxaRank2 <- "OTU_rank"
+  if (fill %in% c("OTU", "ASV")) fill <- "OTU_rank"
 
 
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
