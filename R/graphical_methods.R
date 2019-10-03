@@ -618,7 +618,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 #' @return A ggplot2 object
 #' @export
 #'
-#' @importFrom dplyr as_tibble mutater
+#' @importFrom dplyr as_tibble mutate
 #' @importFrom tidyr gather
 #' @examples
 #' data(food)
