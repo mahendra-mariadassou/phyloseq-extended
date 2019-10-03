@@ -618,6 +618,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 #' @return A ggplot2 object
 #' @export
 #'
+#' @importFrom dplyr as_tibble mutater
+#' @importFrom tidyr gather
 #' @examples
 #' data(food)
 #' dist.bc <- distance(food, "bray")
@@ -625,8 +627,11 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
                                  low = "#B1F756", high = "#132B13",
                                  show.names = FALSE) {
-  data <- melt(as(dist, "matrix"))
-  colnames(data) <- c("x", "y", "distance")
+  data <- dist %>%
+    as.matrix() %>%
+    dplyr::as_tibble() %>%
+    dplyr::mutate(x = names(.)) %>%
+    tidyr::gather(key = "y", value = "distance", -x)
   if (!is.null(order)) {
     data$x <- factor(data$x, levels = order)
     data$y <- factor(data$y, levels = order)
@@ -636,8 +641,8 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
                  axis.title.y = element_blank(),
                  axis.text.x = element_text(angle = 90))
   if (!show.names) {
-    p <- p + theme(axis.title.x = element_blank(),
-                   axis.title.y = element_blank())
+    p <- p + theme(axis.text.x = element_blank(),
+                   axis.text.y = element_blank())
   }
   p <- p + scale_fill_gradient(low = low, high = high)
   if (!is.null(title)) {
