@@ -26,9 +26,10 @@ The purpose of this method is to merge/agglomerate the sample indices of a phylo
 }
 \examples{
 data(food)
-merge_group(food, "EnvType")
+mg <- merge_group(food, "EnvType")
+mg
 ## Note that sample data are preserved
-sample_data(food)
+sample_data(mg)
 }
 \seealso{
 \code{\link{merge_samples}}

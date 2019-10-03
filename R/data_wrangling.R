@@ -12,9 +12,10 @@
 #'
 #' @examples
 #' data(food)
-#' merge_group(food, "EnvType")
+#' mg <- merge_group(food, "EnvType")
+#' mg
 #' ## Note that sample data are preserved
-#' sample_data(food)
+#' sample_data(mg)
 merge_group <- function(physeq, group, fun = mean) {
   # Build grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
