@@ -8,19 +8,30 @@ filter_phyloseq(physeq, prev.thresh = 0.5, abund.thresh = 0.001,
   group = rep(1, nsamples(physeq)), rarefy = TRUE)
 }
 \arguments{
-\item{physeq}{A \code{phyloseq} class object}
+\item{physeq}{A \link{phyloseq} class object}
 
-\item{prev.thresh}{Minimum prevalence in a group for a taxa to be kept}
+\item{prev.thresh}{Minimum prevalence in at least one group level for a taxa to be kept}
 
-\item{abund.thresh}{Minimum relative abundance in a group for a taxa to be kept}
+\item{abund.thresh}{Minimum relative abundance in at least one sample}
 
-\item{group}{Groups}
+\item{group}{Either the a single character string matching a variable name in
+the corresponding sample_data of \code{physeq}, or a factor with the same
+length as the number of samples in \code{physeq}.}
 
-\item{rarefy}{Logical. Should samples be rarefied before abundances and prevalence are computed.}
+\item{rarefy}{Logical. Should samples be rarefied before abundances and prevalence are computed?}
 }
 \value{
-A list of taxa that pass the fitlers. To be used with \code{prune_sample}
+Vector of taxa that pass the filters, for further use with \link{prune_sample}.
 }
 \description{
 Prevalence and abundance filters, applied independently on each group
+}
+\details{
+Apply prevalence and abundance based filters to a \link{phyloseq} class object. The relative abundance threshold needs to be satisfied in at least one sample (i.e. abundances are not computed per group). The prevalence needs to be satisfied in at least one group level (or in the global dataset if no group is provided). The samples are rarefied by default to avoid depth-induced biases on discovery rates for the prevalence threshold.
+}
+\examples{
+data(food) ## 507 taxa
+## Taxa with prevalence > 25\% in any food type and abundance > 1\% in at least one sample.
+taxa_to_keep <- filter_phyloseq(food, 0.25, 0.01, group = "EnvType")
+prune_taxa(taxa_to_keep, food) ## 217 taxa
 }
