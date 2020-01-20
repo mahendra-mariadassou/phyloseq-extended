@@ -24,14 +24,18 @@
 #' * `m[i, N+g]` is the specificity of otu i to group g
 #' @export
 #'
+#' @importFrom phyloseq sample_data otu_table rarefy_even_depth
+#' @importFrom dplyr inner_join as_tibble
+#' @importFrom tidyr gather
+#'
 #' @examples
 #' data(food)
 #' estimate_prevalence(food, group = "EnvType", rarefy = TRUE)
 estimate_prevalence <- function(physeq, group, format = c("long", "wide"), rarefy = TRUE) {
     ## Get grouping factor
-    if (!is.null(sample_data(physeq, FALSE))) {
+    if (!is.null(phyloseq::sample_data(physeq, FALSE))) {
         if (class(group) == "character" & length(group) == 1) {
-            x1 <- data.frame(sample_data(physeq))
+            x1 <- data.frame(phyloseq::sample_data(physeq))
             if (!group %in% colnames(x1)) {
                 stop("group not found among sample variable names.")
             }
@@ -42,10 +46,10 @@ estimate_prevalence <- function(physeq, group, format = c("long", "wide"), raref
         group <- factor(group)
     }
     ## Rarefy samples
-    if (rarefy) physeq <- rarefy_even_depth(physeq, rngseed = 1121983,
-                                            trimOTUs = FALSE, verbose = FALSE)
+    if (rarefy) physeq <- phyloseq::rarefy_even_depth(physeq, rngseed = 1121983,
+                                                      trimOTUs = FALSE, verbose = FALSE)
     ## Construct relative abundances by sample
-    tdf <- as(otu_table(physeq), "matrix")
+    tdf <- as(phyloseq::otu_table(physeq), "matrix")
     if (!taxa_are_rows(physeq)) { tdf <- t(tdf) }
     tdf <- 0 + (tdf > 0)
     ## prevalence
@@ -63,9 +67,9 @@ estimate_prevalence <- function(physeq, group, format = c("long", "wide"), raref
         return(cbind(prev, spec))
     }
     ## Melt and join tables
-    inner_join(as_tibble(frac, rownames = "otu") %>%
-                   gather(key = "group", value = "prevalence", -otu),
-               as_tibble(spec, rownames = "otu") %>%
-                   gather(key = "group", value = "specificity", -otu),
-               by = c("otu", "group"))
+    dplyr::inner_join(dplyr::as_tibble(frac, rownames = "otu") %>%
+                          tidyr::gather(key = "group", value = "prevalence", -otu),
+                      dplyr::as_tibble(spec, rownames = "otu") %>%
+                          tidyr::gather(key = "group", value = "specificity", -otu),
+                      by = c("otu", "group"))
 }

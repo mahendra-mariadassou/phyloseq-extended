@@ -13,6 +13,7 @@ filter_abundance <- function(physeq, frac = 0.001, A = 0.05 * nsamples(physeq)) 
 #'              the corresponding sample_data of `physeq`, or a factor with the same
 #'              length as the number of samples in `physeq`.
 #' @param rarefy Logical. Should samples be rarefied before abundances and prevalence are computed?
+#' @param rngseed Numeric. RNG seed used for rarefaction. Enables reproducible analyses.
 #'
 #' @details Apply prevalence and abundance based filters to a \link{phyloseq} class object. The relative abundance threshold needs to be satisfied in at least one sample (i.e. abundances are not computed per group). The prevalence needs to be satisfied in at least one group level (or in the global dataset if no group is provided). The samples are rarefied by default to avoid depth-induced biases on discovery rates for the prevalence threshold.
 #'
@@ -25,8 +26,12 @@ filter_abundance <- function(physeq, frac = 0.001, A = 0.05 * nsamples(physeq)) 
 #' ## Taxa with prevalence > 25% in any food type and abundance > 1% in at least one sample.
 #' taxa_to_keep <- filter_phyloseq(food, 0.25, 0.01, group = "EnvType")
 #' prune_taxa(taxa_to_keep, food) ## 217 taxa
-filter_phyloseq <- function(physeq, prev.thresh = 0.5, abund.thresh = 0.001, group = rep(1, nsamples(physeq)), rarefy = TRUE) {
-  physeq <- suppressMessages(physeq %>% rarefy_even_depth(trimOTUs = FALSE, rngseed = 20171201))
+filter_phyloseq <- function(physeq, prev.thresh = 0.5, abund.thresh = 0.001, group = rep(1, nsamples(physeq)),
+                            rarefy = TRUE, rngseed = 20171201) {
+  ## Rarefy onlyif prev.treshold is used or rarefy == TRUE
+  if (rarefy && prev.thresh > 0) {
+    physeq <- suppressMessages(physeq %>% rarefy_even_depth(trimOTUs = FALSE, rngseed = rngseed))
+  }
   ## Abundant otus
   test_function_abundance <- function(x) { (x / sum(x)) >= abund.thresh }
   abundant.otus <- taxa_names(physeq)[genefilter_sample(physeq, test_function_abundance, A = 1)]
