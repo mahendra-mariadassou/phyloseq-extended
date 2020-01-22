@@ -4,8 +4,15 @@
 \alias{estimate_local_specificity}
 \title{Estimate local specificity of an OTU to a group}
 \usage{
-estimate_local_specificity(physeq, group, index = c("fraction",
-  "indspec"), freq = TRUE, B = 999, se = TRUE, parallel = FALSE)
+estimate_local_specificity(
+  physeq,
+  group,
+  index = c("fraction", "indspec"),
+  freq = TRUE,
+  B = 999,
+  se = TRUE,
+  parallel = FALSE
+)
 }
 \arguments{
 \item{physeq}{phyloseq class object, otu abundances are extracted from this object}
@@ -37,7 +44,7 @@ A data frame with components
 \item specificity: observed local specificity
 \item group: factor level
 \item abundance: local relative abundance of otu (all samples of a level are weighted equally)
-\item mean, sd, quantiles 5, 25, 50, 75 and 95% if 'se' is TRUE
+\item mean, sd, quantiles 5, 25, 50, 75 and 95\% if 'se' is TRUE
 Specificity method is used as attribute 'index' of the data frame.
 }
 }

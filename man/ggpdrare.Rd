@@ -4,8 +4,17 @@
 \alias{ggpdrare}
 \title{Rarefaction curves for phylogenetic diversity, ggplot-style}
 \usage{
-ggpdrare(physeq, step = 10, label = NULL, color = NULL, log = TRUE,
-  replace = FALSE, se = TRUE, plot = TRUE, parallel = FALSE)
+ggpdrare(
+  physeq,
+  step = 10,
+  label = NULL,
+  color = NULL,
+  log = TRUE,
+  replace = FALSE,
+  se = TRUE,
+  plot = TRUE,
+  parallel = FALSE
+)
 }
 \arguments{
 \item{physeq}{phyloseq class object, from which abundance data are extracted}

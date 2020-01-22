@@ -4,8 +4,12 @@
 \alias{scores.pca}
 \title{scores.pca}
 \usage{
-\method{scores}{pca}(pca, choices, display = c("sites", "species",
-  "samples", "variables", "taxa"), ...)
+\method{scores}{pca}(
+  pca,
+  choices,
+  display = c("sites", "species", "samples", "variables", "taxa"),
+  ...
+)
 }
 \arguments{
 \item{pca}{Required. A \code{\link{pca}} class object}

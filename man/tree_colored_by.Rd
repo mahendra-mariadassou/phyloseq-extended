@@ -4,9 +4,15 @@
 \alias{tree_colored_by}
 \title{tree_colored_by}
 \usage{
-tree_colored_by(physeq, group = "Phylum", method = c("majority",
-  "ace"), legend.title = deparse(substitute(group)),
-  legend.pos = "bottomright", plot = TRUE, ...)
+tree_colored_by(
+  physeq,
+  group = "Phylum",
+  method = c("majority", "ace"),
+  legend.title = deparse(substitute(group)),
+  legend.pos = "bottomright",
+  plot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{physeq}{Required. An instance of a \code{phyloseq} class object that has

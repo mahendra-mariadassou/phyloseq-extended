@@ -4,10 +4,20 @@
 \alias{plot_composition}
 \title{Versatile function for plotting compositions graphs}
 \usage{
-plot_composition(physeq, taxaRank1 = "Phylum",
-  taxaSet1 = "Proteobacteria", taxaRank2 = "Family",
-  numberOfTaxa = 9, fill = NULL, startFrom = 1, x = "Sample",
-  y = "Abundance", sampleOrder = NULL, facet_grid = NULL, ...)
+plot_composition(
+  physeq,
+  taxaRank1 = "Phylum",
+  taxaSet1 = "Proteobacteria",
+  taxaRank2 = "Family",
+  numberOfTaxa = 9,
+  fill = NULL,
+  startFrom = 1,
+  x = "Sample",
+  y = "Abundance",
+  sampleOrder = NULL,
+  facet_grid = NULL,
+  ...
+)
 }
 \arguments{
 \item{physeq}{phyloseq class object}

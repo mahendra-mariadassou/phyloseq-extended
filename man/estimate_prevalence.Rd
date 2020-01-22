@@ -4,8 +4,7 @@
 \alias{estimate_prevalence}
 \title{Compute local prevalence and specificity of an OTU in different levels of a group}
 \usage{
-estimate_prevalence(physeq, group, format = c("long", "wide"),
-  rarefy = TRUE)
+estimate_prevalence(physeq, group, format = c("long", "wide"), rarefy = TRUE)
 }
 \arguments{
 \item{physeq}{phyloseq class object, otu abundances are extracted from this object}

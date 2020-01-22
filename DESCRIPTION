@@ -11,7 +11,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Depends:
     R (>= 3.4.0)
 biocViews:
@@ -26,3 +26,5 @@ Imports:
     DESeq2,
     phyloseq,
     biomformat
+Suggests: 
+    testthat

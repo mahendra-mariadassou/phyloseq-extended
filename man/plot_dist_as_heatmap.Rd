@@ -4,8 +4,14 @@
 \alias{plot_dist_as_heatmap}
 \title{Plot a distance matrix as a heatmap}
 \usage{
-plot_dist_as_heatmap(dist, order = NULL, title = NULL,
-  low = "#B1F756", high = "#132B13", show.names = FALSE)
+plot_dist_as_heatmap(
+  dist,
+  order = NULL,
+  title = NULL,
+  low = "#B1F756",
+  high = "#132B13",
+  show.names = FALSE
+)
 }
 \arguments{
 \item{dist}{Distance matrix between the samples}

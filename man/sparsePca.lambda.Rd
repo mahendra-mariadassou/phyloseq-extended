@@ -4,8 +4,15 @@
 \alias{sparsePca.lambda}
 \title{sparsePca}
 \usage{
-sparsePca.lambda(x, number.components = 10, lambda, center = TRUE,
-  scale. = FALSE, iter.max = 500, tol = 1e-09)
+sparsePca.lambda(
+  x,
+  number.components = 10,
+  lambda,
+  center = TRUE,
+  scale. = FALSE,
+  iter.max = 500,
+  tol = 1e-09
+)
 }
 \arguments{
 \item{x}{Required. Numeric matrix.}

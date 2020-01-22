@@ -4,9 +4,15 @@
 \alias{ggformat}
 \title{Format phyloseq data for easy composition plots}
 \usage{
-ggformat(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
-  taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9,
-  startFrom = 1)
+ggformat(
+  physeq,
+  taxaRank1 = "Phylum",
+  taxaSet1 = "Proteobacteria",
+  taxaRank2 = "Family",
+  fill = NULL,
+  numberOfTaxa = 9,
+  startFrom = 1
+)
 }
 \arguments{
 \item{physeq}{phyloseq class object}

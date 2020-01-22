@@ -4,8 +4,16 @@
 \alias{ggrare}
 \title{Rarefaction curves, ggplot styles}
 \usage{
-ggrare(physeq, step = 10, label = NULL, color = NULL, plot = TRUE,
-  parallel = FALSE, se = TRUE, verbose = TRUE)
+ggrare(
+  physeq,
+  step = 10,
+  label = NULL,
+  color = NULL,
+  plot = TRUE,
+  parallel = FALSE,
+  se = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{physeq}{phyloseq class object, from which abundance data are extracted}

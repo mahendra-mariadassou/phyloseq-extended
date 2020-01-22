@@ -4,8 +4,13 @@
 \alias{fattenEdges}
 \title{fattenEdges}
 \usage{
-fattenEdges(physeq, method = c("linear", "logarithmic"),
-  width.lim = c(0.1, 4), base = 10, deviation = FALSE)
+fattenEdges(
+  physeq,
+  method = c("linear", "logarithmic"),
+  width.lim = c(0.1, 4),
+  base = 10,
+  deviation = FALSE
+)
 }
 \arguments{
 \item{physeq}{Required. An instance of a \code{phyloseq} class object with otu_table and

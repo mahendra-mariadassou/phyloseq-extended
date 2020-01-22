@@ -4,9 +4,15 @@
 \alias{plot_clust}
 \title{Wrapper around hclust to represent clustering tree with leaves colored according to a factor.}
 \usage{
-plot_clust(physeq, dist, method = "ward.D2", color = NULL,
-  label = NULL, title = paste(method, "linkage clustering tree"),
-  palette = NULL)
+plot_clust(
+  physeq,
+  dist,
+  method = "ward.D2",
+  color = NULL,
+  label = NULL,
+  title = paste(method, "linkage clustering tree"),
+  palette = NULL
+)
 }
 \arguments{
 \item{physeq}{phyloseq class object}

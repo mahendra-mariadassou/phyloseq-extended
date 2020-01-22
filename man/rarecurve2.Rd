@@ -4,8 +4,16 @@
 \alias{rarecurve2}
 \title{Build rarefaction curves from a count matrice}
 \usage{
-rarecurve2(physeq, step = 1, sample, xlab = "Sample Size",
-  ylab = "Number of species", label = TRUE, col = "black", ...)
+rarecurve2(
+  physeq,
+  step = 1,
+  sample,
+  xlab = "Sample Size",
+  ylab = "Number of species",
+  label = TRUE,
+  col = "black",
+  ...
+)
 }
 \arguments{
 \item{physeq}{A phyloseq class object}

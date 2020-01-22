@@ -4,9 +4,17 @@
 \alias{ggtree}
 \title{ggtree}
 \usage{
-ggtree(physeq, group = NULL, freq = TRUE, method = "linear",
-  base = 10, edge.group = "Phylum", edge.method = "majority",
-  width.lim = c(0.1, 4), ...)
+ggtree(
+  physeq,
+  group = NULL,
+  freq = TRUE,
+  method = "linear",
+  base = 10,
+  edge.group = "Phylum",
+  edge.method = "majority",
+  width.lim = c(0.1, 4),
+  ...
+)
 }
 \arguments{
 \item{physeq}{Required. An instance of a \code{phyloseq} class object that has

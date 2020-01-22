@@ -4,9 +4,18 @@
 \alias{plot_loadings}
 \title{plot_loadings}
 \usage{
-plot_loadings(physeq, epca, choices, fatten.by = c("size"),
-  fatten.tips = FALSE, width.lim = c(0.1, 4), color = c("#EF8A62",
-  "#67A9CF"), color.tip.by = NULL, missing.color = NULL, ...)
+plot_loadings(
+  physeq,
+  epca,
+  choices,
+  fatten.by = c("size"),
+  fatten.tips = FALSE,
+  width.lim = c(0.1, 4),
+  color = c("#EF8A62", "#67A9CF"),
+  color.tip.by = NULL,
+  missing.color = NULL,
+  ...
+)
 }
 \arguments{
 \item{physeq}{Required. A \code{\link{phyloseq-class}} class instance.}

@@ -4,8 +4,12 @@
 \alias{color_edges}
 \title{color_edges}
 \usage{
-color_edges(physeq, group = "Phylum", method = c("majority", "ace"),
-  tip.only = FALSE)
+color_edges(
+  physeq,
+  group = "Phylum",
+  method = c("majority", "ace"),
+  tip.only = FALSE
+)
 }
 \arguments{
 \item{physeq}{Required. An instance of a \code{phyloseq} class object that has

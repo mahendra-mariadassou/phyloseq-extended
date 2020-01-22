@@ -4,8 +4,7 @@
 \alias{regularizedPca}
 \title{regularizedPca}
 \usage{
-regularizedPca(x, number.components = 10, center = TRUE,
-  scale. = FALSE)
+regularizedPca(x, number.components = 10, center = TRUE, scale. = FALSE)
 }
 \arguments{
 \item{x}{Required. Numeric matrix.}

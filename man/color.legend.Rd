@@ -5,8 +5,19 @@
 \title{These functions are adapted from plotrix package and simplified here
 for our purpose}
 \usage{
-color.legend(x, y, h, col.h, col.w, title, rect.col, legend,
-  values = NULL, xpd = NA, ...)
+color.legend(
+  x,
+  y,
+  h,
+  col.h,
+  col.w,
+  title,
+  rect.col,
+  legend,
+  values = NULL,
+  xpd = NA,
+  ...
+)
 }
 \description{
 These functions are adapted from plotrix package and simplified here

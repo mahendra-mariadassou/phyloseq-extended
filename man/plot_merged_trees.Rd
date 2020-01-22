@@ -4,12 +4,23 @@
 \alias{plot_merged_trees}
 \title{plot_merged_trees}
 \usage{
-plot_merged_trees(physeq, group, freq = TRUE, method = "linear",
-  missing.color = "gray", show.missing.tip = TRUE,
-  fatten.edges.by = c("size"), fatten.tips = FALSE,
-  color.edge.by = NULL, color.edge.method = "majority", base = 10,
-  width.lim = c(0.1, 4), deviation = FALSE,
-  legend.title = deparse(substitute(group)), ...)
+plot_merged_trees(
+  physeq,
+  group,
+  freq = TRUE,
+  method = "linear",
+  missing.color = "gray",
+  show.missing.tip = TRUE,
+  fatten.edges.by = c("size"),
+  fatten.tips = FALSE,
+  color.edge.by = NULL,
+  color.edge.method = "majority",
+  base = 10,
+  width.lim = c(0.1, 4),
+  deviation = FALSE,
+  legend.title = deparse(substitute(group)),
+  ...
+)
 }
 \arguments{
 \item{physeq}{Required. An instance of a \code{phyloseq} class object that has

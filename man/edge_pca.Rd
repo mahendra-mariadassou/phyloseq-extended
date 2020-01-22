@@ -4,8 +4,13 @@
 \alias{edge_pca}
 \title{edge_pca}
 \usage{
-edge_pca(physeq, number.components = 2, method = c("normal", "sparse",
-  "regularized"), number.edges = 50, ...)
+edge_pca(
+  physeq,
+  number.components = 2,
+  method = c("normal", "sparse", "regularized"),
+  number.edges = 50,
+  ...
+)
 }
 \arguments{
 \item{physeq}{Required. A \code{\link{phyloseq-class}} class object}

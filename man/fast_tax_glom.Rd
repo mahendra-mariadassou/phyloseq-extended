@@ -4,8 +4,11 @@
 \alias{fast_tax_glom}
 \title{Fast alternative to \code{\link{tax_glom}}}
 \usage{
-fast_tax_glom(physeq, taxrank = rank_names(physeq)[1],
-  bad_empty = c("", " ", "\\t"))
+fast_tax_glom(
+  physeq,
+  taxrank = rank_names(physeq)[1],
+  bad_empty = c("", " ", "\\t")
+)
 }
 \arguments{
 \item{physeq}{Required. \code{\link{phyloseq-class}} object}

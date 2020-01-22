@@ -4,8 +4,15 @@
 \alias{plot_edge_pca}
 \title{plot_edge_pca}
 \usage{
-plot_edge_pca(physeq, epca, axes = c(1, 2), widths = c(1, 1),
-  heights = c(1, 1), args.loadings = NULL, ...)
+plot_edge_pca(
+  physeq,
+  epca,
+  axes = c(1, 2),
+  widths = c(1, 1),
+  heights = c(1, 1),
+  args.loadings = NULL,
+  ...
+)
 }
 \arguments{
 \item{physeq}{Required. A \code{\link{phyloseq-class}} object}

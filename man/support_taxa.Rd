@@ -4,8 +4,13 @@
 \alias{support_taxa}
 \title{support_taxa}
 \usage{
-support_taxa(physeq, epca, choices = seq(epca$number.components),
-  threshold = 0, number = ntaxa(physeq))
+support_taxa(
+  physeq,
+  epca,
+  choices = seq(epca$number.components),
+  threshold = 0,
+  number = ntaxa(physeq)
+)
 }
 \arguments{
 \item{physeq}{Required. A \code{\link{phyloseq-class}} class instance.}

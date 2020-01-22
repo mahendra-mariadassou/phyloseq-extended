@@ -4,9 +4,15 @@
 \alias{sparsePca}
 \title{sparsePca}
 \usage{
-sparsePca(x, number.components = 10, number.variables = rep(ncol(x),
-  number.components), center = TRUE, scale. = FALSE, iter.max = 500,
-  tol = 1e-09)
+sparsePca(
+  x,
+  number.components = 10,
+  number.variables = rep(ncol(x), number.components),
+  center = TRUE,
+  scale. = FALSE,
+  iter.max = 500,
+  tol = 1e-09
+)
 }
 \arguments{
 \item{x}{Required. Numeric matrix.}

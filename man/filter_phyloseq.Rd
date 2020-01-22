@@ -4,8 +4,14 @@
 \alias{filter_phyloseq}
 \title{Prevalence and abundance filters, applied independently on each group}
 \usage{
-filter_phyloseq(physeq, prev.thresh = 0.5, abund.thresh = 0.001,
-  group = rep(1, nsamples(physeq)), rarefy = TRUE)
+filter_phyloseq(
+  physeq,
+  prev.thresh = 0.5,
+  abund.thresh = 0.001,
+  group = rep(1, nsamples(physeq)),
+  rarefy = TRUE,
+  rngseed = 20171201
+)
 }
 \arguments{
 \item{physeq}{A \link{phyloseq} class object}
@@ -19,6 +25,8 @@ the corresponding sample_data of \code{physeq}, or a factor with the same
 length as the number of samples in \code{physeq}.}
 
 \item{rarefy}{Logical. Should samples be rarefied before abundances and prevalence are computed?}
+
+\item{rngseed}{Numeric. RNG seed used for rarefaction. Enables reproducible analyses.}
 }
 \value{
 Vector of taxa that pass the filters, for further use with \link{prune_sample}.

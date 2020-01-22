@@ -4,8 +4,17 @@
 \alias{plot_pretty_tree}
 \title{plot_pretty_tree}
 \usage{
-plot_pretty_tree(tree, edge.size, edge.color, tip.size, tip.color,
-  fatten.edges.by, fatten.tips, color.tip, ...)
+plot_pretty_tree(
+  tree,
+  edge.size,
+  edge.color,
+  tip.size,
+  tip.color,
+  fatten.edges.by,
+  fatten.tips,
+  color.tip,
+  ...
+)
 }
 \arguments{
 \item{tree}{Required. A \code{phylo} class object}
