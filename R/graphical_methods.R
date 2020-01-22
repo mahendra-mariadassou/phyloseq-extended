@@ -281,7 +281,7 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   tax[is.na(tax) | tax %in% bad_empty] <- "Unknown"
   ## create groups
   tax <- tax[ , ranks, drop = FALSE] %>%
-    as_tibble(tax) %>%
+    as_tibble(tax, .name_repair = "minimal") %>%
     mutate(Abundance = taxa_sums(physeq),
            archetype = taxa_names(physeq)) %>%
     group_by_at(vars(one_of(ranks))) %>%
