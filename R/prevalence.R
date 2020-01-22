@@ -64,7 +64,7 @@ estimate_prevalence <- function(physeq, group, format = c("long", "wide"), raref
         colnames(frac) <- paste("prev", colnames(frac), sep = "_")
         colnames(spec) <- paste("spec", colnames(spec), sep = "_")
         ## cbind prevalence and specificity
-        return(cbind(prev, spec))
+        return(cbind(frac, spec))
     }
     ## Melt and join tables
     dplyr::inner_join(dplyr::as_tibble(frac, rownames = "otu") %>%
