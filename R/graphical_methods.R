@@ -569,9 +569,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     topTaxa <- topTaxa %>% slice((startFrom - 1) + 1:numberOfTaxa)
     if (nrow(topTaxa) == 0) {
       warning(paste0(
-        "Not enough taxa left after discarding the ",
-        numberOfTaxa - 1,
-        " most abundant ones and/or all remaining taxa have unknown affiliation at rank ",
+        "Not enough taxa to show and/or all remaining taxa have unknown affiliation at rank ",
         taxaRank2,
         ". Consider using a smaller value."))
     }
