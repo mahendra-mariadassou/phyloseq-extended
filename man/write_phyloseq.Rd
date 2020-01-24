@@ -31,7 +31,9 @@ Export a \link{phyloseq-class} to several text files: biom, newick and fasta.
 }
 \examples{
 data(food)
-tmp <- tempfile()
-write_phyloseq(food, biom_file = tmp)
-import_frogs(tmp)
+tmp_biom <- tempfile()
+tmp_tree <- tempfile()
+write_phyloseq(food, biom_file = tmp_biom, tree_file = tmp_tree)
+## The output biom can be read again as a phyloseq object
+import_frogs(tmp_biom, tmp_tree)
 }

@@ -61,9 +61,11 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard")) {
 #'
 #' @examples
 #' data(food)
-#' tmp <- tempfile()
-#' write_phyloseq(food, biom_file = tmp)
-#' import_frogs(tmp)
+#' tmp_biom <- tempfile()
+#' tmp_tree <- tempfile()
+#' write_phyloseq(food, biom_file = tmp_biom, tree_file = tmp_tree)
+#' ## The output biom can be read again as a phyloseq object
+#' import_frogs(tmp_biom, tmp_tree)
 write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NULL, biom_format = c("frogs", "standard")) {
   biom <- phyloseq_to_biom(physeq, biom_format = match.arg(biom_format))
   ## Write biom
