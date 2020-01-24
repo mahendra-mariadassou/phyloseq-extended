@@ -502,6 +502,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
 
 ## ggplot hue color scale
 gg_color_hue <- function(n) {
+  if (n == 0) return(NULL)
   scales::hue_pal()(n)
 }
 
@@ -567,8 +568,12 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
     topTaxa <- topTaxa %>% slice((startFrom - 1) + 1:numberOfTaxa)
     if (nrow(topTaxa) == 0) {
-      stop(paste("Not enough taxa left after discarding the", numberOfTaxa - 1, "most abundant ones.",
-                 "Use a smaller value."))
+      warning(paste0(
+        "Not enough taxa left after discarding the ",
+        numberOfTaxa - 1,
+        " most abundant ones and/or all remaining taxa have unknown affiliation at rank ",
+        taxaRank2,
+        ". Consider using a smaller value."))
     }
 
     ## Change to character and correct taxonomic levels
