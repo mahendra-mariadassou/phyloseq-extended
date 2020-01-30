@@ -6,6 +6,9 @@
 #' @return A distance matrix
 #' @export
 #'
+#' @importFrom phyloseq access taxa_sums prune_taxa
+#' @importFrom ape is.rooted
+#'
 #' @examples
 #' data(food)
 #' unifrac(food)
@@ -27,6 +30,10 @@ UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, ...) {
   fastUniFrac(physeq, weighted, normalized)
 }
 
+
+#' @importFrom phyloseq phy_tree nsamples sample_names taxa_are_rows otu_table
+#' @importFrom ape reorder.phylo
+#'
 fastUniFrac <- function(physeq, weighted, normalized) {
   ## Extract components and order in pruning wise order
   tree    <- phyloseq::phy_tree(physeq) %>% ape::reorder.phylo("postorder")
@@ -69,7 +76,7 @@ fastUniFrac <- function(physeq, weighted, normalized) {
   counts[ , ] <- counts * edge_length[col(counts)]
 
   ## Unnormalized unifrac distance is then simply the Manhattan distance
-  ## between all samples
+  ## between the modified vectors of all samples
   raw_unifrac <- dist(counts, method = "manhattan")
   if (!normalized) return(raw_unifrac)
 
