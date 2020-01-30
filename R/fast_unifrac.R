@@ -9,16 +9,20 @@
 #' @examples
 #' data(food)
 #' unifrac(food)
-unifrac <- function(physeq, weighted = FALSE, normalized = TRUE, ...) {
+UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, ...) {
   tree <- phyloseq::access(physeq, "phy_tree")
   if (is.null(tree)) {
-    stop("Unifrac distances require a phylogenetic tree.")
+    stop("UniFrac distances require a phylogenetic tree.")
   }
   if (is.null(tree$edge.length)) {
-    stop("Unifrac distances require a tree with branch lengths, consider adding branch lengthes to the tree.")
+    stop("Tree has no branch lengths. See tree$edge.length. Cannot compute UniFrac without branch lengths")
   }
   if (!ape::is.rooted(tree)) {
-    stop("Unifrac distances require a rooted tree, consider rooting your tree. See ?ape::root.")
+    stop("Tree is not rooted. Make sure your tree is rooted before attempting UniFrac calculation. See ?ape::root")
+  }
+  ## Remove taxa with null abundances
+  if (any(x <- phyloseq::taxa_sums(physeq) > 0)) {
+    physeq <- phyloseq::prune_taxa(x > 0, physeq)
   }
   fastUniFrac(physeq, weighted, normalized)
 }
