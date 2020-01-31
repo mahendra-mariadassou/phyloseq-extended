@@ -4,7 +4,7 @@
 \alias{UniFrac}
 \title{Compute unifrac distances}
 \usage{
-UniFrac(physeq, weighted = FALSE, normalized = TRUE, ...)
+UniFrac(physeq, weighted = FALSE, normalized = TRUE, parallel = FALSE)
 }
 \arguments{
 \item{physeq}{(Required). \code{\link[phyloseq]{phyloseq-class}}, containing at minimum
@@ -22,6 +22,13 @@ distance is calculated for all pairs of samples.}
 range from 0 to 1 independent of branch length values? Default is \code{TRUE}.
 Note that (unweighted) \code{UniFrac} is always normalized by total branch-length,
 and so this value is ignored when \code{weighted == FALSE}.}
+
+\item{parallel}{(Optional). Logical. Should execute calculation in parallel,
+using multiple CPU cores simultaneously? This can dramatically hasten the
+computation time for this function. However, it also requires that the user
+has registered a parallel ``backend'' prior to calling this function. 
+Default is \code{FALSE}. If FALSE, UniFrac will register a serial backend
+so that \code{foreach::\%dopar\%} does not throw a warning.}
 
 \item{...}{Arguments passed from other methods. Used for compatibility purpose.}
 }

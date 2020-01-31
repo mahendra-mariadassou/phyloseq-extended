@@ -12,7 +12,7 @@
 #' @examples
 #' data(food)
 #' unifrac(food)
-UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, ...) {
+UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, parallel = FALSE) {
   tree <- phyloseq::access(physeq, "phy_tree")
   if (is.null(tree)) {
     stop("UniFrac distances require a phylogenetic tree.")
@@ -27,14 +27,15 @@ UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, ...) {
   if (any(x <- phyloseq::taxa_sums(physeq) > 0)) {
     physeq <- phyloseq::prune_taxa(x > 0, physeq)
   }
-  fastUniFrac(physeq, weighted, normalized)
+  fastUniFrac(physeq, weighted, normalized, parallel)
 }
 
 
 #' @importFrom phyloseq phy_tree nsamples sample_names taxa_are_rows otu_table
 #' @importFrom ape reorder.phylo
+#' @import foreach
 #'
-fastUniFrac <- function(physeq, weighted, normalized) {
+fastUniFrac <- function(physeq, weighted, normalized, parallel) {
   ## Extract components and order in pruning wise order
   tree    <- phyloseq::phy_tree(physeq) %>% ape::reorder.phylo("postorder")
   n_tips  <- length(tree$tip.label)
@@ -77,8 +78,27 @@ fastUniFrac <- function(physeq, weighted, normalized) {
 
   ## Unnormalized unifrac distance is then simply the Manhattan distance
   ## between the modified vectors of all samples
-  raw_unifrac <- dist(counts, method = "manhattan")
-  if (!normalized) return(raw_unifrac)
+  if (!parallel) {
+    raw_unifrac <- dist(counts, method = "manhattan")
+    if (!normalized) return(raw_unifrac)
+  } else {
+    # raw_unifrac <- foreach::foreach(i = 1:ncol(counts), .inorder = FALSE, .combine = "+") %dopar% {
+    #   unclass(dist(counts[, i]))
+    # }
+    spn <- combn(phyloseq::nsamples(physeq), 2)
+    dist_vect <- foreach::foreach(pair = 1:ncol(spn), .combine = c, .noexport = c("physeq", "tree")) %dopar% {
+      i <- spn[1, pair]
+      j <- spn[2, pair]
+      sum(abs(counts[i, ] - counts[j, ]))
+    }
+    raw_unifrac <- matrix(NA_real_,
+                          nrow = phyloseq::nsamples(physeq),
+                          ncol = phyloseq::nsamples(physeq),
+                          dimnames = list(phyloseq::sample_names(physeq),
+                                          phyloseq::sample_names(physeq)))
+    raw_unifrac[t(spn)[ , 2:1]] <- dist_vect
+    raw_unifrac <- as.dist(raw_unifrac)
+  }
 
   ## Compute normalization constants
   if (weighted) {
