@@ -2,7 +2,7 @@
 % Please edit documentation in R/prevalence.R
 \name{estimate_prevalence}
 \alias{estimate_prevalence}
-\title{Compute local prevalence and specificity of an OTU in different levels of a group}
+\title{Compute local prevalence, abundance and specificity of an OTU in different levels of a group}
 \usage{
 estimate_prevalence(physeq, group, format = c("long", "wide"), rarefy = TRUE)
 }
@@ -14,8 +14,8 @@ the corresponding sample_data of \code{physeq}, or a factor with the same
 length as the number of samples in \code{physeq}.}
 
 \item{format}{long (default) or wide. Should the result be organised as a long data.frame
-with columns "otu", "group", "prevalence" and "specificity" or a numeric matrix
-with otus in rows and group specificty/group prevalence in column.}
+with columns "otu", "group", "prevalence", "specificity" and "abundance" or a numeric matrix
+with otus in rows and group specificty/group prevalence/group abundance in column.}
 
 \item{rarefy}{(Logical). Default TRUE. Rarefy samples before computing prevalences.}
 }
@@ -24,16 +24,18 @@ A tibble with components
 \itemize{
 \item prevalence: observed prevalence in group
 \item specifity : specifity (prevalence / global prevalence) in group
+\item abundance : relative abundance in group
 \item group: factor level
 \item otu: otu
-or a matrix m of size \code{ntaxa(physeq)} times 2*N where
+or a matrix m of size \code{ntaxa(physeq)} times 3*N where
 N is the number of levels (groups) in \code{group} and
 \item \code{m[i, g]} is the prevalence of otu i in group g
 \item \code{m[i, N+g]} is the specificity of otu i to group g
+\item \verb{m[i, 2N+g]} is the relative abundance of otu i in group g
 }
 }
 \description{
-Compute local prevalence and specificity of an OTU in different levels of a group
+Compute local prevalence, abundance and specificity of an OTU in different levels of a group
 }
 \details{
 Specificity is defined here as local prevalence / global prevalence,
