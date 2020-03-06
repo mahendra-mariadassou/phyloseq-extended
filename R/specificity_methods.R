@@ -90,35 +90,39 @@ local_specificity <- function(x, index = c("fraction", "indspec"), groupfrac = N
     return(Div)
 }
 
-## Estimate specificity of an otu to a given factor
+#' Estimate specificity of an OTU to a group
+#'
+#' @inheritParams estimate_prevalence
+#' @param index Specificity index used for computing specificity.
+#' @param freq Logical. Defaults to TRUE. Should counts be replaced by frequencies (TRUE)
+#'             or kept as such (FALSE). TRUE corresponding to weighting all samples equally
+#'             while FALSE weights them with their library size.
+#' @param B Only used if `se` is TRUE, number of bootstrap replicates used
+#'          to compute quantiles.
+#' @param se Logical. Defaults to TRUE. Variability of the computed specificities be assessed
+#'           (by bootstrapping samples within levels of factor). If TRUE, quantiles
+#'           5, 25, 50, 75 and 95 of specificity coefficients are returned.
+#' @param parallel Logical, should computations be performed in parallel using \code{\link{parallel::mclapply}}
+#'                 and parallel framework)
+#'
+#' @return  A data frame with components
+#' * specificity: observed specificity
+#' * group: factor level in which OTU is most abundant
+#' * abundance: overall relative abundance of otu (all levels are weighted equally)
+#' * mean, sd, quantiles 5, 25, 50, 75 and 95% if `se` is TRUE
+#' Specificity method is used as attribute `index` of the data frame.
+#'
+#' @export
+#' @importFrom parallel mclapply
+#'
+#' @seealso [estimate_local_specificity()]
+#'
+#' @examples
+#' data(food)
+#' estimate_specificity(food, group = "EnvType", index = "shannon", se = FALSE)
 estimate_specificity <- function(physeq, group,
                                  index = c("shannon", "simpson", "yanai", "indspec"), freq = TRUE,
                                  B = 999, se = TRUE, parallel = FALSE) {
-  ## Args:
-  ## - physeq: phyloseq class object, otu abundances are extracted from this object
-  ## - index:  method used for computing specificity
-  ## - group:  Either the a single character string matching a
-  ##           variable name in the corresponding sample_data of ‘physeq’, or a
-  ##           factor with the same length as the number of samples in ‘physeq’.
-  ## - freq    Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
-  ##           Defaults to TRUE. TRUE corresponding to weighting all samples equally while FALSE
-  ##           weights them with their library size.
-  ## - se:     Logical, variability of the computed specificities be assessed
-  ##           (by bootstrapping samples within levels of factor). If TRUE, quantiles
-  ##           5, 25, 50, 75 and 95 of specificity coefficients are returned. Defaults to TRUE
-  ## - B:      Only used if se is TRUE, number of bootstrap replicates used
-  ##           to compute quantiles.
-  ## - parallel: Logical, should computations be performed in parallel. Use mclapply and
-  ##             parallel HPC framework
-  ##
-  ## Returns;
-  ## data frame with components
-  ## - specificity: observed specificity
-  ## - level: factor level in which otu is most abundant
-  ## - abundance: overall relative abundance of otu (all levels are weighted equally)
-  ## - mean, sd, quantiles 5, 25, 50, 75 and 95% if 'se' is TRUE
-  ## Specificity method is used as attribute 'index'
-
   ## Get grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
     if (class(group) == "character" & length(group) == 1) {
@@ -182,7 +186,7 @@ estimate_specificity <- function(physeq, group,
       ## Replicate specificity estimates (optionally, in parallel using foreach)
       cat("Estimating se, may take a few minutes", sep = "\n")
       if (parallel) {
-          resmat <- mclapply(1:B, function(i) {
+          resmat <- parallel::mclapply(1:B, function(i) {
               cat(paste("bootstrap sample", i), sep = "\n")
               one_rand_sample_spec(tdf, index, group)} )
           resmat <- do.call(cbind, resmat)
@@ -200,23 +204,9 @@ estimate_specificity <- function(physeq, group,
   return(res)
 }
 
-
-## Estimate local specificity of an otu to a given factor
 #' Estimate local specificity of an OTU to a group
 #'
-#' @inheritParams estimate_prevalence
-#' @param index Either "fraction" (default) or "indspec".
-#'              Method used for computing local specificity (see details).
-#' @param freq Logical. Defaults to TRUE. Should counts be replaced by frequencies (TRUE)
-#'             or kept as such (FALSE). TRUE corresponding to weighting all samples equally
-#'             while FALSE weights them with their library size.
-#' @param B Only used if se is TRUE, number of bootstrap replicates used
-#'          to compute quantiles.
-#' @param se Logical. Defaults to TRUE. Variability of the computed specificities be assessed
-#'           (by bootstrapping samples within levels of factor). If TRUE, quantiles
-#'           5, 25, 50, 75 and 95 of specificity coefficients are returned.
-#' @param parallel Logical, should computations be performed in parallel using \code{\link{mclapply}}
-#'                 and parallel framework)
+#' @inheritParams estimate_specificity
 #'
 #' @return  A data frame with components
 #' * specificity: observed local specificity
@@ -226,8 +216,10 @@ estimate_specificity <- function(physeq, group,
 #' Specificity method is used as attribute 'index' of the data frame.
 #'
 #' @details Method "fraction" correspond to fraction of reads coming from a given group. Method "indspec" corresponds to fraction x local prevalence in that group.
-
+#'
+#' @seealso [estimate_specificity()]
 #' @export
+#' @importFrom parallel mclapply
 #'
 #' @examples
 #' data(food)
@@ -296,7 +288,7 @@ estimate_local_specificity <- function(physeq, group,
       ## Replicate specificity estimates (optionally, in parallel using foreach)
       cat("Estimating se, may take a few minutes", sep = "\n")
       if (parallel) {
-          resmat <- mclapply(1:B, function(i) {
+          resmat <- parallel::mclapply(1:B, function(i) {
               cat(paste("bootstrap sample", i), sep = "\n")
               one_rand_sample_spec(tdf, index, group)} )
           resmat <- do.call(cbind, resmat)
@@ -316,6 +308,7 @@ estimate_local_specificity <- function(physeq, group,
 
 
 ## Plot specifity against relative abundance
+#' @keywords internal
 plot_specificity <- function(specOTUS, y = "specificity", color = "level",
                              se = TRUE, plot = TRUE) {
   p <- ggplot(specOTUS, aes_string(x = "abundance", y = y, color = color)) + geom_point(size = 2)
@@ -341,6 +334,7 @@ plot_specificity <- function(specOTUS, y = "specificity", color = "level",
 }
 
 ## Plot local specifity against relative abundance
+#' @keywords internal
 plot_local_specificity <- function(specOTUS, y = "specificity", formula = y~x,
                                    color = "level", method = "loess",
                                    se = TRUE, plot = TRUE) {
@@ -367,8 +361,8 @@ plot_local_specificity <- function(specOTUS, y = "specificity", formula = y~x,
   return(invisible(p))
 }
 
-
 ## Plot specificity rank curve with (optionnally) error bars
+#' @keywords internal
 plot_specificity_distribution <- function(specOTUS, x = "specificity", color = "level",
                                           se = TRUE, plot =TRUE) {
   ## Order specOTUS by specificity
@@ -398,6 +392,7 @@ plot_specificity_distribution <- function(specOTUS, x = "specificity", color = "
 
 ## Expected Robust specificity for taxa presents in only
 ## one replicate of a given treatment condition
+#' @keywords internal
 expected_robust_specificity <- function(group,
                                         index = c("shannon", "simpson", "yanai", "indspec")) {
   prop <- function(n) { return(1 - (1 - 1/n)^n) }
@@ -417,32 +412,30 @@ expected_robust_specificity <- function(group,
   return(data.frame(level = names(res), specificity = res))
 }
 
-
-## Assess significance of observed specificities using permutation tests
+#' Assess significance of observed specificities using permutation tests
+#'
+#' @inheritParams estimate_specificity
+#' @param replace Logical. Should samples be replaced when randomizing samples within group levels.
+#'
+#' @return  A data frame with components
+#' * specificity: observed local specificity
+#' * level: factor level in which otu is most abundant
+#' * abundance: overall relative abundance of otu (all levels are weighted equally)
+#' * rawp:  raw p-value
+#' * adjp: adjusted p-value (computed using [p.adjust()] with \code{method = "fdr"})
+#' Specificity method is used as attribute `index` of the data frame.
+#'
+#' @seealso [estimate_specificity()], [estimate_local_specificity()], [test_local_specificity()]
+#' @export
+#' @importFrom parallel mclapply
+#'
+#' @examples
+#' data(food)
+#' test_specificity(food, group = "EnvType", index = "shannon", se = FALSE)
 test_specificity <- function(physeq, group,
                              index = c("shannon", "simpson", "yanai", "indspec"),
                              freq = TRUE, replace = FALSE,
                              B = 999, parallel = FALSE) {
-  ## Args:
-  ## - physeq: phyloseq class object, otu abundances are extracted from this object
-  ## - index:  method used for computing specificity
-  ## - group:  Either the a single character string matching a
-  ##           variable name in the corresponding sample_data of ‘physeq’, or a
-  ##           factor with the same length as the number of samples in ‘physeq’.
-  ## - freq    Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
-  ##           Defaults to TRUE. TRUE corresponding to weighting all samples equally while FALSE
-  ##           weights them with their library size.
-  ## - replace Logical. Should samples be replaced when randomizing samples within group levels.
-  ## - B:      Number of permutation tests used to assess significance.
-  ##
-  ## Returns;
-  ## data frame with components
-  ## - specificity: observed specificity
-  ## - level: factor level in which otu is most abundant
-  ## - abundance: overall relative abundance of otu (all levels are weighted equally)
-  ## - rawp:  raw p-value
-  ## - adjp: adjusted p-value (computed using "fdr")
-
   ## Get grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
     if (class(group) == "character" & length(group) == 1) {
@@ -492,7 +485,7 @@ test_specificity <- function(physeq, group,
   ## Replicate specificity estimates
   cat("Estimating p-values, may take a few minutes", sep = "\n")
   if (parallel) {
-      resmat <- mclapply(1:B, function(i) {
+      resmat <- parallel::mclapply(1:B, function(i) {
           cat(paste("bootstrap sample", i), sep = "\n")
           one_rand_sample_spec(tdf, index, group)} )
       resmat <- do.call(cbind, resmat)
@@ -511,36 +504,32 @@ test_specificity <- function(physeq, group,
   return(res)
 }
 
-
-## Assess significance of observed local specificities using permutation tests
+#' Assess significance of observed local specificities using permutation tests
+#'
+#' @inheritParams test_specificity
+#' @param type Unambiguous abbreviation of "global" or "local". If "local", specificity of a taxa to an environment
+#'             is compared to random specificities in that environment only. If "global", it is compared to
+#'             the maximum specificity over all environments. "global" is more conservative than "local". Defaults to "local".
+#'
+#' @return  A data frame with components
+#' * specificity: observed local specificity
+#' * level: factor level in which otu is most abundant
+#' * abundance: overall relative abundance of otu (all levels are weighted equally)
+#' * rawp:  raw p-value
+#' * adjp: adjusted p-value (computed using [p.adjust()] with \code{method = "fdr"})
+#' Specificity method is used as attribute `index` of the data frame.
+#'
+#' @seealso [estimate_specificity()], [estimate_local_specificity()], [test_specificity()]
+#' @export
+#' @importFrom parallel mclapply
+#'
+#' @examples
+#' data(food)
+#' test_local_specificity(food, group = "EnvType", index = "indspec", se = FALSE)
 test_local_specificity <- function(physeq, group,
                              index = c("fraction", "indspec"),
                              freq = TRUE, replace = FALSE, type = c("local", "global"),
                              B = 999, parallel = FALSE) {
-  ## Args:
-  ## - physeq: phyloseq class object, otu abundances are extracted from this object
-  ## - index:  method used for computing local specificity
-  ## - group:  Either the a single character string matching a
-  ##           variable name in the corresponding sample_data of ‘physeq’, or a
-  ##           factor with the same length as the number of samples in ‘physeq’.
-  ## - freq    Logical. Should counts be replaced by frequencies (TRUE) or kept as such (FALSE).
-  ##           Defaults to TRUE. TRUE corresponding to weighting all samples equally while FALSE
-  ##           weights them with their library size.
-  ## - type    Unambiguous abbreviation of "global" or "local". If "local", specificity of a taxa
-  ##           to an environment is compared to random specificities in that environment only. If
-  ##           "global", it is compared to the maximum specificity over all environments. "global"
-  ##            is more conservative than "local". Defaults to "local".
-  ## - replace Logical. Should samples be replaced when randomizing samples within group levels.
-  ## - B:      Number of permutation tests used to assess significance.
-  ##
-  ## Returns;
-  ## data frame with components
-  ## - specificity: observed specificity
-  ## - level: grouping factor level
-  ## - abundance: local relative abundance of otu (all levels are weighted equally)
-  ## - rawp:  raw p-value
-  ## - adjp: adjusted p-value (computed using "fdr")
-
   ## Get grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
     if (class(group) == "character" & length(group) == 1) {
@@ -596,7 +585,7 @@ test_local_specificity <- function(physeq, group,
   ## Replicate specificity estimates
   cat("Estimating p-values, may take a few minutes", sep = "\n")
   if (parallel) {
-      resmat <- mclapply(1:B, function(i) {
+      resmat <- parallel::mclapply(1:B, function(i) {
           cat(paste("bootstrap sample", i), sep = "\n")
           one_rand_sample_spec(tdf, index, group, type)} )
       resmat <- do.call(cbind, resmat)
@@ -615,7 +604,9 @@ test_local_specificity <- function(physeq, group,
   return(res)
 }
 
+
 ## Compare saturation speed of rarefaction curves for specific species against all species.
+#' @keywords internal
 specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction", "indspec"),
                                  specificity = NULL, threshold = 0.9, pvalue = 0.05,
                                  label = NULL, B = 999,
