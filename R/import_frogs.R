@@ -10,7 +10,7 @@
 #' @export
 #'
 #' @importFrom biomformat read_biom biom_data sample_metadata
-#' @importFrom plyr rbind.fill.matrix
+#' @importFrom purrr map map_chr map_lgl map_int pluck
 #'
 #' @examples
 #' biom_file <- system.file("extdata", "frogs_data.biom", package = "phyloseq.extended")
@@ -31,28 +31,48 @@ import_frogs <- function(biom,
     ## tax table
     taxMethod <- match.arg(taxMethod)
     field <- paste(taxMethod, "taxonomy", sep = "_")
-    if (all(sapply(sapply(x$rows, function(i) {
-        i$metadata[[field]]
-    }), is.null))) {
+    taxnames <- purrr::map_chr(x$rows, "id")
+    taxlist <- purrr::map(x$rows, purrr::pluck, "metadata", field)
+    if (all(purrr::map_lgl(taxlist, is.null))) {
         taxtab <- NULL
         warning(paste("No taxonomy tag", field ,"was found in the biom file"))
     } else {
-        taxlist <- lapply(x$rows, function(i) {
-            tmp <- i$metadata[[field]]
-            if (is.null(tmp)) {
-                return(matrix(NA, nrow = 1))
-            } else {
-                return(matrix(tmp, nrow = 1))
-            }
-        })
-        taxnames <- vapply(x$rows, function(i) {
-            i$id
-        }, "character")
-        taxtab <- plyr::rbind.fill.matrix(taxlist)
-        rownames(taxtab) <- taxnames
-        colnames(taxtab) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")[1:ncol(taxtab)]
-        taxtab <- tax_table(taxtab)
+        n_taxa <- length(taxnames)
+        n_ranks <- purrr::map_int(taxlist, length)
+        max_n_ranks <- max(n_ranks)
+        ranknames <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species",
+                       paste0("Rank_", seq(from = 8, length.out = max(0, max_n_ranks - 7))))[1:max_n_ranks]
+        ## Empty tax table
+        taxtab <- matrix(NA_character_, nrow = n_taxa, ncol = max_n_ranks,
+                         dimnames = list(taxnames, ranknames))
+        ## Fill tax table using two column index array
+        ii <- cbind(rep(1:n_taxa, times = n_ranks),               ## row index
+                    purrr::map(taxlist, seq_along) %>% unlist()   ## col index
+                    )
+        taxtab[ii] <- unlist(taxlist)
     }
+    # if (all(sapply(sapply(x$rows, function(i) {
+    #     i$metadata[[field]]
+    # }), is.null))) {
+    #     taxtab <- NULL
+    #     warning(paste("No taxonomy tag", field ,"was found in the biom file"))
+    # } else {
+    #     taxlist <- lapply(x$rows, function(i) {
+    #         tmp <- i$metadata[[field]]
+    #         if (is.null(tmp)) {
+    #             return(matrix(NA, nrow = 1))
+    #         } else {
+    #             return(matrix(tmp, nrow = 1))
+    #         }
+    #     })
+    #     taxnames <- vapply(x$rows, function(i) {
+    #         i$id
+    #     }, "character")
+    #     taxtab <- plyr::rbind.fill.matrix(taxlist)
+    #     rownames(taxtab) <- taxnames
+    #     colnames(taxtab) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")[1:ncol(taxtab)]
+    #     taxtab <- tax_table(taxtab)
+    # }
     argumentlist <- c(argumentlist, list(taxtab))
     ## sample data
     if (is.null(sample_metadata(x))) {
