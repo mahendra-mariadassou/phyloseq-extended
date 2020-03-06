@@ -9,6 +9,9 @@
 #' @importFrom phyloseq access taxa_sums prune_taxa
 #' @importFrom ape is.rooted
 #'
+#' @details Support for parallel computations was removed as it proved to
+#'          be much lower sequential computations on benchmark data, due to very high overhead.
+#'
 #' @examples
 #' data(food)
 #' unifrac(food)
@@ -33,7 +36,6 @@ UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, parallel = FALS
 
 #' @importFrom phyloseq phy_tree nsamples sample_names taxa_are_rows otu_table
 #' @importFrom ape reorder.phylo
-#' @import foreach
 #'
 fastUniFrac <- function(physeq, weighted, normalized, parallel) {
   ## Extract components and order in pruning wise order
@@ -78,27 +80,33 @@ fastUniFrac <- function(physeq, weighted, normalized, parallel) {
 
   ## Unnormalized unifrac distance is then simply the Manhattan distance
   ## between the modified vectors of all samples
+  if (parallel) {
+    warning("For typical microbiome datasets, benchmarks showed optimized sequential computations were faster, due to high computational overheads. Automatically switching to sequential version.")
+    parallel <- !parallel
+  }
   if (!parallel) {
     raw_unifrac <- dist(counts, method = "manhattan")
     if (!normalized) return(raw_unifrac)
-  } else {
-    # raw_unifrac <- foreach::foreach(i = 1:ncol(counts), .inorder = FALSE, .combine = "+") %dopar% {
-    #   unclass(dist(counts[, i]))
-    # }
-    spn <- combn(phyloseq::nsamples(physeq), 2)
-    dist_vect <- foreach::foreach(pair = 1:ncol(spn), .combine = c, .noexport = c("physeq", "tree")) %dopar% {
-      i <- spn[1, pair]
-      j <- spn[2, pair]
-      sum(abs(counts[i, ] - counts[j, ]))
-    }
-    raw_unifrac <- matrix(NA_real_,
-                          nrow = phyloseq::nsamples(physeq),
-                          ncol = phyloseq::nsamples(physeq),
-                          dimnames = list(phyloseq::sample_names(physeq),
-                                          phyloseq::sample_names(physeq)))
-    raw_unifrac[t(spn)[ , 2:1]] <- dist_vect
-    raw_unifrac <- as.dist(raw_unifrac)
-  }
+  } # else {
+  ## VERY slow
+  # raw_unifrac <- foreach::foreach(i = 1:ncol(counts), .inorder = FALSE, .combine = "+") %dopar% {
+  #   unclass(dist(counts[, i]))
+  # }
+  ## A bit faster but still slower that the non parallel version.
+  #   spn <- combn(phyloseq::nsamples(physeq), 2)
+  #   dist_vect <- foreach::foreach(pair = 1:ncol(spn), .combine = c, .noexport = c("physeq", "tree")) %dopar% {
+  #     i <- spn[1, pair]
+  #     j <- spn[2, pair]
+  #     sum(abs(counts[i, ] - counts[j, ]))
+  #   }
+  #   raw_unifrac <- matrix(NA_real_,
+  #                         nrow = phyloseq::nsamples(physeq),
+  #                         ncol = phyloseq::nsamples(physeq),
+  #                         dimnames = list(phyloseq::sample_names(physeq),
+  #                                         phyloseq::sample_names(physeq)))
+  #   raw_unifrac[t(spn)[ , 2:1]] <- dist_vect
+  #   raw_unifrac <- as.dist(raw_unifrac)
+  # }
 
   ## Compute normalization constants
   if (weighted) {

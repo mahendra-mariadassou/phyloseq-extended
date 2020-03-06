@@ -38,6 +38,10 @@ A distance matrix
 \description{
 Compute unifrac distances
 }
+\details{
+Support for parallel computations was removed as it proved to
+be much lower sequential computations on benchmark data, due to very high overhead.
+}
 \examples{
 data(food)
 unifrac(food)
