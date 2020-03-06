@@ -50,3 +50,64 @@ merge_group <- function(physeq, group, fun = c("sum", "mean")) {
 
   physeq
 }
+
+#' Fast alternative to [tax_glom()]
+#'
+#' @param physeq Required. \code{\link{phyloseq-class}} object
+#' @param taxrank A character string specifying the taxonomic level that you want to agglomerate over. Should be among the results of \code{rank_names(physeq)}. The default value is \code{rank_names(physeq)[1]}, which may agglomerate too broadly for a given experiment. You are strongly encouraged to try different values for this argument.
+#' @param bad_empty (Optional). Character vector. Default to empty white spaces and tabs. Defines the bad/empty values that should be replaced by "Unknown".
+#'
+#' @return A taxonomically-agglomerated \code{\link{phyloseq-class}} object.
+#' @export
+#'
+#' @details fast_tax_glom differs from [tax_glom()] in three important ways:
+#' * It is based on dplyr function and thus much faster
+#' * It does not preserve the phy_tree slot
+#' * It only preserves taxonomic ranks up to \code{taxrank} and discard all other ones.
+#' The "archetype" (OTU name) and sequence for each group are chosen as those from the most abundant taxa
+#' within that group (for compatibility with [tax_glom()])
+#'
+#' @seealso [tax_glom()], [merge_taxa()]
+#' @importFrom tibble column_to_rownames
+#' @importFrom dplyr as_tibble mutate group_by_at arrange slice select
+#' @examples
+#' data(food)
+#' fast_tax_glom(food, "Species")
+fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c("", " ", "\t")) {
+  rank_number <- match(taxrank, rank_names(physeq))
+  if (is.na(rank_number)) {
+    stop("Bad taxrank argument. Must be among the values of rank_names(physeq)")
+  }
+  ranks <- rank_names(physeq)[1:rank_number]
+  ## change NA and empty to Unknown before merging
+  tax <- as(tax_table(physeq), "matrix")
+  tax[is.na(tax) | tax %in% bad_empty] <- "Unknown"
+  ## create groups
+  tax <- tax[ , ranks, drop = FALSE] %>%
+    dplyr::as_tibble(tax, .name_repair = "minimal") %>%
+    dplyr::mutate(Abundance = taxa_sums(physeq),
+                  archetype = taxa_names(physeq)) %>%
+    dplyr::group_by_at(vars(one_of(ranks))) %>%
+    dplyr::mutate(group = group_indices())
+  ## create new_taxonomy
+  new_tax <- tax %>%
+    dplyr::arrange(desc(Abundance)) %>%
+    dplyr::slice(1) %>% dplyr::arrange(group) %>%
+    dplyr::select(-group, -Abundance) %>%
+    tibble::column_to_rownames(var = "archetype") %>% as.matrix()
+  ## create new count table
+  otutab <- otu_table(physeq)
+  if (!taxa_are_rows(physeq)) otutab  <- t(otutab)
+  otutab <- rowsum(otutab, group = tax$group, reorder = TRUE)
+  rownames(otutab) <- rownames(new_tax)
+  ## create new refseq
+  seqs <- access(physeq, "refseq")
+  if (!is.null(seqs)) seqs <- seqs[rownames(new_tax)]
+  ## return merged phyloseq
+  phyloseq(sample_data(physeq),
+           tax_table(new_tax),
+           otu_table(otutab, taxa_are_rows = TRUE),
+           seqs
+  )
+}
+
