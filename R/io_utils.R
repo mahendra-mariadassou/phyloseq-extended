@@ -42,8 +42,6 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard")) {
   biom
 }
 
-
-
 #' Export a \link{phyloseq-class} to several text files: biom, newick and fasta.
 #'
 #' @param physeq (Required). A \link{phyloseq-class} object
@@ -88,4 +86,54 @@ write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NUL
       ape::write.tree(phyloseq::phy_tree(physeq), file = tree_file)
     }
   }
+}
+
+#' Export a \link{phyloseq-class} to a tsv file
+#'
+#' @param physeq (Required). A \link{phyloseq-class} object
+#' @param tsv_file (Required). A character string indicating the file location of the tsv file.
+#'
+#' @return Nothing. The function is used for its side effect of exporting a \link{phyloseq-class} object to a tsv file.
+#' @export
+#'
+#' @details The tsv files contains:
+#' * taxa names
+#' * taxa affiliation (when available)
+#' * taxa sequences (when available)
+#' * taxa abundances across samples (1 column per sample)
+#' * taxa prevalence
+#' * taxa mean abundance (conditional upon presence)
+#' All metadata pertaining to the samples is lost.
+#'
+#' @importFrom phyloseq access taxa_names otu_table
+#' @importFrom dplyr as_tibble bind_cols mutate
+#'
+#' @examples
+#' data(food)
+#' phyloseq_to_tsv(food)
+phyloseq_to_tsv <- function(physeq) {
+  ## Base tibble
+  results <- dplyr::tibble(OTU = phyloseq::taxa_names(physeq))
+  ## Add taxonomic affiliations if any
+  taxtab <- phyloseq::access(physeq, "tax_table")
+  if (!is.null(taxtab)) {
+    results <- dplyr::bind_cols(
+      results,
+      as(taxtab, "matrix") %>% dplyr::as_tibble()
+    )
+  }
+  ## Add sequence
+  refseq <- phyloseq::access(physeq, "refseq")
+  if (!is.null(refseq)) {
+    results <- mutate(results, Sequence = unname(as.character(refseq)))
+  }
+  ## Add proportion data
+  cdf <- phyloseq::otu_table(physeq) %>% as("matrix")
+  if (!phyloseq::taxa_are_rows(physeq)) cdf <- t(cdf)
+  results <- dplyr::bind_cols(results, dplyr::as_tibble(cdf))
+  ## Add prevalence and conditional mean
+  results <- dplyr::mutate(results,
+                    prevalence    = rowMeans(cdf > 0),
+                    avg_abundance = rowMeans(cdf) / prevalence)
+  results
 }
