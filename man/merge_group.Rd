@@ -4,25 +4,20 @@
 \alias{merge_group}
 \title{Merge samples based on a grouping variable given either as a sample variable or a factor.}
 \usage{
-merge_group(physeq, group, fun = mean)
+merge_group(physeq, group, fun = c("sum", "mean"))
 }
 \arguments{
 \item{group}{(Required). Either the a single character string matching a variable name in
 the corresponding sample_data of \code{x}, or a factor with the same length as
 the number of samples in \code{x}.}
 
-\item{fun}{(Optional). The function that will be used to merge the values that
-correspond to the same group for each variable. It must take a numeric vector
-as first argument and return a single value. Default is \code{\link[base]{mean}}.
-Note that this is (currently) ignored for the otu_table, where the equivalent
-function is \code{\link[base]{sum}}, but evaluated via \code{\link[base]{rowsum}}
-for efficiency.}
+\item{fun}{Either "sum" (default) or "mean". Controls how abundances are merged within each factor level.}
 }
 \value{
 A phyloseq object that has had its sample indices merged according to the factor indicated by the group argument. The output class matches x.
 }
 \description{
-The purpose of this method is to merge/agglomerate the sample indices of a phyloseq object according to a categorical variable contained in a sample_data or a provided factor. Unlike the original \code{\link{merge_samples}}, sample metada are not coerced to factors. Instead, the metadata from the first sample in each group is kept.
+The purpose of this method is to merge/agglomerate the sample indices of a phyloseq object according to a categorical variable contained in a sample_data or a provided factor. Unlike the original \code{\link{merge_samples}}, sample metadata are not coerced to factors. Instead, the metadata from the first sample in each group is kept and the samples are renamed according to the levels of the factors.
 }
 \examples{
 data(food)

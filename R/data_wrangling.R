@@ -1,8 +1,9 @@
 #' @title Merge samples based on a grouping variable given either as a sample variable or a factor.
 #'
-#' @description The purpose of this method is to merge/agglomerate the sample indices of a phyloseq object according to a categorical variable contained in a sample_data or a provided factor. Unlike the original \code{\link{merge_samples}}, sample metada are not coerced to factors. Instead, the metadata from the first sample in each group is kept.
+#' @description The purpose of this method is to merge/agglomerate the sample indices of a phyloseq object according to a categorical variable contained in a sample_data or a provided factor. Unlike the original \code{\link{merge_samples}}, sample metadata are not coerced to factors. Instead, the metadata from the first sample in each group is kept and the samples are renamed according to the levels of the factors.
 #'
 #' @inheritParams phyloseq::merge_samples
+#' @param fun Either "sum" (default) or "mean". Controls how abundances are merged within each factor level.
 #'
 #' @return A phyloseq object that has had its sample indices merged according to the factor indicated by the group argument. The output class matches x.
 #'
@@ -16,7 +17,9 @@
 #' mg
 #' ## Note that sample data are preserved
 #' sample_data(mg)
-merge_group <- function(physeq, group, fun = mean) {
+merge_group <- function(physeq, group, fun = c("sum", "mean")) {
+  fun <- match.arg(fun)
+
   # Build grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
     if (class(group) == "character" & length(group) == 1) {
@@ -33,10 +36,17 @@ merge_group <- function(physeq, group, fun = mean) {
   cdf <- as(otu_table(physeq), "matrix")
   if (taxa_are_rows(physeq)) cdf <- t(cdf)
   cdf_merged <- rowsum(cdf, group, reorder = FALSE)
+  if (fun == "mean") {
+    cdf_merged <- cdf_merged / matrix(table(group)[row(cdf_merged)], ncol = ncol(cdf_merged))
+  }
   ## Rename merged samples according to first sample in group
   rownames(cdf_merged) <- sample_names(physeq)[!duplicated(group)]
 
   ## Update otu_table
   otu_table(physeq) <- otu_table(cdf_merged, taxa_are_rows = FALSE)
+
+  ## Update sample names
+  sample_names(physeq) <- unique(group)
+
   physeq
 }
