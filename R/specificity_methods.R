@@ -183,7 +183,7 @@ estimate_specificity <- function(physeq, group,
 
   ## Compute variability of specificity indexes
   if (se) {
-      ## Replicate specificity estimates (optionally, in parallel using foreach)
+      ## Replicate specificity estimates
       cat("Estimating se, may take a few minutes", sep = "\n")
       if (parallel) {
           resmat <- parallel::mclapply(1:B, function(i) {
@@ -285,7 +285,7 @@ estimate_local_specificity <- function(physeq, group,
   res$specificity <- local_spec(tdf, index, group)
   ## Compute variability of specificity indexes
   if (se) {
-      ## Replicate specificity estimates (optionally, in parallel using foreach)
+      ## Replicate specificity estimates
       cat("Estimating se, may take a few minutes", sep = "\n")
       if (parallel) {
           resmat <- parallel::mclapply(1:B, function(i) {
