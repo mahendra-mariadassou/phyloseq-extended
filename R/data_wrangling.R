@@ -37,7 +37,8 @@ merge_group <- function(physeq, group, fun = c("sum", "mean")) {
   if (taxa_are_rows(physeq)) cdf <- t(cdf)
   cdf_merged <- rowsum(cdf, group, reorder = FALSE)
   if (fun == "mean") {
-    cdf_merged <- cdf_merged / matrix(table(group)[row(cdf_merged)], ncol = ncol(cdf_merged))
+    scaling <- table(group)[rownames(cdf_merged)]
+    cdf_merged <- cdf_merged / matrix(scaling[row(cdf_merged)], ncol = ncol(cdf_merged))
   }
   ## Rename merged samples according to first sample in group
   rownames(cdf_merged) <- sample_names(physeq)[!duplicated(group)]
