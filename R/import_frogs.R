@@ -73,7 +73,7 @@ import_frogs <- function(biom,
     #     colnames(taxtab) <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")[1:ncol(taxtab)]
     #     taxtab <- tax_table(taxtab)
     # }
-    argumentlist <- c(argumentlist, list(taxtab))
+    argumentlist <- c(argumentlist, list(tax_table(taxtab)))
     ## sample data
     if (is.null(sample_metadata(x))) {
         samdata <- NULL
