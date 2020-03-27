@@ -4,6 +4,7 @@
 #'
 #' @inheritParams phyloseq::merge_samples
 #' @param fun Either "sum" (default) or "mean". Controls how abundances are merged within each factor level.
+#' @param update.names Logical. If `TRUE` (default) merged samples are named according to the levels of the grouping variable. Else, keep the name of the first sample in each group.
 #'
 #' @return A phyloseq object that has had its sample indices merged according to the factor indicated by the group argument. The output class matches x.
 #'
@@ -17,7 +18,7 @@
 #' mg
 #' ## Note that sample data are preserved
 #' sample_data(mg)
-merge_group <- function(physeq, group, fun = c("sum", "mean")) {
+merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TRUE) {
   fun <- match.arg(fun)
 
   # Build grouping factor
@@ -47,7 +48,9 @@ merge_group <- function(physeq, group, fun = c("sum", "mean")) {
   otu_table(physeq) <- otu_table(cdf_merged, taxa_are_rows = FALSE)
 
   ## Update sample names
-  sample_names(physeq) <- unique(group)
+  if (update.names) {
+    sample_names(physeq) <- unique(group)
+  }
 
   physeq
 }
