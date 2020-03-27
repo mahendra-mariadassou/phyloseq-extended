@@ -4,6 +4,3 @@
 \name{phyloseq.extended}
 \alias{phyloseq.extended}
 \title{This package extends phyloseq by providing several useful additional functions}
-\description{
-This package extends phyloseq by providing several useful additional functions
-}

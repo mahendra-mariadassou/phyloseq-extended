@@ -4,7 +4,7 @@
 \alias{merge_group}
 \title{Merge samples based on a grouping variable given either as a sample variable or a factor.}
 \usage{
-merge_group(physeq, group, fun = c("sum", "mean"))
+merge_group(physeq, group, fun = c("sum", "mean"), update.names = TRUE)
 }
 \arguments{
 \item{group}{(Required). Either the a single character string matching a variable name in
@@ -12,6 +12,8 @@ the corresponding sample_data of \code{x}, or a factor with the same length as
 the number of samples in \code{x}.}
 
 \item{fun}{Either "sum" (default) or "mean". Controls how abundances are merged within each factor level.}
+
+\item{update.names}{Logical. If \code{TRUE} (default) merged samples are named according to the levels of the grouping variable. Else, keep the name of the first sample in each group.}
 }
 \value{
 A phyloseq object that has had its sample indices merged according to the factor indicated by the group argument. The output class matches x.
