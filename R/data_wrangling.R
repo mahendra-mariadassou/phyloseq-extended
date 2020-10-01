@@ -92,7 +92,7 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
     dplyr::mutate(Abundance = taxa_sums(physeq),
                   archetype = taxa_names(physeq)) %>%
     dplyr::group_by_at(vars(one_of(ranks))) %>%
-    dplyr::mutate(group = group_indices())
+    dplyr::mutate(group = cur_group_id())
   ## create new_taxonomy
   new_tax <- tax %>%
     dplyr::arrange(desc(Abundance)) %>%
