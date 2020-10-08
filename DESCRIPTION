@@ -1,6 +1,6 @@
 Package: phyloseq.extended
 Title: PhyloseqExtended
-Version: 0.1.1.3002
+Version: 0.1.1.3003
 Authors@R: 
     person(given = "Mahendra",
            family = "Mariadassou",

@@ -507,7 +507,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                           taxonomy  = as(tax_table(physeq), "matrix")[ , taxaRank2],
                           stringsAsFactors = FALSE) %>%
       arrange(desc(abundance)) %>%
-      filter(taxonomy != "Unknown")
+      slice(which(.$taxonomy != "Unknown"))
+      ## filter(taxonomy != "Unknown")
 
     if (startFrom > 1) {
       discarded_taxa <- topTaxa %>% slice(1:(startFrom-1)) %>% pull(taxa)
