@@ -15,5 +15,5 @@ You can install the development version of `phyloseq.extended` from
 github
 
 ``` r
-remotes::install_github("mahendra-mariadassou/phyloseq-extended", ref = "dev")
+remotes::install_github("mahendra-mariadassou/phyloseq-extended", ref = "easy16S")
 ```
