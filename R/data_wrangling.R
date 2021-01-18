@@ -115,3 +115,62 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   )
 }
 
+
+#' Compute core microbiome
+#'
+#' @param physeq Required. \code{\link{phyloseq-class}} object
+#' @param group Optional. Grouping variable, used to compute the core microbiome in a groupwise fashion. Either a single character string matching a variable name in the corresponding `sample_data` of `physeq`, or a factor with the same length as the number of samples in `physeq`. If `NULL` all samples belong to the same group.
+#' @param ab_threshold Numeric. The minimum (relative) abundance for a taxa to be considered present. Defaults to 0
+#' @param prev_threshold Numeric. The minimum prevalence (across samples in the group) for a taxa to be considered core. Defaults to 0.5
+#'
+#' @return a tibble with components
+#' * `OTU` taxa name
+#' * `group` grouping level (only if group is speficied)
+#' * `prevalence` prevalence in the group (using no abundance threshold)
+#' * `abundance` average relative abundance in the group
+#' * `coreness` coreness value (prevalence above the abundance threshold) in the group
+#' * `is_core` logical indicating whether the taxa is core in the group
+#'
+#' @export
+#'
+#' @seealso
+#' [estimate_prevalence]
+#'
+#' @examples
+#' extract_core(food, group = "EnvType")
+extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold = 0.5) {
+
+  # Build grouping factor
+  if (is.null(group)) {
+    group <- rep(1, phyloseq::nsamples(physeq))
+  }
+  if (!is.null(phyloseq::sample_data(physeq, FALSE))) {
+    if (class(group) == "character" & length(group) == 1) {
+      if (!group %in% phyloseq::sample_variables(physeq)) {
+        stop("group not found among sample variable names.")
+      }
+      group <- phyloseq::get_variable(physeq, group)
+    }
+  }
+  if (class(group) != "factor") {
+    group <- factor(group)
+  }
+
+  # Melt count table and add grouping information
+  cdf <- physeq %>%
+    phyloseq::transform_sample_counts(function(x) { x / sum(x)}) %>%
+    phyloseq::otu_table() %>%
+    as("matrix")
+  if (taxa_are_rows(physeq)) cdf <- t(cdf)
+  cdf %>% dplyr::as_tibble(rownames = "Sample") %>%
+    dplyr::mutate(group = group) %>%
+    tidyr::pivot_longer(cols = -c(Sample, group), names_to = "OTU", values_to = "freq") %>%
+    dplyr::group_by(OTU, group) %>%
+    dplyr::summarise(prevalence = mean(freq > 0),
+                     abundance  = mean(freq),
+                     coreness   = mean(freq > ab_threshold)
+                     ) %>%
+    dplyr::mutate(is_core = coreness >= prev_threshold) %>%
+    dplyr::mutate(any_core = any(is_core)) %>% dplyr::ungroup() %>%
+    dplyr::filter(any_core) %>% dplyr::select(-any_core)
+}
