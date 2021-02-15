@@ -171,6 +171,8 @@ extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold 
                      coreness   = mean(freq > ab_threshold)
                      ) %>%
     dplyr::mutate(is_core = coreness >= prev_threshold) %>%
-    dplyr::mutate(any_core = any(is_core)) %>% dplyr::ungroup() %>%
+    dplyr::group_by(OTU) %>%
+    dplyr::mutate(any_core = any(is_core)) %>%
+    dplyr::ungroup() %>%
     dplyr::filter(any_core) %>% dplyr::select(-any_core)
 }
