@@ -45,6 +45,7 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
     if (is.null(tdf)) return(x)
     ## Happy path
     current_taxonomy <- unname(tdf[x$id, ])
+    if (all(is.na(current_taxonomy))) current_taxonomy <- NA
     if (!is.list(x$metadata)) x$metadata <- list()
     if (biom_format == "standard") x$metadata$taxonomy <- current_taxonomy
     if (biom_format == "frogs")    x$metadata$blast_taxonomy <- current_taxonomy
