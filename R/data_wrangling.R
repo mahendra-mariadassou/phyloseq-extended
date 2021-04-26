@@ -115,19 +115,24 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   )
 }
 
+## Internal function to compute groupwise prevalence using multiple abundance thresholds
+.core_microbiome <- function(cdf, group, ab_thresholds) {
+
+}
 
 #' Compute core microbiome
 #'
 #' @param physeq Required. \code{\link{phyloseq-class}} object
 #' @param group Optional. Grouping variable, used to compute the core microbiome in a groupwise fashion. Either a single character string matching a variable name in the corresponding `sample_data` of `physeq`, or a factor with the same length as the number of samples in `physeq`. If `NULL` all samples belong to the same group.
-#' @param ab_threshold Numeric. The minimum (relative) abundance for a taxa to be considered present. Defaults to 0
+#' @param ab_threshold Numeric. The minimum (relative) abundance for a taxa to be considered present. Can be a vector
 #' @param prev_threshold Numeric. The minimum prevalence (across samples in the group) for a taxa to be considered core. Defaults to 0.5
 #'
 #' @return a tibble with components
 #' * `OTU` taxa name
 #' * `group` grouping level (only if group is speficied)
-#' * `prevalence` prevalence in the group (using no abundance threshold)
-#' * `abundance` average relative abundance in the group
+#' * `raw_prevalence` prevalence in the group (using no abundance threshold)
+#' * `raw_abundance` average relative abundance in the group
+#' * `ab_threshold` abundance threshold used to compute coreness
 #' * `coreness` coreness value (prevalence above the abundance threshold) in the group
 #' * `is_core` logical indicating whether the taxa is core in the group
 #'
@@ -165,7 +170,8 @@ extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold 
   cdf %>% dplyr::as_tibble(rownames = "Sample") %>%
     dplyr::mutate(group = group) %>%
     tidyr::pivot_longer(cols = -c(Sample, group), names_to = "OTU", values_to = "freq") %>%
-    dplyr::group_by(OTU, group) %>%
+    tidyr::crossing(ab_threshold = ab_threshold) %>%
+    dplyr::group_by(OTU, group, ab_threshold) %>%
     dplyr::summarise(prevalence = mean(freq > 0),
                      abundance  = mean(freq),
                      coreness   = mean(freq > ab_threshold)

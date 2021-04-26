@@ -9,7 +9,8 @@ write_phyloseq(
   biom_file,
   tree_file = NULL,
   fasta_file = NULL,
-  biom_format = c("frogs", "standard")
+  biom_format = c("frogs", "standard"),
+  ...
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ write_phyloseq(
 \item{fasta_file}{(Optional). A character string indicating the file location of the fasta formatted file. If \code{NULL} (default), the \code{\link[=refseq]{refseq()}} component of \code{physeq} is ignored.}
 
 \item{biom_format}{(Optional). Either "frogs" (default) or "standard". Controls the way the taxonomy is written in the \link{biom-class} object. \code{biom_format = "frogs"} is intended for later use with \link{import_frogs} and \code{biom_format = "standard"} for later use with \link{import_biom}.}
+
+\item{...}{Additional arguments passed on \code{\link[=phyloseq_to_biom]{phyloseq_to_biom()}}}
 }
 \value{
 Nothing. The function is used for its side effect of exporting a \link{phyloseq-class} object to text files.

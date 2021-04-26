@@ -4,15 +4,21 @@
 \alias{phyloseq_to_biom}
 \title{Create a \link{biom-class} from a \link{phyloseq-class} object.}
 \usage{
-phyloseq_to_biom(physeq, biom_format = c("frogs", "standard"))
+phyloseq_to_biom(
+  physeq,
+  biom_format = c("frogs", "standard"),
+  rows_metadata = NULL
+)
 }
 \arguments{
 \item{physeq}{(Required). A \link{phyloseq-class} object.}
 
 \item{biom_format}{(Optional). Either "frogs" (default) or "standard". Controls the way the taxonomy is written in the \link{biom-class} object. \code{biom_format = "frogs"} is intended for later use with \link{import_frogs} and \code{biom_format = "standard"} for later use with \link{import_biom}.}
+
+\item{rows_metadata}{(Optional). Either \code{NULL} (default) or a named list of rows metadata included in the final biom output. The taxonomy and blast_taxonomy fields are automatically ignored and replaced by corresponding fields from the physeq argument}
 }
 \value{
-A \link{biom-class}
+A \link{biom-class} object
 }
 \description{
 Create a \link{biom-class} from a \link{phyloseq-class} object.

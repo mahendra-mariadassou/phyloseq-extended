@@ -11,7 +11,7 @@ extract_core(physeq, group = NULL, ab_threshold = 0, prev_threshold = 0.5)
 
 \item{group}{Optional. Grouping variable, used to compute the core microbiome in a groupwise fashion. Either a single character string matching a variable name in the corresponding \code{sample_data} of \code{physeq}, or a factor with the same length as the number of samples in \code{physeq}. If \code{NULL} all samples belong to the same group.}
 
-\item{ab_threshold}{Numeric. The minimum (relative) abundance for a taxa to be considered present. Defaults to 0}
+\item{ab_threshold}{Numeric. The minimum (relative) abundance for a taxa to be considered present. Can be a vector}
 
 \item{prev_threshold}{Numeric. The minimum prevalence (across samples in the group) for a taxa to be considered core. Defaults to 0.5}
 }
@@ -20,8 +20,9 @@ a tibble with components
 \itemize{
 \item \code{OTU} taxa name
 \item \code{group} grouping level (only if group is speficied)
-\item \code{prevalence} prevalence in the group (using no abundance threshold)
-\item \code{abundance} average relative abundance in the group
+\item \code{raw_prevalence} prevalence in the group (using no abundance threshold)
+\item \code{raw_abundance} average relative abundance in the group
+\item \code{ab_threshold} abundance threshold used to compute coreness
 \item \code{coreness} coreness value (prevalence above the abundance threshold) in the group
 \item \code{is_core} logical indicating whether the taxa is core in the group
 }
