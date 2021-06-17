@@ -1,15 +1,15 @@
 Package: phyloseq.extended
 Title: PhyloseqExtended
-Version: 0.1.1.4
+Version: 0.1.1.5
 Authors@R: 
     person(given = "Mahendra",
            family = "Mariadassou",
            role = c("aut", "cre"),
-           email = "mahendra.mariadassou@inra.fr")
-Description: Adds severals additional functions to phyloseq
-    (rarefaction curves, phylogenetic diversities, specificity and
-    prevalence indices, nice composition plots, etc). Mostly used for
-    personal use and during training sessions.
+           email = "mahendra.mariadassou@inrae.fr")
+Description: Adds severals additional functions to phyloseq (rarefaction
+    curves, phylogenetic diversities, specificity and prevalence indices,
+    nice composition plots, etc). Mostly used for personal use and during
+    training sessions.
 License: GPL-3
 Depends:
     R (>= 3.4.0)
@@ -21,6 +21,7 @@ Imports:
     ggplot2,
     grid,
     gridBase,
+    MASS,
     parallel,
     phyloseq,
     purrr,
