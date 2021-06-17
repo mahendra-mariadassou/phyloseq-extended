@@ -182,3 +182,23 @@ extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold 
     dplyr::ungroup() %>%
     dplyr::filter(any_core) %>% dplyr::select(-any_core)
 }
+
+#' clr transformation
+#'
+#' @param data a integer vector or numeric vector of non-negative values
+#'
+#' @return the clr-transformed vector
+#'
+#' @details
+#'
+#'
+#' @examples
+#' clr(c(1, 2, 4))
+#'
+#' @export
+#'
+clr <- function(x) {
+  if (any(x <= 0)) stop("clr is not defined for negative data")
+  log_x <- log(x)
+  log_x - mean(log_x)
+}
