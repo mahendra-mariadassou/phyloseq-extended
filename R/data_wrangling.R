@@ -73,7 +73,7 @@ merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TR
 #'
 #' @seealso [tax_glom()], [merge_taxa()]
 #' @importFrom tibble column_to_rownames
-#' @importFrom dplyr as_tibble mutate group_by_at arrange slice select
+#' @importFrom dplyr as_tibble mutate group_by arrange slice select across all_of
 #' @examples
 #' data(food)
 #' fast_tax_glom(food, "Species")
@@ -91,7 +91,7 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
     dplyr::as_tibble(tax, .name_repair = "minimal") %>%
     dplyr::mutate(Abundance = taxa_sums(physeq),
                   archetype = taxa_names(physeq)) %>%
-    dplyr::group_by_at(vars(one_of(ranks))) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(ranks))) %>%
     dplyr::mutate(group = cur_group_id())
   ## create new_taxonomy
   new_tax <- tax %>%
