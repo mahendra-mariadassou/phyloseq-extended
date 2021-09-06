@@ -25,6 +25,7 @@ Imports:
     parallel,
     phyloseq,
     purrr,
+    stringr,
     scales,
     tibble,
     tidyr,

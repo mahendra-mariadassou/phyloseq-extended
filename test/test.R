@@ -42,6 +42,7 @@ ggplotly(p + geom_text(aes(label = EnvType), color = "transparent"), tooltip = c
 
 
 ## Test plot_composition
+plot_composition(tax_spread(food), taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species')
 
 ## test different gradient for plot_dist_as_heatmap
 dist.uf <- distance(food, "unifrac")
