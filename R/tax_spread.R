@@ -1,6 +1,6 @@
 #' tax_spread
 #'
-#' Spread taxonomy according to last knowing taxa
+#' Spread taxonomy according to last known taxa, to remove unknown and multi-affiliations
 #'
 #' @param physeq (Required). phyloseq-class.
 #' @param pattern string. Pattern matching with taxon to rename. Can use regex, use `|` for separator
@@ -15,8 +15,9 @@
 #' @export
 #'
 #' @examples
-#' data(food)
-#' tax_spread(food)
+#' physeq <- phyloseq(otu_table(matrix(1:4, 2, 2), taxa_are_rows = TRUE),
+#' tax_table(matrix(c("Firmicutes", "Firmicutes", "Unknown", "Bacilli", NA, "Lactobacillales"), 2, 3)))
+#' tax_spread(physeq)
 tax_spread <- function(physeq,
                        pattern = "^NA$|Multi-affiliation|Unknown") {
   if (is.null(access(physeq, "tax_table"))) {
