@@ -8,7 +8,7 @@
 #' @importFrom phyloseq tax_table
 #' @importFrom tibble rownames_to_column column_to_rownames
 #' @importFrom tidyr pivot_longer pivot_wider
-#' @importFrom dplyr mutate group_by select
+#' @importFrom dplyr mutate group_by select last if_else
 #' @importFrom stringr str_detect regex
 #'
 #' @return physeq object with correct name
@@ -23,21 +23,16 @@ tax_spread <- function(physeq,
   if (is.null(access(physeq, "tax_table"))) {
     stop("The tax_spread() function requires that physeq contain a taxonomyTable")
   }
-
-  tax_table(physeq) <- tax_table(physeq) %>%
-    as.data.frame() %>%
-    rownames_to_column(var = "OTU") %>%
-    pivot_longer(cols = -OTU, names_to = "rank", values_to = "taxon") %>%
-    mutate(new_taxon = ifelse(str_detect(taxon, regex(pattern, ignore_case = TRUE)), NA, taxon)) %>%
-    group_by(OTU) %>%
-    mutate(new_taxon = ifelse(is.na(new_taxon),
-      paste("Unknown", last(na.omit(new_taxon)), rank),
-      new_taxon
-    )) %>%
-    select(-taxon) %>%
-    pivot_wider(names_from = rank, values_from = new_taxon) %>%
-    column_to_rownames("OTU") %>%
-    as.matrix() %>%
-    tax_table()
+  ranks <- rank_names(physeq)
+  ## Spreading function
+  .spread <- function(x) {
+    last_aff <- x[!is.na(x) & str_detect(x, regex(pattern, ignore_case = TRUE), negate = TRUE)] %>% dplyr::last()
+    dplyr::if_else(
+      str_detect(x, regex(pattern, ignore_case = TRUE)) | is.na(x),
+      paste("Unknown", last_aff, ranks),
+      x
+    )
+  }
+  tax_table(physeq) <- tax_table(physeq) %>% as('matrix') %>% apply(MARGIN = 1, .spread) %>% t() %>% `colnames<-`(ranks)
   return(physeq)
 }
