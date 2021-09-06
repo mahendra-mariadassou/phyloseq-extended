@@ -28,7 +28,7 @@
 #'
 #' @importFrom phyloseq sample_data otu_table rarefy_even_depth
 #' @importFrom dplyr inner_join as_tibble
-#' @importFrom tidyr gather
+#' @importFrom tidyr pivot_longer
 #'
 #' @examples
 #' data(food)
@@ -75,8 +75,8 @@ estimate_prevalence <- function(physeq, group, format = c("long", "wide"), raref
     }
     ## Melt and join tables
     dplyr::as_tibble(frac, rownames = "otu") %>% tidyr::gather(key = "group", value = "prevalence", -otu) %>%
-        dplyr::inner_join(dplyr::as_tibble(spec, rownames = "otu") %>% tidyr::gather(key = "group", value = "specificity", -otu),
+        dplyr::inner_join(dplyr::as_tibble(spec, rownames = "otu") %>% pivot_longer(cols = -otu, values_to = "specificity", names_to = "group"),
                           by = c("otu", "group")) %>%
-        dplyr::inner_join(dplyr::as_tibble(abund, rownames = "otu") %>% tidyr::gather(key = "group", value = "abundance", -otu),
+        dplyr::inner_join(dplyr::as_tibble(abund, rownames = "otu") %>% pivot_longer(cols = -otu, values_to = "abundance", names_to = "group"),
                           by = c("otu", "group"))
 }

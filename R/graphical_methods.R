@@ -570,7 +570,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 #' @export
 #'
 #' @importFrom dplyr as_tibble mutate
-#' @importFrom tidyr gather
+#' @importFrom tidyr pivot_longer
 #' @examples
 #' data(food)
 #' dist.bc <- distance(food, "bray")
@@ -582,7 +582,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
     as.matrix() %>%
     dplyr::as_tibble() %>%
     dplyr::mutate(x = names(.)) %>%
-    tidyr::gather(key = "y", value = "distance", -x)
+    pivot_longer(cols = -x, values_to = "distance", names_to = "y")
   if (!is.null(order)) {
     data$x <- factor(data$x, levels = order)
     data$y <- factor(data$y, levels = order)
