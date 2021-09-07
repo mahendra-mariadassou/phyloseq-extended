@@ -100,7 +100,10 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #'
 #' @examples
 #' data(food)
-#' plot_composition(food, "Kingdom", "Bacteria", "Phylum", facet_grid = "~EnvType", spread = TRUE)
+#' plot_composition(food, "Kingdom", "Bacteria", "Phylum", facet_grid = "~EnvType")
+#' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType", spread = TRUE)
+#' ## Contrast with
+#' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType")
 plot_composition <- function(physeq,
                              taxaRank1 = "Phylum",
                              taxaSet1 = "Proteobacteria",
