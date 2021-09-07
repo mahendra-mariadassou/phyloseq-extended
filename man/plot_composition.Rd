@@ -16,6 +16,7 @@ plot_composition(
   y = "Abundance",
   sampleOrder = NULL,
   facet_grid = NULL,
+  spread = FALSE,
   ...
 )
 }
@@ -43,6 +44,8 @@ selecting the \code{numberOfTaxa} most abundant taxa.}
 
 \item{facet_grid}{variable used for faceting.}
 
+\item{spread}{If \code{TRUE} spread taxonomy from top to bottom using \code{\link[=tax_spread]{tax_spread()}} to avoid Unknown, Multi-affiliation and NA from showing up in the plot.}
+
 \item{...}{Additional arguments passed on to geom_bar}
 }
 \value{
@@ -56,5 +59,5 @@ Allows the user to restrict the plot to taxa in the set \code{taxaSet1} at level
 }
 \examples{
 data(food)
-plot_composition(food, "Kingdom", "Bacteria", "Family", fill = "Phylum", facet_grid = "EnvType")
+plot_composition(food, "Kingdom", "Bacteria", "Phylum", facet_grid = "~EnvType", spread = TRUE)
 }

@@ -1,11 +1,15 @@
 Package: phyloseq.extended
 Title: PhyloseqExtended
-Version: 0.1.1.5
+Version: 0.1.1.6
 Authors@R: 
     person(given = "Mahendra",
            family = "Mariadassou",
            role = c("aut", "cre"),
            email = "mahendra.mariadassou@inrae.fr")
+    person(given = "Cédric",
+           family = "Midoux",
+           role = c("ctb"),
+           email = "cedric.midoux@inrae.fr")
 Description: Adds severals additional functions to phyloseq (rarefaction
     curves, phylogenetic diversities, specificity and prevalence indices,
     nice composition plots, etc). Mostly used for personal use and during
@@ -17,7 +21,7 @@ Imports:
     ape,
     biomformat,
     Biostrings,
-    dplyr (>= 1.0.0),
+    dplyr,
     ggplot2,
     grid,
     gridBase,

@@ -2,8 +2,7 @@
 % Please edit documentation in R/tax_spread.R
 \name{tax_spread}
 \alias{tax_spread}
-\title{tax_spread
-Spread taxonomy according to last knowing taxa}
+\title{tax_spread}
 \usage{
 tax_spread(physeq, pattern = "^NA$|Multi-affiliation|Unknown")
 }
@@ -16,10 +15,10 @@ tax_spread(physeq, pattern = "^NA$|Multi-affiliation|Unknown")
 physeq object with correct name
 }
 \description{
-tax_spread
-Spread taxonomy according to last knowing taxa
+Spread taxonomy according to last known taxa, to remove unknown and multi-affiliations
 }
 \examples{
-data(food)
-tax_spread(food)
+physeq <- phyloseq(otu_table(matrix(1:4, 2, 2), taxa_are_rows = TRUE),
+tax_table(matrix(c("Firmicutes", "Firmicutes", "Unknown", "Bacilli", NA, "Lactobacillales"), 2, 3)))
+tax_spread(physeq)
 }
