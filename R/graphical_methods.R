@@ -90,6 +90,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' @param y Variable mapped to y-axis
 #' @param facet_grid variable used for faceting.
 #' @param sampleOrder Sample order (ignored if \code{x} is different from "Samples")
+#' @param spread If `TRUE` spread taxonomy from top to bottom using [tax_spread()] to avoid Unknown, Multi-affiliation and NA from showing up in the plot.
 #' @param ... Additional arguments passed on to geom_bar
 #'
 #' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
@@ -99,7 +100,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #'
 #' @examples
 #' data(food)
-#' plot_composition(food, "Kingdom", "Bacteria", "Family", fill = "Phylum", facet_grid = "EnvType")
+#' plot_composition(food, "Kingdom", "Bacteria", "Phylum", facet_grid = "~EnvType", spread = TRUE)
 plot_composition <- function(physeq,
                              taxaRank1 = "Phylum",
                              taxaSet1 = "Proteobacteria",
@@ -111,6 +112,7 @@ plot_composition <- function(physeq,
                              y = "Abundance",
                              sampleOrder = NULL,
                              facet_grid = NULL,
+                             spread = FALSE,
                              ...) {
   if (is.null(taxaRank2) || taxaRank2 %in% c("OTU", "ASV")) {
     taxaRank2 <- "OTU_rank"
@@ -126,7 +128,7 @@ plot_composition <- function(physeq,
 
 
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
-                     fill, numberOfTaxa, startFrom)
+                     fill, numberOfTaxa, startFrom, spread)
   if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
 
   p <- ggplot(ggdata,
@@ -140,18 +142,22 @@ plot_composition <- function(physeq,
       colvals <- c(gg_color_hue(length(levels)),
                    "grey75", "grey45", "black")
       names(colvals) <- c(levels, "Multi-affiliation", "Unknown", "Other")
+      if (spread) {
+        colvals <- colvals[!names(colvals) %in% c("Multi-affiliation", "Unknown")]
+      }
       ## Now add the manually re-scaled layer with Unassigned as grey
       p <- p +
-        scale_fill_manual(values = colvals) +
+        scale_fill_manual(values = colvals, drop = TRUE) +
         scale_color_manual(values = colvals)
 
   }
   p <- p + geom_bar(stat = "identity", position = "stack", ...)
   if ( !is.null(facet_grid)) {
-    p <- p + facet_grid(facets = facet_grid, scales = "free_x")
+    p <- p + facet_grid(facet_grid, scales = "free_x")
   }
   p <- p + theme(axis.text.x=element_text(angle = 90),
                  axis.title.x=element_blank()) +
+    scale_y_continuous(expand = expansion(0, 0)) +
     ggtitle(paste0("Composition",
                    ## Filter or not
                    ifelse(!is.null(taxaSet1),
@@ -466,7 +472,7 @@ gg_color_hue <- function(n) {
 #' data(food)
 #' ggformat(food)
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
-                     taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9, startFrom = 1) {
+                     taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9, startFrom = 1, spread = FALSE) {
     ## Enforce orientation and transform count to relative abundances
     stopifnot(!is.null(sample_data(physeq, FALSE)),
               !is.null(tax_table(physeq, FALSE)))
@@ -490,13 +496,22 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
       }
     }
 
-    ## Correct taxonomy and agglomerate at TaxaRank2
+    ## Spread affiliations
+    if (spread) {
+      physeq <- tax_spread(physeq)
+    }
+
+    ## Correct taxonomy
     tax <- as(tax_table(physeq), "matrix")
     tax <- cbind(tax, OTU_rank = taxa_names(physeq))
-    tax[is.na(tax)] <- "Unknown"
-    tax[grepl("unknown", tax)] <- "Unknown"
-    tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
+    if (!spread) {
+      tax[is.na(tax)] <- "Unknown"
+      tax[grepl("unknown", tax)] <- "Unknown"
+      tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
+    }
     tax_table(physeq) <- tax
+
+    ## agglomerate at TaxaRank2
     if (taxaRank2 != "OTU_rank") {
       physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
     }
@@ -541,7 +556,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     archetype <- taxa_names(physeq)[!ii][1]
     physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = archetype)
     taxa_names(physeq)[taxa_names(physeq) == archetype] <- "Other"
-    ## physeq <- tax_glom(physeq, taxrank = taxaRank2)
+    # physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
 
     tdf <- psmelt(physeq)
     tdf[, taxaRank2] <- as.character(tdf[, taxaRank2])
@@ -549,10 +564,11 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                                levels = correct_taxonomy(topTaxa$taxonomy))
     tdf[, fill] <- as.character(tdf[, fill])
     tdf[, fill] <- factor(tdf[, fill],
-                          levels = correct_taxonomy(unique(tdf[, fill])))
+                          levels = correct_taxonomy(unique(tdf[, fill]))) %>% droplevels()
 
     ## tdf <- tdf %>% arrange(desc(!!enquo(fill)), desc(Abundance))
-    tdf <- tdf[ order(tdf[ , fill], tdf$Abundance, decreasing = TRUE), ]
+    tdf <- tdf %>% arrange(desc(.data[[fill]]), desc(Abundance))
+    ## tdf[ order(tdf[ , fill], tdf$Abundance, decreasing = TRUE), ]
     return(tdf)
 }
 
