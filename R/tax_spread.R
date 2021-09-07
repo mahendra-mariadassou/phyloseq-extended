@@ -33,6 +33,6 @@ tax_spread <- function(physeq,
       x
     )
   }
-  tax_table(physeq) <- tax_table(physeq) %>% as('matrix') %>% apply(MARGIN = 1, .spread) %>% t() %>% `colnames<-`(ranks)
+  tax_table(physeq) <- tax_table(physeq) %>% apply(MARGIN = 1, .spread) %>% t() %>% `colnames<-`(ranks)
   return(physeq)
 }
