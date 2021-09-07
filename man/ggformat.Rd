@@ -11,7 +11,8 @@ ggformat(
   taxaRank2 = "Family",
   fill = NULL,
   numberOfTaxa = 9,
-  startFrom = 1
+  startFrom = 1,
+  spread = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ ggformat(
 
 \item{startFrom}{\code{startFrom - 1} is the number of (most abundant) taxa to discard before
 selecting the \code{numberOfTaxa} most abundant taxa.}
+
+\item{spread}{If \code{TRUE} spread taxonomy from top to bottom using \code{\link[=tax_spread]{tax_spread()}} to avoid Unknown, Multi-affiliation and NA from showing up in the plot.}
 }
 \value{
 A ggplot friendly data frame with the relative abundance of the top \code{NumberOfTaxa} OTUs (starting from the \code{startFrom}th most abundant) at the taxaRank2 level within taxaSet1 at taxaRank1 level
