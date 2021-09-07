@@ -138,16 +138,13 @@ plot_composition <- function(physeq,
   ## Manually change color scale to assign grey to "Unknown" (if any)
   if (!is.null(fill) && any(c("Unknown", "Other") %in% levels(ggdata[, fill]))) {
       levels <- levels(ggdata[, fill])
-      levels <- levels[ ! levels %in% c("Multi-affiliation", "Unknown", "Other")]
-      colvals <- c(gg_color_hue(length(levels)),
-                   "grey75", "grey45", "black")
-      names(colvals) <- c(levels, "Multi-affiliation", "Unknown", "Other")
-      if (spread) {
-        colvals <- colvals[!names(colvals) %in% c("Multi-affiliation", "Unknown")]
-      }
+      proper_levels <- setdiff(levels, c("Multi-affiliation", "Unknown", "Other"))
+      colvals <- setNames(object = c(gg_color_hue(length(proper_levels)), "grey75", "grey45", "black"),
+                          nm = c(proper_levels, "Multi-affiliation", "Unknown", "Other"))
+      colvals <- colvals[levels]
       ## Now add the manually re-scaled layer with Unassigned as grey
       p <- p +
-        scale_fill_manual(values = colvals, drop = TRUE) +
+        scale_fill_manual(values = colvals) +
         scale_color_manual(values = colvals)
 
   }
