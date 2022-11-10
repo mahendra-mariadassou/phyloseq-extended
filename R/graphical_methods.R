@@ -129,22 +129,31 @@ plot_composition <- function(physeq,
   }
   if (fill %in% c("OTU", "ASV")) fill <- "OTU_rank"
 
-
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
                      fill, numberOfTaxa, startFrom, spread)
   if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
 
   p <- ggplot(ggdata,
-              aes_string(x = x, y = y, fill = fill,
-                         # color = fill,
-                         group = "Sample"))
+              aes_string(x = x, y = y, fill = fill, group = "Sample"))
   ## Manually change color scale to assign grey to "Unknown" (if any)
-  if (!is.null(fill) && any(c("Unknown", "Other") %in% levels(ggdata[, fill]))) {
-      levels <- levels(ggdata[, fill])
+  if (!is.null(fill) && any(c("Unknown", "Other") %in% levels(ggdata[[fill]]))) {
+      levels <- levels(ggdata[[fill]])
       proper_levels <- setdiff(levels, c("Multi-affiliation", "Unknown", "Other"))
-      colvals <- setNames(object = c(gg_color_hue(length(proper_levels)), "grey75", "grey45", "black"),
-                          nm = c(proper_levels, "Multi-affiliation", "Unknown", "Other"))
-      colvals <- colvals[levels]
+
+      if (length(proper_levels) > 12) {
+        warning("Too many taxa: reverting from Brewer 'Paired' scale to a hue scale.\nThe human eye has trouble picking more than 12 colors, consider showing a smaller number of taxa.")
+        fill_cols <- scales::hue_pal()(length(proper_levels))
+      } else {
+        fill_cols <- scales::brewer_pal(palette = "Paired")(length(proper_levels))
+      }
+
+      colvals <- c(
+        setNames(fill_cols, proper_levels),
+        "Multi-affiliation" = "grey75",
+        "Unknown"           = "grey45",
+        "Other"             = "black"
+      )
+      # colvals <- colvals[levels]
       ## Now add the manually re-scaled layer with Unassigned as grey
       p <- p +
         scale_fill_manual(values = colvals) +
@@ -155,8 +164,7 @@ plot_composition <- function(physeq,
   if ( !is.null(facet_grid)) {
     p <- p + facet_grid(facet_grid, scales = "free_x")
   }
-  p <- p + theme(axis.text.x=element_text(angle = 90),
-                 axis.title.x=element_blank()) +
+  p <- p +
     scale_y_continuous(expand = expansion(0, 0)) +
     ggtitle(paste0("Composition",
                    ## Filter or not
@@ -166,7 +174,11 @@ plot_composition <- function(physeq,
                    ## number of taxa represented on the plot
                    " (", taxaRank2, " ", startFrom, " to ",
                    startFrom + numberOfTaxa - 1, ")")
-    )
+    ) +
+    theme_bw() +
+    theme(axis.text.x=element_text(angle = 90),
+                 axis.title.x=element_blank()) +
+    NULL
   p
 }
 
