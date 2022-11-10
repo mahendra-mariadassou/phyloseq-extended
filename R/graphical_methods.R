@@ -455,10 +455,10 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
 }
 
 ## ggplot hue color scale
-gg_color_hue <- function(n) {
-  if (n == 0) return(NULL)
-  scales::hue_pal()(n)
-}
+# gg_color_hue <- function(n) {
+#   if (n == 0) return(NULL)
+#   scales::hue_pal()(n)
+# }
 
 
 #' Format phyloseq data for easy composition plots
@@ -519,10 +519,10 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ## Keep only numberOfTaxa top taxa and aggregate the rest as "Other"
     topTaxa <- data.frame(abundance = taxa_sums(physeq),
                           taxa      = taxa_names(physeq),
-                          taxonomy  = as(tax_table(physeq), "matrix")[ , taxaRank2],
                           stringsAsFactors = FALSE) %>%
+      bind_cols(as(tax_table(physeq), "matrix") %>% as_tibble() %>% select(all_of(c(fill, taxaRank2)))) %>%
       arrange(desc(abundance)) %>%
-      filter(taxonomy != "Unknown")
+      filter(.data[[taxaRank2]] != "Unknown")
 
     if (startFrom > 1) {
       discarded_taxa <- topTaxa %>% slice(1:(startFrom-1)) %>% pull(taxa)
@@ -539,8 +539,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
     ## Change to character and correct taxonomic levels
     correct_taxonomy <- function(x) {
-      res <- c(sort(x[!x %in% c("Multi-affiliation", "Unknown", "Other")]),
-        c("Multi-affiliation", "Unknown", "Other"))
+      last_levels <- c("Multi-affiliation", "Unknown", "Other")
+      res <- c(setdiff(x, last_levels), last_levels)
       if (any(duplicated(res))) {
         warning(paste("Please check upper ranks of", res[duplicated(res)], "as they may have typos.\n"))
         res <- unique(res)
@@ -548,7 +548,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
       res
     }
 
-    ## Replace all levels in taxonomy of non-top/ non-unknown taxa to Other
+    ## Replace all levels in taxonomy of non-top / non-unknown taxa to Other
     tax <- as(tax_table(physeq), "matrix")
     ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
     tax[!ii, ] <- "Other"
@@ -559,16 +559,18 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     # physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
 
     tdf <- psmelt(physeq)
-    tdf[, taxaRank2] <- as.character(tdf[, taxaRank2])
-    tdf[, taxaRank2] <- factor(tdf[, taxaRank2],
-                               levels = correct_taxonomy(topTaxa$taxonomy))
-    tdf[, fill] <- as.character(tdf[, fill])
-    tdf[, fill] <- factor(tdf[, fill],
-                          levels = correct_taxonomy(unique(tdf[, fill]))) %>% droplevels()
+    tdf[, taxaRank2] <- factor(tdf[, taxaRank2], levels = correct_taxonomy(topTaxa[[taxaRank2]]))
 
-    ## tdf <- tdf %>% arrange(desc(!!enquo(fill)), desc(Abundance))
+    ## Create correct order for the filling variable (if different from taxaRank2)
+    if (fill != taxaRank2) {
+      fill_order <- count(topTaxa, .data[[fill]], wt = abundance, sort = TRUE) %>%
+        pull(fill)
+      tdf[, fill] <- factor(tdf[, fill], levels = correct_taxonomy(fill_order)) %>%
+        droplevels()
+    }
+
     tdf <- tdf %>% arrange(desc(.data[[fill]]), desc(Abundance))
-    ## tdf[ order(tdf[ , fill], tdf$Abundance, decreasing = TRUE), ]
+
     return(tdf)
 }
 
