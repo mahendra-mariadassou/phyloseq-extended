@@ -55,6 +55,26 @@ merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TR
   physeq
 }
 
+#' extract in order all ranks above above a given rank
+#'
+#' @param physeq Required. \code{\link{phyloseq-class}} object with a taxonomic table.
+#' @param ranks  Required. One or more ranks whose ancestry are search (e.g. "Phylum", "Species", etc). Values not encountered in `physeq` are silently ignored
+#'
+#' @return a vector of rank names
+#' @export
+#'
+#' @example
+#' data(food)
+#' find_upper_ranks(food, "Phylum") ## c("Kingdom", "Phylum")
+#' find_upper_ranks(food, c("Class", "Genus")) ## c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus")
+find_upper_ranks <- function(physeq, ranks) {
+  rank_numbers <- match(ranks, rank_names(physeq))
+  if (all(is.na(rank_numbers))) {
+    stop("Bad ranks. Must be among the values of rank_names(physeq)")
+  }
+  rank_names(physeq)[1:max(rank_numbers, na.rm = TRUE)]
+}
+
 #' Fast alternative to [tax_glom()]
 #'
 #' @param physeq Required. \code{\link{phyloseq-class}} object
@@ -78,11 +98,7 @@ merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TR
 #' data(food)
 #' fast_tax_glom(food, "Species")
 fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c("", " ", "\t")) {
-  rank_number <- match(taxrank, rank_names(physeq))
-  if (is.na(rank_number)) {
-    stop("Bad taxrank argument. Must be among the values of rank_names(physeq)")
-  }
-  ranks <- rank_names(physeq)[1:rank_number]
+  ranks <- find_upper_ranks(physeq, taxrank)
   ## change NA and empty to Unknown before merging
   tax <- as(tax_table(physeq), "matrix")
   tax[is.na(tax) | tax %in% bad_empty] <- "Unknown"
