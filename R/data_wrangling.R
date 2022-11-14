@@ -63,7 +63,7 @@ merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TR
 #' @return a vector of rank names
 #' @export
 #'
-#' @example
+#' @examples
 #' data(food)
 #' find_upper_ranks(food, "Phylum") ## c("Kingdom", "Phylum")
 #' find_upper_ranks(food, c("Class", "Genus")) ## c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus")
@@ -204,8 +204,6 @@ extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold 
 #' @param data a integer vector or numeric vector of non-negative values
 #'
 #' @return the clr-transformed vector
-#'
-#' @details
 #'
 #'
 #' @examples

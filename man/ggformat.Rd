@@ -42,4 +42,5 @@ Format phyloseq data for easy composition plots
 \examples{
 data(food)
 ggformat(food)
+ggformat(food, taxaSet1 = NULL, taxaRank2 = "Phylum")
 }

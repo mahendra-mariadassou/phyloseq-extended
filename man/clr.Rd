@@ -15,9 +15,6 @@ the clr-transformed vector
 \description{
 clr transformation
 }
-\details{
-
-}
 \examples{
 clr(c(1, 2, 4))
 
