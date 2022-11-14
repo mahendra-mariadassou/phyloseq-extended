@@ -483,6 +483,7 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
 #' @examples
 #' data(food)
 #' ggformat(food)
+#' ggformat(food, taxaSet1 = NULL, taxaRank2 = "Phylum")
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                      taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9, startFrom = 1, spread = FALSE) {
     ## Enforce orientation and transform count to relative abundances
@@ -498,6 +499,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ## Check that taxaranks and fill are propers ranks
     if (is.null(fill)) { fill <- taxaRank2 }
     stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU_rank")))
+    ranks <- find_upper_ranks(physeq, c(taxaRank1, taxaRank2, fill))
 
     ## Subset at TaxaRank1
     if (!is.null(taxaSet1)) {
@@ -528,62 +530,126 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
       physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
     }
 
-    ## Keep only numberOfTaxa top taxa and aggregate the rest as "Other"
+    ## Sort taxa by abundance, remove unwanted taxa and remove affiliation of least abundant taxa
+    last_levels <- c("Multi-affiliation", "Unknown", "Other")
     topTaxa <- data.frame(abundance = taxa_sums(physeq),
                           taxa      = taxa_names(physeq),
                           stringsAsFactors = FALSE) %>%
-      bind_cols(as(tax_table(physeq), "matrix") %>% as_tibble() %>% select(all_of(c(fill, taxaRank2)))) %>%
+      bind_cols(as(tax_table(physeq), "matrix")[ , ranks, drop = F] %>% as_tibble()) %>%
       arrange(desc(abundance)) %>%
-      filter(.data[[taxaRank2]] != "Unknown")
+      mutate(
+        rank = row_number(),
+        status = case_when(
+          row_number() < startFrom-1              ~ "filtered out",
+          row_number() < startFrom + numberOfTaxa ~ "conserved",
+          TRUE                                    ~ "aggregated"
+        )) %>%
+      ## remove unwanted taxa
+      filter(status != "filtered out") %>%
+      ## propagate Other / Multi-affiliation / Unknown across all ranks in least abundant taxa
+      mutate(across(all_of(ranks), ~ case_when(
+        status == "conserved"                                        ~ .x,
+        status == "aggregated" & .data[[taxaRank2]] %in% last_levels ~ .data[[taxaRank2]],
+        TRUE                                                         ~ "Other"
+      )))
 
-    if (startFrom > 1) {
-      discarded_taxa <- topTaxa %>% slice(1:(startFrom-1)) %>% pull(taxa)
-      physeq <- prune_taxa(!(taxa_names(physeq) %in% discarded_taxa), physeq)
-    }
 
-    topTaxa <- topTaxa %>% slice((startFrom - 1) + 1:numberOfTaxa)
+    ## Warning if no taxa remains
     if (nrow(topTaxa) == 0) {
-      warning(paste0(
-        "Not enough taxa to show and/or all remaining taxa have unknown affiliation at rank ",
-        taxaRank2,
-        ". Consider using a smaller value."))
+      stop(paste0("Not enough taxa to show. Consider decreasing `startFrom` to a lower value."))
     }
 
-    ## Change to character and correct taxonomic levels
-    correct_taxonomy <- function(x) {
-      last_levels <- c("Multi-affiliation", "Unknown", "Other")
-      res <- c(setdiff(x, last_levels), last_levels)
-      if (any(duplicated(res))) {
-        warning(paste("Please check upper ranks of", res[duplicated(res)], "as they may have typos.\n"))
-        res <- unique(res)
+    ### Check that final names of most abundant taxa are unique; if not print a warning message and sanitize them.
+    res <- topTaxa %>% filter(status == "conserved") %>% pull(taxaRank2)
+    if (length(res) < numberOfTaxa) {
+      warning(paste0("Not enough taxa to show and/or all remaining taxa have unknown affiliation at rank ",
+        taxaRank2, ". Consider using a smaller value."))
+    }
+    problematic_taxa <- duplicated(res) | res %in% last_levels
+    if (any(problematic_taxa)) {
+      warning(paste("Some of the most abundant taxa are unknown or have the same name at rank", taxaRank2, "but not at upper ranks.\nUsing suffix '_x' to distinguish them. See table for further details."))
+      cat("Problematic taxa", sep = "\n")
+      topTaxa %>% filter(status == "conserved", .data[[taxaRank2]] %in% res[problematic_taxa]) %>%
+        select(-abundance, -status) %>% print()
+      .f <- function(status, x) {
+        if (length(x) == 1) return(x)
+        if_else(status == "conserved", paste(x, seq_along(x), sep = "_"), x)
       }
-      res
+      topTaxa <- topTaxa %>%
+        group_by(.data[[taxaRank2]]) %>%
+        mutate({{taxaRank2}} := .f(status, .data[[taxaRank2]])) %>%
+        ungroup()
     }
 
-    ## Replace all levels in taxonomy of non-top / non-unknown taxa to Other
-    tax <- as(tax_table(physeq), "matrix")
-    ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
-    tax[!ii, ] <- "Other"
-    tax_table(physeq) <- tax
-    archetype <- taxa_names(physeq)[!ii][1]
-    physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = archetype)
-    taxa_names(physeq)[taxa_names(physeq) == archetype] <- "Other"
-    # physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
-
-    tdf <- psmelt(physeq)
-    tdf[, taxaRank2] <- factor(tdf[, taxaRank2], levels = correct_taxonomy(topTaxa[[taxaRank2]]))
-
-    ## Create correct order for the filling variable (if different from taxaRank2)
-    if (fill != taxaRank2) {
-      fill_order <- count(topTaxa, .data[[fill]], wt = abundance, sort = TRUE) %>%
-        pull(fill)
-      tdf[, fill] <- factor(tdf[, fill], levels = correct_taxonomy(fill_order)) %>%
-        droplevels()
+    ## Change taxaRank2/fill to ordered levels and sort topTaxa
+    topTaxa[[taxaRank2]] <- factor(topTaxa[[taxaRank2]],
+                                   levels = c(topTaxa %>% filter(status == "conserved") %>% pull(taxaRank2),
+                                              last_levels))
+    topTaxa <- arrange(topTaxa, .data[[taxaRank2]])
+    if (taxaRank2 != fill) {
+      topTaxa[[fill]] <- factor(topTaxa[[fill]],
+                                   levels = c(topTaxa %>% filter(status == "conserved") %>% pull(fill) %>% unique(),
+                                              last_levels))
     }
 
-    tdf <- tdf %>% arrange(desc(.data[[fill]]), desc(Abundance))
+    ## Compact and simplify physeq object
+    physeq <- prune_taxa(topTaxa$taxa, physeq)
+    tax_table(physeq) <- topTaxa %>%
+      tibble::remove_rownames() %>%
+      select(all_of(c("taxa", ranks))) %>%
+      column_to_rownames(var = "taxa") %>% as.matrix()
+    physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
+
+    tdf <- psmelt(physeq) %>%
+      mutate({{taxaRank2}} := factor(.data[[taxaRank2]], levels = levels(topTaxa[[taxaRank2]])),
+             {{fill}} := factor(.data[[fill]], levels = levels(topTaxa[[fill]]))) %>%
+      arrange(desc(.data[[fill]]), Abundance)
 
     return(tdf)
+    # ## Bind with undefined taxa and propagate Unknown / Multi-affiliation / Other across all ranks
+    # topTaxa <- bind_rows(topTaxa, topTaxa_undefined) %>%
+    #   mutate(across(all_of(ranks), ~ if_else(.data[[taxaRank2]] %in% last_levels, .data[[taxaRank2]], .x)))
+
+
+
+    #
+    #
+    # ## TOD0: change taxaRank2 and fill directly to factors in topTaxa.
+    # ## Change to character and correct taxonomic levels
+    # correct_taxonomy <- function(x) {
+    #   last_levels <- c("Multi-affiliation", "Unknown", "Other")
+    #   res <- c(setdiff(x, last_levels), last_levels)
+    #   if (any(duplicated(res))) {
+    #     warning(paste("Please check upper ranks of", res[duplicated(res)], "as they may have typos.\n"))
+    #     res <- unique(res)
+    #   }
+    #   res
+    # }
+
+    # ## Replace all levels in taxonomy of non-top / non-unknown taxa to Other
+    # tax <- as(tax_table(physeq), "matrix")
+    # ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
+    # tax[!ii, ] <- "Other"
+    # tax_table(physeq) <- tax
+    # archetype <- taxa_names(physeq)[!ii][1]
+    # physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = archetype)
+    # taxa_names(physeq)[taxa_names(physeq) == archetype] <- "Other"
+    # # physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
+    #
+    # tdf <- psmelt(physeq)
+    # tdf[, taxaRank2] <- factor(tdf[, taxaRank2], levels = correct_taxonomy(topTaxa[[taxaRank2]]))
+    #
+    # ## Create correct order for the filling variable (if different from taxaRank2)
+    # if (fill != taxaRank2) {
+    #   fill_order <- count(topTaxa, .data[[fill]], wt = abundance, sort = TRUE) %>%
+    #     pull(fill)
+    #   tdf[, fill] <- factor(tdf[, fill], levels = correct_taxonomy(fill_order)) %>%
+    #     droplevels()
+    # }
+    #
+    # tdf <- tdf %>% arrange(desc(.data[[fill]]), desc(Abundance))
+    #
+    # return(tdf)
 }
 
 #' Plot a distance matrix as a heatmap
