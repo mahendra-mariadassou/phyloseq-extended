@@ -1,16 +1,10 @@
 Package: phyloseq.extended
 Title: PhyloseqExtended
-Version: 0.1.1.7
+Version: 0.1.1.8
 Authors@R: c(
-    person(given = "Mahendra",
-           family = "Mariadassou",
-           role = c("aut", "cre"),
-           email = "mahendra.mariadassou@inrae.fr"),
-    person(given = "Cédric",
-           family = "Midoux",
-           role = c("ctb"),
-           email = "cedric.midoux@inrae.fr")
-    )
+    person("Mahendra", "Mariadassou", , "mahendra.mariadassou@inrae.fr", role = c("aut", "cre")),
+    person("Cédric", "Midoux", , "cedric.midoux@inrae.fr", role = "ctb")
+  )
 Description: Adds severals additional functions to phyloseq (rarefaction
     curves, phylogenetic diversities, specificity and prevalence indices,
     nice composition plots, etc). Mostly used for personal use and during
@@ -30,8 +24,8 @@ Imports:
     parallel,
     phyloseq,
     purrr,
-    stringr,
     scales,
+    stringr,
     tibble,
     tidyr,
     vegan
@@ -41,4 +35,4 @@ biocViews:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
