@@ -104,6 +104,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType", spread = TRUE)
 #' ## Contrast with
 #' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType")
+#' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', fill = "Phylum", facet_grid = "~EnvType")
 plot_composition <- function(physeq,
                              taxaRank1 = NULL,
                              taxaSet1 = NULL,
@@ -130,7 +131,7 @@ plot_composition <- function(physeq,
   if (fill %in% c("OTU", "ASV")) fill <- "OTU_rank"
 
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
-                     fill, numberOfTaxa, startFrom, spread)
+                     fill, numberOfTaxa, startFrom, spread) %>% droplevels()
   if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
 
   p <- ggplot(ggdata,
@@ -153,13 +154,20 @@ plot_composition <- function(physeq,
         "Unknown"           = "grey45",
         "Other"             = "black"
       )
-      # colvals <- colvals[levels]
+      colvals <- colvals[levels]
       ## Now add the manually re-scaled layer with Unassigned as grey
       p <- p +
-        scale_fill_manual(values = colvals) +
-        scale_color_manual(values = colvals)
+        scale_fill_manual(values = colvals)
 
+      if (fill != taxaRank2) {
+        colvals[] <- "grey20"
+        p <- p +
+          aes(color = .data[[fill]]) +
+          scale_color_manual(values = colvals) +
+          labs(subtitle = paste("Grey boxes correspond to", taxaRank2, "within the same", fill))
+      }
   }
+
   p <- p + geom_bar(stat = "identity", position = "stack", ...)
   if ( !is.null(facet_grid)) {
     p <- p + facet_grid(facet_grid, scales = "free_x")
