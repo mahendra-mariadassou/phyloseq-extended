@@ -90,6 +90,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' @param y Variable mapped to y-axis
 #' @param facet_grid variable used for faceting.
 #' @param sampleOrder Sample order (ignored if \code{x} is different from "Samples")
+#' @param taxaOrder Taxa order, either "abundance" (default) or "name" (alphabetical order)
 #' @param spread If `TRUE` spread taxonomy from top to bottom using [tax_spread()] to avoid Unknown, Multi-affiliation and NA from showing up in the plot.
 #' @param ... Additional arguments passed on to geom_bar
 #'
@@ -105,6 +106,8 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' ## Contrast with
 #' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType")
 #' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', fill = "Phylum", facet_grid = "~EnvType")
+#' ## Change taxa ordering
+#' plot_composition(food, "Kingdom", "Bacteria", "Phylum", taxaOrder = "name", facet_grid = "~EnvType")
 plot_composition <- function(physeq,
                              taxaRank1 = NULL,
                              taxaSet1 = NULL,
@@ -115,6 +118,7 @@ plot_composition <- function(physeq,
                              x = "Sample",
                              y = "Abundance",
                              sampleOrder = NULL,
+                             taxaOrder = "abundance",
                              facet_grid = NULL,
                              spread = FALSE,
                              ...) {
@@ -131,7 +135,7 @@ plot_composition <- function(physeq,
   if (fill %in% c("OTU", "ASV")) fill <- "OTU_rank"
 
   ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
-                     fill, numberOfTaxa, startFrom, spread) %>% droplevels()
+                     fill, numberOfTaxa, startFrom, taxaOrder, spread) %>% droplevels()
   if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
 
   p <- ggplot(ggdata,
@@ -493,7 +497,10 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
 #' ggformat(food)
 #' ggformat(food, taxaSet1 = NULL, taxaRank2 = "Phylum")
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
-                     taxaRank2 = "Family", fill = NULL, numberOfTaxa = 9, startFrom = 1, spread = FALSE) {
+                     taxaRank2 = "Family", fill = NULL,
+                     numberOfTaxa = 9, startFrom = 1,
+                     taxaOrder = c("abundance", "name"),
+                     spread = FALSE) {
     ## Enforce orientation and transform count to relative abundances
     stopifnot(!is.null(sample_data(physeq, FALSE)),
               !is.null(tax_table(physeq, FALSE)))
@@ -590,14 +597,27 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     }
 
     ## Change taxaRank2/fill to ordered levels and sort topTaxa
-    topTaxa[[taxaRank2]] <- factor(topTaxa[[taxaRank2]],
-                                   levels = c(topTaxa %>% filter(status == "conserved") %>% pull(taxaRank2),
-                                              last_levels))
-    topTaxa <- arrange(topTaxa, .data[[taxaRank2]])
+    taxaOrder <- match.arg(taxaOrder)
+    taxa_levels <- topTaxa %>% filter(status == "conserved") %>% pull(taxaRank2)
+    if (taxaOrder == "name") {
+      taxa_levels <- sort(taxa_levels)
+    }
+    taxa_levels <- c(taxa_levels, last_levels)
+
+    topTaxa <- topTaxa %>%
+      mutate({{taxaRank2}} := factor(.data[[taxaRank2]], levels = taxa_levels)) %>%
+      arrange(.data[[taxaRank2]])
+
     if (taxaRank2 != fill) {
-      topTaxa[[fill]] <- factor(topTaxa[[fill]],
-                                   levels = c(topTaxa %>% filter(status == "conserved") %>% pull(fill) %>% unique(),
-                                              last_levels))
+      fill_levels <- topTaxa %>% filter(status == "conserved") %>% pull(fill) %>% unique()
+      if (taxaOrder == "name") {
+        fill_levels <- sort(fill_levels)
+      }
+      fill_levels <- c(fill_levels, last_levels)
+      topTaxa <- topTaxa %>%
+        mutate({{fill}} := factor(.data[[fill]], levels = fill_levels))
+    } else {
+      fill_levels <- taxa_levels
     }
 
     ## Compact and simplify physeq object
@@ -609,8 +629,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
 
     tdf <- psmelt(physeq) %>%
-      mutate({{taxaRank2}} := factor(.data[[taxaRank2]], levels = levels(topTaxa[[taxaRank2]])),
-             {{fill}} := factor(.data[[fill]], levels = levels(topTaxa[[fill]]))) %>%
+      mutate({{taxaRank2}} := factor(.data[[taxaRank2]], levels = taxa_levels),
+             {{fill}} := factor(.data[[fill]], levels = fill_levels)) %>%
       arrange(desc(.data[[fill]]), Abundance)
 
     return(tdf)
