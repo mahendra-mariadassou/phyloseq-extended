@@ -15,6 +15,7 @@ plot_composition(
   x = "Sample",
   y = "Abundance",
   sampleOrder = NULL,
+  taxaOrder = "abundance",
   facet_grid = NULL,
   spread = FALSE,
   ...
@@ -42,6 +43,8 @@ selecting the \code{numberOfTaxa} most abundant taxa.}
 
 \item{sampleOrder}{Sample order (ignored if \code{x} is different from "Samples")}
 
+\item{taxaOrder}{Taxa order, either "abundance" (default) or "name" (alphabetical order)}
+
 \item{facet_grid}{variable used for faceting.}
 
 \item{spread}{If \code{TRUE} spread taxonomy from top to bottom using \code{\link[=tax_spread]{tax_spread()}} to avoid Unknown, Multi-affiliation and NA from showing up in the plot.}
@@ -64,4 +67,6 @@ plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', tax
 ## Contrast with
 plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType")
 plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', fill = "Phylum", facet_grid = "~EnvType")
+## Change taxa ordering
+plot_composition(food, "Kingdom", "Bacteria", "Phylum", taxaOrder = "name", facet_grid = "~EnvType")
 }

@@ -12,6 +12,7 @@ ggformat(
   fill = NULL,
   numberOfTaxa = 9,
   startFrom = 1,
+  taxaOrder = c("abundance", "name"),
   spread = FALSE
 )
 }
@@ -30,6 +31,8 @@ ggformat(
 
 \item{startFrom}{\code{startFrom - 1} is the number of (most abundant) taxa to discard before
 selecting the \code{numberOfTaxa} most abundant taxa.}
+
+\item{taxaOrder}{Taxa order, either "abundance" (default) or "name" (alphabetical order)}
 
 \item{spread}{If \code{TRUE} spread taxonomy from top to bottom using \code{\link[=tax_spread]{tax_spread()}} to avoid Unknown, Multi-affiliation and NA from showing up in the plot.}
 }
