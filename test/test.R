@@ -3,7 +3,7 @@ library(phyloseq)
 library(reshape2)
 library(ape)
 library(dplyr)
-library(gridExtra)
+#library(gridExtra)
 library(plotly)
 
 source("R/graphical_methods.R")

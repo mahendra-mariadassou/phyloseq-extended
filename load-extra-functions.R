@@ -3,7 +3,7 @@ library(ggplot2)
 library(phyloseq)
 library(reshape2)
 library(ape)
-library(gridExtra)
+#library(gridExtra)
 
 scripts <- c("graphical_methods.R",
              "tree_methods.R",
