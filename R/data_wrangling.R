@@ -144,7 +144,8 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
 #'
 #' @example
 #' data(food)
-#' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum")
+#' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> tax_table()
+#' staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum")  |> tax_table()
 staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
   taxa_index <- matrix(FALSE, nrow = ntaxa(physeq), ncol = length(rank_names(physeq)))
   taxa_index[] <- tax_table(physeq) %in% atomic_taxa
@@ -152,24 +153,37 @@ staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
     stop("Overlap between preserved taxa detected. Make sure to specify which taxa to conserve.")
   }
   preserved_ranks <- which(colSums(taxa_index) > 0)
-  if (any(preserved_ranks <= which(rank_names(physeq) == taxrank))) {
+  preserved_taxa <- rowSums(taxa_index) == 1
+  min_rank <- min(preserved_ranks); max_rank <- max(preserved_ranks)
+  glom_rank <- which(rank_names(physeq) == taxrank)
+  if (min_rank < glom_rank) {
     stop("The agglomeration rank conflicts with some of the taxa. Choose a higher rank.")
   }
-  other_taxa <- prune_taxa(rowSums(taxa_index) == 0, physeq) |>
+  ## Find rightmost rank and set all further values to NA
+  preserved_taxa_coord <- which(taxa_index, arr.ind = TRUE)
+  rightmost_rank <- rep(glom_rank, ntaxa(physeq))
+  rightmost_rank[preserved_taxa_coord[, 1]] <- preserved_taxa_coord[, 2]
+  tax_table(physeq)[col(tax_table(physeq)) > rightmost_rank] <- NA_character_
+  ## Extract most accurate taxonomy for each taxa and replace
+  # rightmost_name <- as(tax_table(physeq), "matrix")[matrix(c(1:ntaxa(physeq), rightmost_rank), ncol = 2)]
+  # replacement_mask <- col(tax_table(physeq)) > rightmost_rank
+  # tax_table(physeq)[replacement_mask] <- rightmost_name[row(tax_table(physeq))][replacement_mask]
+  other_taxa <- prune_taxa(!preserved_taxa, physeq) |>
     fast_tax_glom(taxrank)
-  preserved_taxa <- prune_taxa(rowSums(taxa_index) > 0, physeq) |>
-    fast_tax_glom(rank_names(physeq)[max(preserved_ranks)])
-  if (length(preserved_ranks == 1)) {
-    ## manage rank names in other_taxa
-    preserved_glom <- tax_table(preserved_taxa)[, taxrank] %>% unique() %>% as.character()
-    srank <- tax_table(other_taxa)[, taxrank] %>% as.character()
-    tax_table(other_taxa)[, taxrank] <- if_else(
-      srank %in% preserved_glom,
-      paste("Other", srank),
-      srank
-    )
-  }
-  all_taxa <- merge_phyloseq(other_taxa, preserved_taxa) %>%
+  preserved_taxa <- prune_taxa(preserved_taxa, physeq) |>
+    fast_tax_glom(rank_names(physeq)[max_rank])
+  ## pad ranks for other taxonomic levels
+  # if (min_rank == max_rank) {
+  ## manage rank names in other_taxa
+  preserved_glom <- tax_table(preserved_taxa)[, glom_rank] %>% unique() %>% as.character()
+  srank <- tax_table(other_taxa)[, glom_rank] %>% as.character()
+  tax_table(other_taxa)[, glom_rank] <- if_else(
+    srank %in% preserved_glom,
+    paste("Other", srank),
+    srank
+  )
+  # }
+  merge_phyloseq(other_taxa, preserved_taxa) %>%
     tax_spread(explicit = FALSE)
 }
 
