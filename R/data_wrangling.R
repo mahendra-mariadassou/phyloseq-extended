@@ -131,11 +131,6 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   )
 }
 
-## Internal function to compute groupwise prevalence using multiple abundance thresholds
-.core_microbiome <- function(cdf, group, ab_thresholds) {
-
-}
-
 #' Compute core microbiome
 #'
 #' @param physeq Required. \code{\link{phyloseq-class}} object
@@ -215,4 +210,34 @@ clr <- function(x) {
   if (any(x <= 0)) stop("clr is not defined for negative data")
   log_x <- log(x)
   log_x - mean(log_x)
+}
+
+#' mclr transformation
+#'
+#' @param data a integer vector or numeric vector of non-negative values
+#' @param c positive constant used to separate the minimum value (after clr transform) and the zeros. The default value is the one recommended by the authors.
+#'
+#' @return the modified clr-transformed vector as defined in Yoon, Gaynanova and Müeller (2019)
+#'
+#' @references Yoon, Gaynanova and Müeller (2019), Frontiers in Genetics, Microbial Networks in SPRING - Semi-parametric Rank-Based Correlation and Partial Correlation Estimation for Quantitative Microbiome Data. doi:10.3389/fgene.2019.00516
+#'
+#' @details The mclr transform of a vector x is given by
+#' \deqn{mclr(x) = \left(0, \frac{log(x_i)}{g(x)} + \varepsilon, \dots \right)}{%
+#' mclr(x) = (0, log(x_i)/g(x) + epsilon, ...)}
+#' where \eqn{g(x)} is the geometric mean of x (excluding 0s) and all non-zeros values are shifted by epsilon to preserve the original ordering of the data.
+#' @examples
+#' counts <- matrix(c(0, 1, 1, 1, 2, 0), nrow = 2)
+#' mclr(counts)
+#'
+#' @export
+#'
+mclr <- function(data, c = 1) {
+  zero_mask <- data == 0
+  log_data <- log(data)
+  log_data[zero_mask] <- NA_real_
+  clr_data <- log_data - rowMeans(log_data, na.rm = TRUE)
+  shift <- min(clr_data, na.rm = TRUE) + c
+  mclr_data <- clr_data + shift
+  mclr_data[zero_mask] <- 0
+  mclr_data
 }
