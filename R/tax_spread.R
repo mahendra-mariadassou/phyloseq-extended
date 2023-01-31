@@ -4,6 +4,7 @@
 #'
 #' @param physeq (Required). phyloseq-class.
 #' @param pattern string. Pattern matching with taxon to rename. Can use regex, use `|` for separator
+#' @param explicit Logical. Should the spreading be explicit (e.g. "Unknown Firmicute species" for the species rank) (TRUE, default) or implicit (e.g. "Firmicutes" for all ranks below Phylum).
 #'
 #' @importFrom phyloseq tax_table
 #' @importFrom tibble rownames_to_column column_to_rownames
@@ -17,9 +18,11 @@
 #' @examples
 #' physeq <- phyloseq(otu_table(matrix(1:4, 2, 2), taxa_are_rows = TRUE),
 #' tax_table(matrix(c("Firmicutes", "Firmicutes", "Unknown", "Bacilli", NA, "Lactobacillales"), 2, 3)))
-#' tax_spread(physeq)
+#' tax_spread(physeq) %>% tax_table()
+#' tax_spread(physeq, explicit = FALSE) %>% tax_table
 tax_spread <- function(physeq,
-                       pattern = "^NA$|Multi-affiliation|Unknown") {
+                       pattern = "^NA$|Multi-affiliation|Unknown",
+                       explicit = TRUE) {
   if (is.null(access(physeq, "tax_table"))) {
     stop("The tax_spread() function requires that physeq contain a taxonomyTable")
   }
@@ -29,7 +32,7 @@ tax_spread <- function(physeq,
     last_aff <- x[!is.na(x) & str_detect(x, regex(pattern, ignore_case = TRUE), negate = TRUE)] %>% dplyr::last()
     dplyr::if_else(
       str_detect(x, regex(pattern, ignore_case = TRUE)) | is.na(x),
-      paste("Unknown", last_aff, ranks),
+      if (explicit) paste("Unknown", last_aff, ranks) else last_aff,
       x
     )
   }
