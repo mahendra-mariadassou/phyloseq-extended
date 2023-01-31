@@ -131,6 +131,48 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   )
 }
 
+#' Staggered taxonomic agglomeration
+#'
+#' @param physeq Required. \code{\link{phyloseq-class}} object
+#' @param atomic_taxa A character string specificying the taxa that won't be agglomerated. Note that taxa can be mixed (i.e. Species and Phylum) but are not allowed to overlap.
+#' @param taxrank A character string specifying the taxonomic level that you want to agglomerate over (except for the taxa in `atomic_taxa`).
+#'
+#' @return A taxonomically-agglomerated \code{\link{phyloseq-class}} object.
+#' @export
+#'
+#' @details staggered_tax_glom differs from [fast_tax_glom()] by preserving some taxa during the taxonomic agglomeration phase
+#'
+#' @example
+#' data(food)
+#' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum")
+staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
+  taxa_index <- matrix(FALSE, nrow = ntaxa(physeq), ncol = length(rank_names(physeq)))
+  taxa_index[] <- tax_table(physeq) %in% atomic_taxa
+  if (any(rowSums(taxa_index) > 1)) {
+    stop("Overlap between preserved taxa detected. Make sure to specify which taxa to conserve.")
+  }
+  preserved_ranks <- which(colSums(taxa_index) > 0)
+  if (any(preserved_ranks <= which(rank_names(physeq) == taxrank))) {
+    stop("The agglomeration rank conflicts with some of the taxa. Choose a higher rank.")
+  }
+  other_taxa <- prune_taxa(rowSums(taxa_index) == 0, physeq) |>
+    fast_tax_glom(taxrank)
+  preserved_taxa <- prune_taxa(rowSums(taxa_index) > 0, physeq) |>
+    fast_tax_glom(rank_names(physeq)[max(preserved_ranks)])
+  if (length(preserved_ranks == 1)) {
+    ## manage rank names in other_taxa
+    preserved_glom <- tax_table(preserved_taxa)[, taxrank] %>% unique() %>% as.character()
+    srank <- tax_table(other_taxa)[, taxrank] %>% as.character()
+    tax_table(other_taxa)[, taxrank] <- if_else(
+      srank %in% preserved_glom,
+      paste("Other", srank),
+      srank
+    )
+  }
+  all_taxa <- merge_phyloseq(other_taxa, preserved_taxa) %>%
+    tax_spread(explicit = FALSE)
+}
+
 #' Compute core microbiome
 #'
 #' @param physeq Required. \code{\link{phyloseq-class}} object
