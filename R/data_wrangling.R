@@ -142,7 +142,7 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
 #'
 #' @details staggered_tax_glom differs from [fast_tax_glom()] by preserving some taxa during the taxonomic agglomeration phase
 #'
-#' @example
+#' @examples
 #' data(food)
 #' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> tax_table()
 #' staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum")  |> tax_table()
