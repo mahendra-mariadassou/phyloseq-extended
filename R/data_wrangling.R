@@ -142,6 +142,8 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
 #'
 #' @details staggered_tax_glom differs from [fast_tax_glom()] by preserving some taxa during the taxonomic agglomeration phase
 #'
+#' @importFrom stringr str_remove
+#'
 #' @examples
 #' data(food)
 #' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> tax_table()
@@ -183,8 +185,10 @@ staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
     srank
   )
   # }
-  merge_phyloseq(other_taxa, preserved_taxa) %>%
+  res <- merge_phyloseq(other_taxa, preserved_taxa) %>%
     tax_spread(explicit = FALSE)
+  tax_table(res)[ , glom_rank] <- stringr::str_remove(tax_table(res)[ , glom_rank], "^Other ")
+  res
 }
 
 #' Compute core microbiome
