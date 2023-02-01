@@ -605,7 +605,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     if (taxaOrder == "name") {
       taxa_levels <- sort(taxa_levels)
     }
-    taxa_levels <- c(taxa_levels, last_levels)
+    taxa_levels <- c(taxa_levels, last_levels) %>% unique()
 
     topTaxa <- topTaxa %>%
       mutate({{taxaRank2}} := factor(.data[[taxaRank2]], levels = taxa_levels)) %>%
