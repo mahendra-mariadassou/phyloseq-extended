@@ -513,6 +513,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 
     ## Check that taxaranks and fill are propers ranks
     if (is.null(fill)) { fill <- taxaRank2 }
+    if (is.null(taxaRank1)) { taxaRank1 <- rank_names(physeq)[1]; taxaSet1 <- NULL }
     stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU_rank")))
     ranks <- find_upper_ranks(physeq, c(taxaRank1, taxaRank2, fill))
 
@@ -543,6 +544,8 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
     ## agglomerate at TaxaRank2
     if (taxaRank2 != "OTU_rank") {
       physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
+    } else {
+      ranks <- c(ranks, "OTU_rank")
     }
 
     ## Sort taxa by abundance, remove unwanted taxa and remove affiliation of least abundant taxa

@@ -4,12 +4,14 @@
 \alias{tax_spread}
 \title{tax_spread}
 \usage{
-tax_spread(physeq, pattern = "^NA$|Multi-affiliation|Unknown")
+tax_spread(physeq, pattern = "^NA$|Multi-affiliation|Unknown", explicit = TRUE)
 }
 \arguments{
 \item{physeq}{(Required). phyloseq-class.}
 
 \item{pattern}{string. Pattern matching with taxon to rename. Can use regex, use \code{|} for separator}
+
+\item{explicit}{Logical. Should the spreading be explicit (e.g. "Unknown Firmicute species" for the species rank) (TRUE, default) or implicit (e.g. "Firmicutes" for all ranks below Phylum).}
 }
 \value{
 physeq object with correct name
@@ -20,5 +22,6 @@ Spread taxonomy according to last known taxa, to remove unknown and multi-affili
 \examples{
 physeq <- phyloseq(otu_table(matrix(1:4, 2, 2), taxa_are_rows = TRUE),
 tax_table(matrix(c("Firmicutes", "Firmicutes", "Unknown", "Bacilli", NA, "Lactobacillales"), 2, 3)))
-tax_spread(physeq)
+tax_spread(physeq) \%>\% tax_table()
+tax_spread(physeq, explicit = FALSE) \%>\% tax_table
 }
