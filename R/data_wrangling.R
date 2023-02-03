@@ -296,8 +296,8 @@ mclr <- function(data, c = 1) {
   log_data <- log(data)
   log_data[zero_mask] <- NA_real_
   clr_data <- log_data - rowMeans(log_data, na.rm = TRUE)
-  shift <- min(clr_data, na.rm = TRUE) + c
-  mclr_data <- clr_data + shift
+  shift <- min(clr_data, na.rm = TRUE)
+  mclr_data <- clr_data + abs(shift) + c
   mclr_data[zero_mask] <- 0
   mclr_data
 }
