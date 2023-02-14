@@ -7,7 +7,8 @@
 phyloseq_to_biom(
   physeq,
   biom_format = c("frogs", "standard"),
-  rows_metadata = NULL
+  rows_metadata = NULL,
+  matrix_type = c("dense", "sparse")
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ phyloseq_to_biom(
 \item{biom_format}{(Optional). Either "frogs" (default) or "standard". Controls the way the taxonomy is written in the \link{biom-class} object. \code{biom_format = "frogs"} is intended for later use with \link{import_frogs} and \code{biom_format = "standard"} for later use with \link{import_biom}.}
 
 \item{rows_metadata}{(Optional). Either \code{NULL} (default) or a named list of rows metadata included in the final biom output. The taxonomy and blast_taxonomy fields are automatically ignored and replaced by corresponding fields from the physeq argument}
+
+\item{matrix_type}{(Optional). Either "dense" (default) to store the otu count table as dense matrix or "sparse" to store it as a sparse matrix.}
 }
 \value{
 A \link{biom-class} object
@@ -32,6 +35,7 @@ in the 'rows' metadata. The difference is intended for better compatibility with
 \dontrun{
 data(food)
 phyloseq_to_biom(food)
+phyloseq_to_biom(food, matrix_type = "sparse")
 }
 }
 \seealso{
