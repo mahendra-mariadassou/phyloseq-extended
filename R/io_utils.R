@@ -70,7 +70,7 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
 #' @export
 #'
 #' @importFrom phyloseq access
-#' @importFrom biomformat write_biom
+#' @importFrom jsonlite toJSON
 #' @importFrom Biostrings writeXStringSet
 #'
 #' @examples
@@ -82,8 +82,8 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
 #' import_frogs(tmp_biom, tmp_tree)
 write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NULL, biom_format = c("frogs", "standard"), ...) {
   biom <- phyloseq_to_biom(physeq, biom_format = match.arg(biom_format), ...)
-  ## Write biom
-  biomformat::write_biom(x = biom, biom_file = biom_file)
+  ## Write biom using a safe copy of biomformat::write_biom()
+  cat(jsonlite::toJSON(x = biom, always_decimal = TRUE), file = biom_file)
   ## Write fasta (if any)
   refseq <- phyloseq::access(physeq, "refseq")
   if (!is.null(refseq)) {
