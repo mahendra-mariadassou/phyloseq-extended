@@ -3,6 +3,7 @@
 #' @param physeq (Required). A \link{phyloseq-class} object.
 #' @param biom_format (Optional). Either "frogs" (default) or "standard". Controls the way the taxonomy is written in the \link{biom-class} object. \code{biom_format = "frogs"} is intended for later use with \link{import_frogs} and \code{biom_format = "standard"} for later use with \link{import_biom}.
 #' @param rows_metadata (Optional). Either `NULL` (default) or a named list of rows metadata included in the final biom output. The taxonomy and blast_taxonomy fields are automatically ignored and replaced by corresponding fields from the physeq argument
+#' @param matrix_type (Optional). Either "dense" (default) to store the otu count table as dense matrix or "sparse" to store it as a sparse matrix.
 #'
 #' @return A \link{biom-class} object
 #' @export
@@ -20,8 +21,9 @@
 #' \dontrun{
 #' data(food)
 #' phyloseq_to_biom(food)
+#' phyloseq_to_biom(food, matrix_type = "sparse")
 #' }
-phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_metadata = NULL) {
+phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_metadata = NULL, matrix_type = c("dense", "sparse")) {
   ## Counts
   cdf <- phyloseq::otu_table(physeq) %>% as("matrix")
   if (!phyloseq::taxa_are_rows(physeq)) cdf <- t(cdf)
@@ -54,6 +56,15 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
   biom@.Data[[10]] <- lapply(biom@.Data[[10]], correct_taxonomy)
   ## Converts observations to integers for FROGS output
   if (biom_format == "frogs") biom@.Data[[12]] <- lapply(biom@.Data[[12]], as.integer)
+  ## Convert count matrix to sparse format (if matrix_type = "sparse")
+  matrix_type <- match.arg(matrix_type)
+  if (matrix_type == "sparse") {
+    biom@.Data[[7]] <- "sparse"
+    non_zero_index <- which(cdf > 0, arr.ind = TRUE, useNames = FALSE)
+    sparse_cdf <- cbind(non_zero_index - 1, ## 0-zero based coordinates in JSON
+                        cdf[non_zero_index])
+    biom@.Data[[12]] <- sparse_cdf
+  }
   biom
 }
 
@@ -77,7 +88,7 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
 #' data(food)
 #' tmp_biom <- tempfile()
 #' tmp_tree <- tempfile()
-#' write_phyloseq(food, biom_file = tmp_biom, tree_file = tmp_tree)
+#' write_phyloseq(food, biom_file = tmp_biom, tree_file = tmp_tree, matrix_type = "sparse")
 #' ## The output biom can be read again as a phyloseq object
 #' import_frogs(tmp_biom, tmp_tree)
 write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NULL, biom_format = c("frogs", "standard"), ...) {
