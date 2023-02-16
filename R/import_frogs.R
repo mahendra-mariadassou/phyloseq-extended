@@ -23,11 +23,21 @@ import_frogs <- function(biom,
                          refseqArgs = NULL,
                          taxMethod = c("blast", "rdp"),
                          parallel = TRUE, ...) {
-    argumentlist <- list()
     x <- biomformat::read_biom(biom)
     ## otu table
     otuTable <- otu_table(as(biom_data(x), "matrix"), taxa_are_rows = TRUE)
-    argumentlist <- c(argumentlist, list(otuTable))
+    ## sample data
+    if (is.null(sample_metadata(x))) {
+      samdata <- NULL
+    }
+    else {
+      samdata = sample_data(sample_metadata(x))
+      # failsafe of biom_data() when there is only one sample
+      if (ncol(otuTable) == 1 & nrow(samdata) == 1) {
+        colnames(otuTable) <- rownames(samdata)
+      }
+    }
+    argumentlist <- c(list(otuTable), list(samdata))
     ## tax table
     taxMethod <- match.arg(taxMethod)
     field <- paste(taxMethod, "taxonomy", sep = "_")
@@ -74,14 +84,6 @@ import_frogs <- function(biom,
     #     taxtab <- tax_table(taxtab)
     # }
     argumentlist <- c(argumentlist, list(tax_table(taxtab)))
-    ## sample data
-    if (is.null(sample_metadata(x))) {
-        samdata <- NULL
-    }
-    else {
-        samdata = sample_data(sample_metadata(x))
-    }
-    argumentlist <- c(argumentlist, list(samdata))
     ## tree
     if (!is.null(treefilename)) {
         if (inherits(treefilename, "phylo")) {
