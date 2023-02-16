@@ -1,6 +1,6 @@
 Package: phyloseq.extended
 Title: PhyloseqExtended
-Version: 0.1.3.0
+Version: 0.1.4.0
 Authors@R: c(
     person("Mahendra", "Mariadassou", , "mahendra.mariadassou@inrae.fr", role = c("aut", "cre")),
     person("Cédric", "Midoux", , "cedric.midoux@inrae.fr", role = "ctb")
