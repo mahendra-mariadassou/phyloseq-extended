@@ -3,3 +3,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^FileSaver.js$
+^load-extra-functions.R$
+^test/*$
