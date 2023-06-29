@@ -9,7 +9,7 @@ Description: Adds severals additional functions to phyloseq (rarefaction
     curves, phylogenetic diversities, specificity and prevalence indices,
     nice composition plots, etc). Mostly used for personal use and during
     training sessions.
-License: GPL-3
+License: GPL-3 + file LICENSE
 Depends:
     R (>= 3.4.0)
 Imports: 
