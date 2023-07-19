@@ -806,27 +806,3 @@ g_legend <- function(a.gplot){
   legend <- tmp$grobs[[leg]]
   legend
 }
-
-
-################################################################################
-# Define S3 generic extract_eigenvalue function
-# Function is used by `plot_scree` to get the eigenvalue vector from different
-# types of ordination objects.
-# Used S3 generic in this case because many ordination objects, the input, are
-# not formally-defined S4 classes, but vaguely-/un-defined S3.
-#' @keywords internal
-# extract_eigenvalue = function(ordination) UseMethod("extract_eigenvalue", ordination)
-# # Default is to return NULL (e.g. for NMDS, or non-supported ordinations/classes).
-# extract_eigenvalue.default = function(ordination) NULL
-# # for pcoa objects
-# extract_eigenvalue.pcoa = function(ordination) ordination$values$Relative_eig
-# # for CCA objects
-# extract_eigenvalue.cca = function(ordination) c(ordination$CCA$eig, ordination$CA$eig)
-# # for RDA objects
-# extract_eigenvalue.rda = function(ordination) c(ordination$CCA$eig, ordination$CA$eig)
-# # for dpcoa objects
-# extract_eigenvalue.dpcoa = function(ordination) ordination$eig
-# # for decorana (dca) objects
-# extract_eigenvalue.decorana = function(ordination) ordination$evals
-# for pca (edgePCA) objects
-extract_eigenvalue.pca = function(ordination) ordination$values$Eigenvalues
