@@ -20,6 +20,9 @@
 #' @examples
 #' data(food)
 #' model <- ncm_fit(food)
+#' @importFrom dplyr if_else mutate select
+#' @importFrom phyloseq nsamples otu_table sample_sums taxa_are_rows
+#' @importFrom tibble tibble
 ncm_fit <- function(physeq, threshold, absolute.threshold = 1) {
     abundances <- otu_table(physeq)
     ## Extract species count
@@ -74,6 +77,7 @@ ncm_fit <- function(physeq, threshold, absolute.threshold = 1) {
 #' data(food)
 #' model <- ncm_fit(food)
 #' plot_ncm(model)
+#' @importFrom ggplot2 aes geom_line geom_point geom_ribbon ggplot scale_x_log10
 plot_ncm <- function(ncm.fit) {
     ggplot(data = ncm.fit$observations, aes(x = freq, y = occ)) +
         geom_ribbon(data = ncm.fit$ncm_prediction, aes(ymin = occ_lower, ymax = occ_upper), alpha = 0.1) +
@@ -104,6 +108,7 @@ plot_ncm <- function(ncm.fit) {
 #' @examples
 #' data(food)
 #' ncm_loglik(otu_table(food), absolute.threshold = 1)
+#' @importFrom stats pbeta
 ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute.threshold = NULL) {
     Nt <- colSums(abundances)
     ## regional pool species composition
@@ -131,6 +136,7 @@ ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute.t
 }
 
 ## MLE of migration rate m in NCM
+#' @importFrom stats optimize
 ncm_mle_fit <- function(abundances, threshold, absolute.threshold = NULL) {
     optim.function <- function(m) { ncm_loglik(abundances, m, threshold, absolute.threshold) }
     solution <- optimize(optim.function, interval = c(1e-10, 1), maximum = TRUE)
@@ -142,6 +148,7 @@ ncm_mle_fit <- function(abundances, threshold, absolute.threshold = NULL) {
 ## Probability of occupancy of a site with total count `N` and detection threshold `threshold`
 ## by a species with abundance `pi` in the regional pool under a NCM with migration rate `m`. Vectorized over
 ## N and threshold if there are multiple sites (in which the function returns the mean across sites)
+#' @importFrom stats pbeta
 ncm_curve <- function(threshold, N, m) {
     if (length(threshold) == 1) {
         if (threshold >= 1) {
@@ -164,6 +171,7 @@ ncm_curve <- function(threshold, N, m) {
 }
 
 ## Wilson confidence interval for mean of sum of independent bernoulli (with different parameters)
+#' @importFrom stats qnorm
 wilson_conf_int <- function(p, alpha  = 0.05, n) {
     z <- qnorm(1 - alpha/2)
     center <- (p + z^2 / (2*n)) / (1 + z^2 / n)

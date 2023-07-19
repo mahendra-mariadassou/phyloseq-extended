@@ -8,8 +8,10 @@
 #' @return A \link{biom-class} object
 #' @export
 #'
-#' @importFrom phyloseq otu_table access
 #' @importFrom biomformat make_biom
+#' @importFrom methods as
+#' @importFrom phyloseq access otu_table taxa_are_rows taxa_names
+#' @importFrom purrr map_chr
 #'
 #' @seealso \link{make_biom}, \link{write_phyloseq}
 #'
@@ -80,9 +82,9 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
 #' @return Nothing. The function is used for its side effect of exporting a \link{phyloseq-class} object to text files.
 #' @export
 #'
-#' @importFrom phyloseq access
-#' @importFrom jsonlite toJSON
 #' @importFrom Biostrings writeXStringSet
+#' @importFrom ape write.tree
+#' @importFrom phyloseq access phy_tree
 #'
 #' @examples
 #' data(food)
@@ -132,8 +134,10 @@ write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NUL
 #' * taxa mean abundance (conditional upon presence)
 #' All metadata pertaining to the samples is lost.
 #'
-#' @importFrom phyloseq access taxa_names otu_table
 #' @importFrom dplyr as_tibble bind_cols mutate
+#' @importFrom methods as
+#' @importFrom phyloseq access otu_table taxa_are_rows taxa_names
+#' @importFrom tibble tibble
 #'
 #' @examples
 #' data(food)
@@ -169,7 +173,8 @@ phyloseq_to_tsv <- function(physeq) {
 #'
 #' @description Works for biom data with only one column (sample), unlike the original version.
 #'
-#' @importFrom jsonlite unbox toJSON
+#' @importFrom jsonlite toJSON
+#' @importFrom methods slot
 #'
 #' @examples
 #' data(food)

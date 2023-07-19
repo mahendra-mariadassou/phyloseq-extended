@@ -31,6 +31,9 @@
 #'        tip.presence[i, j] is TRUE if taxa j is found in community i.
 #' - pendant.edges A logical vector indicating which edges are pendant (i.e lead to a tip)
 #' - legend A named vector featuring edge widths and labels for legend.
+#' @importFrom methods as
+#' @importFrom phyloseq nsamples otu_table phy_tree taxa_are_rows
+#' @importFrom scales cbreaks log_breaks
 fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
                         width.lim = c(0.1, 4), base = 10, deviation = FALSE) {
     ## Exception handling
@@ -130,6 +133,9 @@ fattenEdges <- function(physeq, method = c("linear", "logarithmic"),
 #' - edge A color vector for edges of \code{phy_tree{physeq}}
 #' - tip A color vector for tip labels of \code{phy_tree{physeq}}
 #' - palette The named color palette color, useful for the legend
+#' @importFrom ape ace prop.part
+#' @importFrom methods as
+#' @importFrom phyloseq phy_tree tax_table taxa_names
 color_edges <- function(physeq,
                         group = "Phylum",
                         method = c("majority", "ace"),
@@ -212,6 +218,9 @@ color_edges <- function(physeq,
 #' @note The function assumes that the tree is rooted.
 #' @return The function is mainly called for its side effect of plotting a tree
 #'         with colored edges and leaves.
+#' @importFrom ape is.rooted
+#' @importFrom graphics legend
+#' @importFrom phyloseq phy_tree
 tree_colored_by <- function(physeq, group = "Phylum", method = c("majority", "ace"),
                             legend.title = deparse(substitute(group)),
                             legend.pos = "bottomright", plot = TRUE, ...) {
@@ -260,6 +269,7 @@ tree_colored_by <- function(physeq, group = "Phylum", method = c("majority", "ac
 #'         with colored edge widths
 #' - legend A named list with components \code{size}, \code{alpha} and \code{color}
 #'               used for constructing a legend.
+#' @importFrom scales alpha gradient_n_pal rescale
 construct_aesthetics <- function(x, color, fatten.edges.by,
                                  deviation = FALSE) {
     edge <- x$edge.width
@@ -350,6 +360,7 @@ construct_aesthetics <- function(x, color, fatten.edges.by,
 #' @param ... Optional. Additional arguments passed on to plot.phylo.
 #' @return Nothing. This function is used for its side effect of plotting a tree.
 #' @note This function is intended for use within plot_merged_tree, no argument checking is performed.
+#' @importFrom scales alpha
 plot_pretty_tree <- function(tree, edge.size, edge.color,
                              tip.size, tip.color,
                              fatten.edges.by, fatten.tips, color.tip, ...) {
@@ -389,6 +400,7 @@ plot_pretty_tree <- function(tree, edge.size, edge.color,
 #'               'legend' component
 #' @return Dimensions of the legend.
 #' @note This function is intended for use within plot_merged_tree, no argument checking is performed.
+#' @importFrom graphics legend
 get_legend_dimension <- function(leg) {
     ## Legend total dimensions
     leg.dim <- list(x = 0, y = 0)
@@ -473,6 +485,7 @@ get_legend_dimension <- function(leg) {
 #' @return Nothing. This function is used for its side effect of plotting
 #'         a legend.
 #' @note This function is intended for use within plot_merged_tree, no argument checking is performed.
+#' @importFrom graphics legend
 plot_pretty_legend <- function(x, y, leg) {
     res <- get_legend_dimension(leg)
     leg.dim <- res$leg.dim
@@ -562,6 +575,9 @@ plot_pretty_legend <- function(x, y, leg) {
 #' @note The function assumes that the tree is rooted.
 #' @return The function is mainly called for its side effect of plotting a tree
 #'         with colored edges and leaves.
+#' @importFrom ape is.rooted
+#' @importFrom graphics grconvertX grconvertY par title
+#' @importFrom phyloseq merge_samples nsamples phy_tree sample_names transform_sample_counts
 plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
                               missing.color = "gray",
                               show.missing.tip = TRUE,
@@ -668,6 +684,8 @@ plot_merged_trees <- function(physeq, group, freq = TRUE, method = "linear",
 
 #' These functions are adapted from plotrix package and simplified here
 #' for our purpose
+#' @importFrom graphics par strwidth text
+#' @importFrom stats approxfun
 color.legend <- function(x, y, h, col.h, col.w, title, rect.col,
                          legend, values = NULL,
                          xpd = NA, ...) {
@@ -697,6 +715,7 @@ color.legend <- function(x, y, h, col.h, col.w, title, rect.col,
     text(textx, texty, labels = legend, adj = textadj, ...)
 }
 
+#' @importFrom graphics par rect
 gradient.rect <- function (xleft, ybottom, xright, ytop, col = NULL,
                           nslices = 50, border = par("fg")) {
     yinc <- (ytop - ybottom)/nslices

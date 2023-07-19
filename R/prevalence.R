@@ -26,9 +26,10 @@
 #' * `m[i, 2N+g]` is the relative abundance of otu i in group g
 #' @export
 #'
-#' @importFrom phyloseq sample_data otu_table rarefy_even_depth
-#' @importFrom dplyr inner_join as_tibble
-#' @importFrom tidyr pivot_longer
+#' @importFrom dplyr as_tibble inner_join
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table rarefy_even_depth sample_data taxa_are_rows
+#' @importFrom tidyr gather pivot_longer
 #'
 #' @examples
 #' data(food)

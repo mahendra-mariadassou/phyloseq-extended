@@ -6,11 +6,9 @@
 #' @param pattern string. Pattern matching with taxon to rename. Can use regex, use `|` for separator
 #' @param explicit Logical. Should the spreading be explicit (e.g. "Unknown Firmicute species" for the species rank) (TRUE, default) or implicit (e.g. "Firmicutes" for all ranks below Phylum).
 #'
-#' @importFrom phyloseq tax_table
-#' @importFrom tibble rownames_to_column column_to_rownames
-#' @importFrom tidyr pivot_longer pivot_wider
-#' @importFrom dplyr mutate group_by select last if_else
-#' @importFrom stringr str_detect regex
+#' @importFrom dplyr if_else last
+#' @importFrom phyloseq access rank_names tax_table
+#' @importFrom stringr regex str_detect
 #'
 #' @return physeq object with correct name
 #' @export

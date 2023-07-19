@@ -15,6 +15,7 @@
 #' @references Vetroský, T. and Baldrian, P.(2013). The variability of the 16S rRNA Gene in Bacterial
 #'             Genomes and Its Consequences for Bacterial Community Analyses. _Plos One_ *8*(2):e57923
 #' @seealso \code{\link{sample_copy_number}}
+#' @importFrom stats rnorm
 sample_copy_number_internal <- function(level, dispersion = FALSE) {
     known.levels <- c("Acidobacteria", "Actinobacteria", "Aquificae", "Bacteroidetes", "Caldiserica",
                       "Chlamydiae", "Chlorobi", "Chloroflexi", "Cyanobacteria", "Defferibacteres",
@@ -133,6 +134,7 @@ sample_copy_number <- Vectorize(sample_copy_number_internal, "level")
 #' @param physeq Required. \code{\link{phyloseq}} class object with \code{tax_table} slot.
 #' @return A level vector, for use in \code{\link{sample_copy_number}}
 #' @seealso \code{\link{sample_copy_number}}
+#' @importFrom phyloseq tax_table
 extract_level <- function(physeq) {
     res <- tax_table(physeq)[, "Phylum"]
     res[ res %in% "Proteobacteria" ] <- tax_table(physeq)[res %in% "Proteobacteria", "Class"]
@@ -166,6 +168,8 @@ extract_level <- function(physeq) {
 #' @seealso \code{\link{sample_copy_number}}
 #'
 #' @export
+#' @importFrom phyloseq ntaxa transform_sample_counts
+#' @importFrom scales rescale
 scale_sample_counts <- function(physeq, scaling = "Phylum", dispersion = FALSE) {
     ## Test scaling and reconstruct it if needed
     if (length(scaling) == 1 && scaling == "Abundance") {

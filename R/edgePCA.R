@@ -12,6 +12,7 @@
 #' @examples
 #' data(food)
 #' incidence_matrix(phy_tree(food))
+#' @importFrom ape is.rooted prop.part
 incidence_matrix <- function(phy) {
     if (!ape::is.rooted(phy)) {
         warning("Tree is not rooted, incidence matrix may be meaningless")
@@ -73,6 +74,8 @@ incidence_matrix <- function(phy) {
 #' @examples
 #' data(food)
 #' epca <- edge_pca(food)
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table phy_tree taxa_are_rows
 edge_pca <- function(physeq,
                      number.components = 2,
                      method = c("normal", "sparse", "regularized"),
@@ -310,6 +313,7 @@ regularizedPca <- function(x, number.components = 10, center = TRUE, scale. = FA
 #' - center, scale: centering and scaling vectors, used, if any.
 #'                         Otherwise, FALSE.
 #' @seealso \code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}
+#' @importFrom stats lsfit
 sparsePca <- function(x, number.components = 10,
                       number.variables = rep(ncol(x), number.components),
                       center = TRUE, scale. = FALSE,
@@ -629,6 +633,7 @@ scores.pca <- function(pca, choices,
 #' @note  If number and threshold are specified, extracts at most \code{number} taxa whose loadings
 #'        exceed threshold for each axis.
 #' @return A character vector ot taxa names.
+#' @importFrom phyloseq ntaxa phy_tree taxa_names
 support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
                          threshold = 0, number = ntaxa(physeq)) {
     ## Extract loading vectors
@@ -683,6 +688,9 @@ support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
 #' @export
 #' @return Nothing, this function is used for its side effect of plotting a tree
 #' @seealso \code{\link{edge_pca}}
+#' @importFrom graphics par title
+#' @importFrom phyloseq phy_tree
+#' @importFrom scales alpha rescale
 plot_loadings <- function(physeq, epca, choices, fatten.by = c("size"), fatten.tips = FALSE,
                          width.lim = c(0.1, 4), color = c("#EF8A62", "#67A9CF"),
                          color.tip.by = NULL, missing.color = NULL,
@@ -809,8 +817,11 @@ extract_eigenvalue.pca = function(ordination) ordination$values$Eigenvalues
 #' @param ... Optional. Additional argument passed on to plot_ordination
 #' @return Nothing. The function is called for its side effect.
 #'
+#' @importFrom ggplot2 ggplot_build ggplot_gtable
+#' @importFrom graphics layout plot.new
 #' @importFrom grid grid.draw pushViewport upViewport
 #' @importFrom gridBase baseViewports
+#' @importFrom phyloseq plot_ordination
 #' @export
 #'
 #' @seealso \code{\link{pca}}, \code{\link{edge_pca}}, \code{\link{regularizedPca}}, \code{\link{sparsePca}}
@@ -840,4 +851,3 @@ plot_edge_pca <- function(physeq, epca, axes = c(1, 2),
     grid::grid.draw(g)
     grid::upViewport()
 }
-

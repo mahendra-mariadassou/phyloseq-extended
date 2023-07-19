@@ -6,8 +6,8 @@
 #' @return A distance matrix
 #' @export
 #'
-#' @importFrom phyloseq access taxa_sums prune_taxa
 #' @importFrom ape is.rooted
+#' @importFrom phyloseq access prune_taxa taxa_sums
 #'
 #' @details Support for parallel computations was removed as it proved to
 #'          be much lower sequential computations on benchmark data, due to very high overhead.
@@ -34,8 +34,10 @@ UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, parallel = FALS
 }
 
 
-#' @importFrom phyloseq phy_tree nsamples sample_names taxa_are_rows otu_table
 #' @importFrom ape reorder.phylo
+#' @importFrom methods as
+#' @importFrom phyloseq nsamples otu_table phy_tree sample_names taxa_are_rows
+#' @importFrom stats as.dist dist
 #'
 fastUniFrac <- function(physeq, weighted, normalized, parallel) {
   ## Extract components and order in pruning wise order

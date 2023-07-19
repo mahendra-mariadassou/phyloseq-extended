@@ -1,10 +1,16 @@
 ## Methods for representing differentially abundant (across conditions) otus on a grid or on a tree.
-## Also useful for general sets of interesting otus. 
+## Also useful for general sets of interesting otus.
 
 ## Small multiple plot: each otu in set daOTUS has its own plot and each
 ## its (mean) relative abundance in different levels of condition variable
 ## is represented as a point. If replicates are available for a given level,
 ## SEM are represented as error bars.
+#' @importFrom ggplot2 aes aes_string facet_wrap geom_errorbar geom_point ggplot ggtitle
+#' @importFrom methods as
+#' @importFrom phyloseq get_variable otu_table sample_names sample_variables tax_table taxa_are_rows taxa_names
+#' @importFrom plyr ddply
+#' @importFrom reshape2 melt
+#' @importFrom stats sd
 daOTU_plot <- function(physeq, daOTUS, variable, title = NULL, plot = TRUE) {
   ## Args:
   ## - physeq: phyloseq class object
@@ -38,7 +44,7 @@ daOTU_plot <- function(physeq, daOTUS, variable, title = NULL, plot = TRUE) {
   tdf <- merge(tdf,
                data.frame(Sample = sample_names(physeq), Replicate = get_variable(physeq, variable)),
                by.y = "Sample")
-  meandf <- ddply(tdf, .(otu, Replicate), summarize,
+  meandf <- ddply(tdf, .(otu, Replicate), summarise,
                   mean = mean(value), sem = sd(value)/sqrt(length(value)))
   colnames(meandf)[ colnames(meandf) == "Replicate"] <- variable
   ## Get best taxonomic annotation
@@ -72,6 +78,8 @@ daOTU_plot <- function(physeq, daOTUS, variable, title = NULL, plot = TRUE) {
 
 ## subsidiary function to daOTU_tree_plot
 ## Add thermometer to figure
+#' @importFrom ape BOTHlabels
+#' @importFrom graphics strwidth
 addThermo <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwidth(" ")) {
   ## Add Thermometer
   BOTHlabels(XX = max(lastPP$xx[1:lastPP$Ntip] + adj.x) + 0.3*8*strwidth(" ") + 0.5*width.thermo,
@@ -84,6 +92,7 @@ addThermo <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwi
 
 ## subsidiary function to daOTU_tree_plot
 ## Add Histogram to figure
+#' @importFrom graphics rect strheight strwidth
 addHist <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwidth(" "), cex = CEX) {
   ## Add squares
   nSquares <- ncol(meandf)
@@ -101,6 +110,7 @@ addHist <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwidt
 
 ## subsidiary function to daOTU_tree_plot
 ## Add Rectangles to figure
+#' @importFrom graphics strwidth symbols
 addRectangle <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwidth(" ")) {
   ## Add rectangles
   nRectangles <- ncol(meandf)
@@ -119,6 +129,7 @@ addRectangle <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*st
 
 ## subsidiary function to daOTU_tree_plot
 ## Add circles to figure
+#' @importFrom graphics strwidth symbols
 addCircle <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwidth(" ")) {
   ## Add circles
   ## Requires plotrix
@@ -127,7 +138,7 @@ addCircle <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwi
   YY = lastPP$yy[1:lastPP$Ntip]
   ## baseline for circles radii
   ratio <- diff(lastPP$y.lim)/diff(lastPP$x.lim)
-  base.size <- min(width.thermo/nCircles, 0.95/(ratio * sqrt(2))) 
+  base.size <- min(width.thermo/nCircles, 0.95/(ratio * sqrt(2)))
   scaling <- sqrt(meandf)
   xcenter <- rep(XX + (seq(nCircles) - 1/2)*base.size, times = nrow(scaling))
   ycenter <- rep(YY, each = ncol(scaling))
@@ -143,6 +154,7 @@ addCircle <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwi
 
 ## subsidiary function to daOTU_tree_plot
 ## Add squares to figure
+#' @importFrom graphics strwidth symbols
 addSquare <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwidth(" ")) {
   ## Add squares
   ## Requires plotrix
@@ -151,7 +163,7 @@ addSquare <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwi
   YY = lastPP$yy[1:lastPP$Ntip]
   ## baseline for squares radii
   ratio <- diff(lastPP$y.lim)/diff(lastPP$x.lim)
-  base.size <- min(width.thermo/nSquares, 0.95/ratio) 
+  base.size <- min(width.thermo/nSquares, 0.95/ratio)
   scaling <- sqrt(meandf)
   xcenter <- rep(XX + (seq(nSquares) - 1/2)*base.size, times = nrow(scaling))
   ycenter <- rep(YY, each = ncol(scaling))
@@ -165,6 +177,7 @@ addSquare <- function(lastPP, meandf, adj.x, width.thermo = ncol(meandf)*8*strwi
 
 ## subsidiary function to daOTU_tree_plot
 ## Add abundance, automatically calibrate scale to roughly match 1:4
+#' @importFrom graphics segments strwidth symbols text
 addAbundance <- function(otuAbun, lastPP, adj.x, width.thermo,
                          abundance.type = c("circle", "bar"),
                          add.ruler = FALSE) {
@@ -203,7 +216,7 @@ addAbundance <- function(otuAbun, lastPP, adj.x, width.thermo,
       if (width.thermo >= 4*8*strwidth(" ")) {
           max.size <- width.thermo / 2
       } else  {
-          max.size <- width.thermo 
+          max.size <- width.thermo
       }
       min.size <- max.size / 20
       ## Scaling widths
@@ -234,6 +247,7 @@ addAbundance <- function(otuAbun, lastPP, adj.x, width.thermo,
 
 ## subsidiary function to daOTU_tree_plot
 ## Add legend
+#' @importFrom graphics legend strwidth symbols
 addLegend <- function(meandf, variable, scale, type, breaks) {
   leg <- legend(x = "topleft",
                 xjust = 0,
@@ -243,10 +257,10 @@ addLegend <- function(meandf, variable, scale, type, breaks) {
                 title = variable,
                 bty = "n")
   leg.abundance <- legend(x = leg$rect$left,
-                          y = leg$rect$top - 1.1*leg$rect$h, 
+                          y = leg$rect$top - 1.1*leg$rect$h,
                           col = "grey40",
                           legend =  prettyNum(breaks),
-                          bty = "n", 
+                          bty = "n",
                           title = "Relative abundance",
                           plot = TRUE)
   if (type == "circle") {
@@ -264,15 +278,20 @@ addLegend <- function(meandf, variable, scale, type, breaks) {
 
 
 ## Tree plot with thermometer: plot a tree with all otus in set daOTUS and add
-## overall abundance and distribution between levels of variable at tips of tree. 
+## overall abundance and distribution between levels of variable at tips of tree.
 ## Samples are first agreggated by level of variable to compute relative abundance
 ## within this level and different levels are then agreggated (and eventually weighted)
 ## to determine which levels contribute most to the overall relative abundance. Overall
 ## abundance is also plotted (in logarithmic scale) next to the thermometer
-daOTU_tree_plot <- function(physeq, daOTUS, variable, colorTip = FALSE, 
+#' @importFrom ape drop.tip plot.phylo tiplabels
+#' @importFrom graphics par segments strwidth
+#' @importFrom methods as
+#' @importFrom phyloseq get_variable otu_table phy_tree sample_variables tax_table taxa_are_rows taxa_names
+#' @importFrom stats aggregate
+daOTU_tree_plot <- function(physeq, daOTUS, variable, colorTip = FALSE,
                             type = c("thermo", "circle", "square", "rectangle", "hist"),
                             abundance.type = c("bar", "circle"),
-                            add.ruler = TRUE, 
+                            add.ruler = TRUE,
                             weight = NULL, ...) {
   ## Args:
   ## - physeq: phyloseq class object
@@ -369,7 +388,7 @@ daOTU_tree_plot <- function(physeq, daOTUS, variable, colorTip = FALSE,
   abunScale <- addAbundance(otuAbun, lastPP, adj.x, width.thermo, abundance.type, add.ruler)
   ## Add segments
   XX <- lastPP$xx[1:lastPP$Ntip] + strwidth(as.character(taxdf$tax), cex = CEX)
-  YY <- lastPP$yy[1:lastPP$Ntip] 
+  YY <- lastPP$yy[1:lastPP$Ntip]
   segments(x0 = XX, x1 = max(XX),
            y0 = YY, y1 = YY, col = "grey80", lty = 2)
   ## Add legend
@@ -380,11 +399,11 @@ daOTU_tree_plot <- function(physeq, daOTUS, variable, colorTip = FALSE,
 
 #' ggplot-like implementation of plot.phylo from the ape package for \code{phyloseq} class
 #' objects. Allows more representation that ggphylo and plot_tree. Returns a data frame representing
-#' the tree that is useful for ggplot graphical function. 
+#' the tree that is useful for ggplot graphical function.
 #'
 #' @title ggtree
 #' @param physeq Required. An instance of a \code{phyloseq} class object that has
-#'               tree slot. 
+#'               tree slot.
 #' @param group  Optional. Either a single character string matching a variable
 #'               name in the corresponding sam_data of `physeq`, or a factor with
 #'               the same length as the number of taxa in `physeq`. If provided, the samples
@@ -403,9 +422,13 @@ daOTU_tree_plot <- function(physeq, daOTUS, variable, colorTip = FALSE,
 #' @param edge.method Optional. Ancestral group reconstruction method; either 'majority' or
 #'                    'ace' (or an abbrevation of these). Defaults to "majority"
 #' @param ...    Optional. Additional arguments passed on to plot.phylo to determine
-#'               the shape of the tree. 
-#' @note ggtree assumes that the tree is rooted. 
-#' @return A list of two data frames properly formatted for ggplot. 
+#'               the shape of the tree.
+#' @note ggtree assumes that the tree is rooted.
+#' @return A list of two data frames properly formatted for ggplot.
+#' @importFrom ape is.rooted plot.phylo
+#' @importFrom ggplot2 aes geom_segment ggplot
+#' @importFrom phyloseq merge_samples phy_tree transform_sample_counts
+#' @importFrom reshape2 melt
 ggtree <- function(physeq, group = NULL, freq = TRUE, method = "linear", base = 10,
                               edge.group = "Phylum", edge.method = "majority",
                               width.lim = c(0.1, 4), ...) {
@@ -423,7 +446,7 @@ ggtree <- function(physeq, group = NULL, freq = TRUE, method = "linear", base = 
     if (freq) {
         physeq <- transform_sample_counts(physeq, function(x) x /sum(x))
     }
-    
+
     ## Merge samples by grouping factor.
     if (!is.null(group)) {
         physeq <- merge_samples(physeq, group)
@@ -436,7 +459,7 @@ ggtree <- function(physeq, group = NULL, freq = TRUE, method = "linear", base = 
         tip.group <- factor(names(x$palette)[match(x$tip, x$palette)])
     }
 
-    ## Fatten edges and compute average 
+    ## Fatten edges and compute average
     fattened.edges <- fattenEdges(physeq, method, width.lim, base)$edge.raw.width
     mean.fattened.edges <- colMeans(fattened.edges)
     edge.names <- colnames(fattened.edges)
@@ -447,7 +470,7 @@ ggtree <- function(physeq, group = NULL, freq = TRUE, method = "linear", base = 
     fattened.edges <- melt(fattened.edges, id.vars = "edge.name")
     colnames(fattened.edges)[2:3] <- c("Sample", "width")
     fattened.edges <- merge(fattened.edges, mean.fattened.edges)
-    
+
     ## Call phylo.plot
     plot.phylo(phy_tree(physeq), plot = FALSE, ...)
     lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
@@ -470,7 +493,7 @@ ggtree <- function(physeq, group = NULL, freq = TRUE, method = "linear", base = 
         p <- p + geom_segment(aes(x = edge.x1, y = edge.y2, xend = edge.x2, yend = edge.y2))
     }
     if (lastPP == "radial") {
-        
+
     }
     if (lastPP == "") {}
 }

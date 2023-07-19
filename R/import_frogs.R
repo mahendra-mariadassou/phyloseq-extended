@@ -9,8 +9,10 @@
 #' @return A \code{\link{phyloseq-class}} object
 #' @export
 #'
-#' @importFrom biomformat read_biom biom_data sample_metadata
-#' @importFrom purrr map map_chr map_lgl map_int pluck
+#' @importFrom biomformat biom_data read_biom sample_metadata
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table read_tree sample_data tax_table
+#' @importFrom purrr map map_chr map_int map_lgl pluck
 #'
 #' @examples
 #' biom_file <- system.file("extdata", "frogs_data.biom", package = "phyloseq.extended")

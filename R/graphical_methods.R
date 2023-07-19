@@ -18,6 +18,14 @@
 #' @examples
 #' data(food)
 #' ggrare(food, step = 100, color = "EnvType", se = FALSE)
+#' @importFrom dplyr bind_rows inner_join mutate
+#' @importFrom ggplot2 aes geom_line geom_ribbon geom_text ggplot labs
+#' @importFrom methods as
+#' @importFrom parallel mclapply
+#' @importFrom phyloseq otu_table sample_data sample_names taxa_are_rows
+#' @importFrom rlang sym
+#' @importFrom tibble tibble
+#' @importFrom vegan rarefy
 ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
                    plot = TRUE, parallel = FALSE, se = TRUE, verbose = TRUE) {
   x <- as(otu_table(physeq), "matrix")
@@ -108,6 +116,10 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', fill = "Phylum", facet_grid = "~EnvType")
 #' ## Change taxa ordering
 #' plot_composition(food, "Kingdom", "Bacteria", "Phylum", taxaOrder = "name", facet_grid = "~EnvType")
+#' @importFrom ggplot2 aes aes_string element_blank element_text expansion facet_grid geom_bar ggplot ggtitle labs scale_color_manual scale_fill_manual scale_y_continuous theme theme_bw
+#' @importFrom phyloseq rank_names
+#' @importFrom scales brewer_pal hue_pal
+#' @importFrom stats setNames
 plot_composition <- function(physeq,
                              taxaRank1 = NULL,
                              taxaSet1 = NULL,
@@ -196,6 +208,7 @@ plot_composition <- function(physeq,
 
 #' Internal function to correct levels in plot_samples
 #' @keywords internal
+#' @importFrom phyloseq get_variable tax_table
 correct_levels <- function(physeq, DF, map.var) {
   oldLevels <- character(0)
   if (any(DF[ , map.var] == "samples", na.rm = TRUE)) {
@@ -211,6 +224,8 @@ correct_levels <- function(physeq, DF, map.var) {
 }
 
 
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table tax_table taxa_are_rows
 top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
     ## Args:
     ## - physeq: phyloseq class object
@@ -259,6 +274,9 @@ top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
 #' @examples
 #' data(food)
 #' top_taxa(food, "Phylum", 10)
+#' @importFrom methods as
+#' @importFrom phyloseq ntaxa rank_names tax_table taxa_names taxa_sums transform_sample_counts
+#' @importFrom utils head
 top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
   if (is.null(taxaRank)) {taxaRank <- "OTU"}
   tax_table(physeq) <- cbind(as(tax_table(physeq), "matrix"),
@@ -281,6 +299,7 @@ top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
 
 
 ## Find numberOfConditions most abundant conditions in variable
+#' @importFrom phyloseq get_variable sample_data
 top_conditions <- function(physeq, variable, numberOfConditions = 9) {
   stopifnot(!is.null(sample_data(physeq, FALSE)))
   var <- get_variable(physeq, variable)
@@ -291,6 +310,7 @@ top_conditions <- function(physeq, variable, numberOfConditions = 9) {
 
 ## Aggregate coordinates by replicate to have "mean" coordinates
 ## for a given replicate condition.
+#' @importFrom stats aggregate as.formula
 replicate_means <- function(DF, replicate) {
   Axis1 <- colnames(DF)[1]
   Axis2 <- colnames(DF)[2]
@@ -304,6 +324,10 @@ replicate_means <- function(DF, replicate) {
 ## Custom modification of plot_ordination to label outliers species and add mean location
 ## of samples aggregated by variable. If shape maps to more than 9 symbols,
 ## use only symbols corresponding to 9 most abundant symbols
+#' @importFrom ggplot2 aes_string geom_point geom_text ggplot ggtitle scale_colour_manual scale_shape_manual scale_size_manual update_labels xlab ylab
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table plot_ordination taxa_names taxa_sums
+#' @importFrom plyr is.discrete
 plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicate = color,
                         shape = NULL, label = NULL, title = NULL, outlier = NULL) {
   DF <- plot_ordination(physeq, ordination, "biplot", axes, color, shape, label, title, TRUE)
@@ -410,6 +434,9 @@ plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicat
 
 ## Custom modification of plot_ordination to  add mean location
 ## of samples aggregated by variable.
+#' @importFrom ggplot2 aes_string geom_point geom_text ggplot ggtitle xlab ylab
+#' @importFrom methods as
+#' @importFrom phyloseq plot_ordination
 plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
                          replicate = color,
                          shape = NULL, label = NULL, title = NULL) {
@@ -496,6 +523,10 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
 #' data(food)
 #' ggformat(food)
 #' ggformat(food, taxaSet1 = NULL, taxaRank2 = "Phylum")
+#' @importFrom dplyr across all_of arrange as_tibble bind_cols case_when desc filter group_by if_else mutate pull row_number select ungroup
+#' @importFrom methods as
+#' @importFrom phyloseq ntaxa prune_taxa psmelt rank_names sample_data sample_sums tax_table taxa_names taxa_sums transform_sample_counts
+#' @importFrom tibble column_to_rownames remove_rownames
 ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                      taxaRank2 = "Family", fill = NULL,
                      numberOfTaxa = 9, startFrom = 1,
@@ -697,6 +728,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 #' @export
 #'
 #' @importFrom dplyr as_tibble mutate
+#' @importFrom ggplot2 aes element_blank element_text geom_tile ggplot ggtitle scale_fill_gradient theme
 #' @importFrom tidyr pivot_longer
 #' @examples
 #' data(food)
@@ -751,6 +783,14 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #' plot_clust(food, dist = "unifrac", color = "EnvType")
 #' Slightly better plot
 #' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
+#' @importFrom ape as.phylo
+#' @importFrom dplyr as_tibble mutate
+#' @importFrom ggplot2 aes labs scale_color_manual theme
+#' @importFrom ggtext element_markdown
+#' @importFrom ggtree geom_tiplab geom_tippoint ggtree layout_dendrogram
+#' @importFrom phyloseq distance get_variable nsamples sample_data
+#' @importFrom scales col_factor hue_pal
+#' @importFrom stats hclust
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
                        label = "label",
                        title = paste(method, "linkage clustering tree"),
@@ -800,6 +840,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
 }
 
 ## Extract legend from a ggplot object
+#' @importFrom ggplot2 ggplot_build ggplot_gtable
 g_legend <- function(a.gplot){
   tmp <- ggplot_gtable(ggplot_build(a.gplot))
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")

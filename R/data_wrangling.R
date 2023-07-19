@@ -18,6 +18,8 @@
 #' mg
 #' ## Note that sample data are preserved
 #' sample_data(mg)
+#' @importFrom methods as
+#' @importFrom phyloseq get_variable otu_table sample_data sample_names sample_variables taxa_are_rows
 merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TRUE) {
   fun <- match.arg(fun)
 
@@ -67,6 +69,7 @@ merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TR
 #' data(food)
 #' find_upper_ranks(food, "Phylum") ## c("Kingdom", "Phylum")
 #' find_upper_ranks(food, c("Class", "Genus")) ## c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus")
+#' @importFrom phyloseq rank_names
 find_upper_ranks <- function(physeq, ranks) {
   rank_numbers <- match(ranks, rank_names(physeq))
   if (all(is.na(rank_numbers))) {
@@ -92,8 +95,10 @@ find_upper_ranks <- function(physeq, ranks) {
 #' within that group (for compatibility with [tax_glom()])
 #'
 #' @seealso [tax_glom()], [merge_taxa()]
+#' @importFrom dplyr across all_of arrange as_tibble cur_group_id desc group_by mutate select slice
+#' @importFrom methods as
+#' @importFrom phyloseq access otu_table phyloseq rank_names sample_data tax_table taxa_are_rows taxa_names taxa_sums
 #' @importFrom tibble column_to_rownames
-#' @importFrom dplyr as_tibble mutate group_by arrange slice select across all_of
 #' @examples
 #' data(food)
 #' fast_tax_glom(food, "Species")
@@ -142,6 +147,8 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
 #'
 #' @details staggered_tax_glom differs from [fast_tax_glom()] by preserving some taxa during the taxonomic agglomeration phase
 #'
+#' @importFrom dplyr if_else
+#' @importFrom phyloseq merge_phyloseq ntaxa prune_taxa rank_names tax_table
 #' @importFrom stringr str_remove
 #'
 #' @examples
@@ -214,6 +221,10 @@ staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
 #'
 #' @examples
 #' extract_core(food, group = "EnvType")
+#' @importFrom dplyr as_tibble filter group_by mutate select summarise ungroup
+#' @importFrom methods as
+#' @importFrom phyloseq get_variable nsamples otu_table sample_data sample_variables taxa_are_rows transform_sample_counts
+#' @importFrom tidyr crossing pivot_longer
 extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold = 0.5) {
 
   # Build grouping factor

@@ -4,6 +4,7 @@
 ## x represents (possibly not normalised) distribution of quantity
 ## of interest across conditions
 #' @keywords internal
+#' @importFrom Biobase rowMax
 specificity <- function(x, index = c("shannon", "simpson", "yanai", "indspec"), groupfrac = NULL) {
     ## Args:
     ## - x: matrix (vectors are automatically coerced to 1-row matrices), specificity
@@ -113,7 +114,10 @@ local_specificity <- function(x, index = c("fraction", "indspec"), groupfrac = N
 #' Specificity method is used as attribute `index` of the data frame.
 #'
 #' @export
+#' @importFrom methods as
 #' @importFrom parallel mclapply
+#' @importFrom phyloseq get_variable otu_table sample_data sample_variables taxa_are_rows
+#' @importFrom stats quantile sd
 #'
 #' @seealso [estimate_local_specificity()]
 #'
@@ -219,7 +223,10 @@ estimate_specificity <- function(physeq, group,
 #'
 #' @seealso [estimate_specificity()]
 #' @export
+#' @importFrom methods as
 #' @importFrom parallel mclapply
+#' @importFrom phyloseq otu_table sample_data taxa_are_rows
+#' @importFrom stats quantile sd
 #'
 #' @examples
 #' data(food)
@@ -309,6 +316,7 @@ estimate_local_specificity <- function(physeq, group,
 
 ## Plot specifity against relative abundance
 #' @keywords internal
+#' @importFrom ggplot2 aes aes_string element_text geom_hline geom_linerange geom_point geom_smooth ggplot labs scale_x_log10 theme
 plot_specificity <- function(specOTUS, y = "specificity", color = "level",
                              se = TRUE, plot = TRUE) {
   p <- ggplot(specOTUS, aes_string(x = "abundance", y = y, color = color)) + geom_point(size = 2)
@@ -335,6 +343,7 @@ plot_specificity <- function(specOTUS, y = "specificity", color = "level",
 
 ## Plot local specifity against relative abundance
 #' @keywords internal
+#' @importFrom ggplot2 aes aes_string element_text facet_wrap geom_hline geom_linerange geom_point geom_smooth ggplot labs scale_x_log10 theme
 plot_local_specificity <- function(specOTUS, y = "specificity", formula = y~x,
                                    color = "level", method = "loess",
                                    se = TRUE, plot = TRUE) {
@@ -363,6 +372,7 @@ plot_local_specificity <- function(specOTUS, y = "specificity", formula = y~x,
 
 ## Plot specificity rank curve with (optionnally) error bars
 #' @keywords internal
+#' @importFrom ggplot2 aes aes_string element_text geom_errorbarh geom_line geom_point geom_vline ggplot labs theme
 plot_specificity_distribution <- function(specOTUS, x = "specificity", color = "level",
                                           se = TRUE, plot =TRUE) {
   ## Order specOTUS by specificity
@@ -427,7 +437,10 @@ expected_robust_specificity <- function(group,
 #'
 #' @seealso [estimate_specificity()], [estimate_local_specificity()], [test_local_specificity()]
 #' @export
+#' @importFrom methods as
 #' @importFrom parallel mclapply
+#' @importFrom phyloseq otu_table sample_data taxa_are_rows
+#' @importFrom stats p.adjust quantile sd
 #'
 #' @examples
 #' data(food)
@@ -521,7 +534,10 @@ test_specificity <- function(physeq, group,
 #'
 #' @seealso [estimate_specificity()], [estimate_local_specificity()], [test_specificity()]
 #' @export
+#' @importFrom methods as
 #' @importFrom parallel mclapply
+#' @importFrom phyloseq otu_table sample_data taxa_are_rows
+#' @importFrom stats p.adjust quantile sd
 #'
 #' @examples
 #' data(food)
@@ -607,6 +623,10 @@ test_local_specificity <- function(physeq, group,
 
 ## Compare saturation speed of rarefaction curves for specific species against all species.
 #' @keywords internal
+#' @importFrom ggplot2 aes aes_string facet_wrap geom_line geom_ribbon geom_text ggplot labs
+#' @importFrom methods as
+#' @importFrom parallel mclapply
+#' @importFrom phyloseq otu_table sample_data taxa_are_rows
 specific_rarefaction <- function(physeq, step = 10, group, index = c("fraction", "indspec"),
                                  specificity = NULL, threshold = 0.9, pvalue = 0.05,
                                  label = NULL, B = 999,

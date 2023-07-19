@@ -1,4 +1,6 @@
 ## Estimate mean niche value of taxa
+#' @importFrom methods as
+#' @importFrom phyloseq get_variable ntaxa otu_table sample_data sample_variables taxa_are_rows taxa_names
 compute_niche <- function(physeq, niche, freq = TRUE) {
   ## Args
   ## - physeq: phyloseq class object, otu abundances are extracted from this object

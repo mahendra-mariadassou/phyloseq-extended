@@ -12,7 +12,11 @@
 #' @param ...    parameters passed to ordilabels
 #'
 #'
-#' @importFrom vegan specnumber ordilabel
+#' @importFrom graphics abline lines
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table taxa_are_rows
+#' @importFrom stats approx
+#' @importFrom vegan ordilabel rarefy specnumber
 #' @examples
 #' data(food)
 #' rarecurve2(food)
@@ -55,6 +59,13 @@ rarecurve2 <- function (physeq, step = 1, sample, xlab = "Sample Size", ylab = "
 
 
 ## Plotting fonction once library sizes have been estimated
+#' @importFrom ggplot2 aes_string element_text geom_boxplot ggplot ggtitle scale_x_discrete scale_y_discrete theme
+#' @importFrom graphics par plot.new
+#' @importFrom grid grid.layout popViewport pushViewport unit viewport
+#' @importFrom gridBase gridFIG
+#' @importFrom methods as
+#' @importFrom phyloseq sample_data
+#' @importFrom reshape2 melt
 ggnorm <- function(physeq, cds, x = "X.SampleID", color = NULL, title = NULL) {
   ## Args:
   ## - cds: Count data set (class eSet of BioConductor)

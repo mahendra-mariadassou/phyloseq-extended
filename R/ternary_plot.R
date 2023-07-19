@@ -1,6 +1,8 @@
 ## Create ggplot style data frame for ternary plots from a phyloseq class objects
 ## Samples are grouped according to `group` and an error is returned is `group` has
 ## 5 or more levels
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table sam_data tax_table taxa_are_rows
 ternary_norm <- function(physeq, group, levelOrder = NULL, raw = FALSE, normalizeGroups = TRUE) {
     ## Args:
     ## - phyloseq class object, otus abundances are extracted from this object
@@ -125,6 +127,7 @@ ternary_norm <- function(physeq, group, levelOrder = NULL, raw = FALSE, normaliz
 }
 
 
+#' @importFrom ggplot2 aes aes_string element_blank geom_point geom_segment geom_text ggplot theme theme_bw
 ternary_plot <- function(physeq, group, grid = TRUE, size = "log2(abundance)",
                          color = NULL, shape = NULL, label = NULL,
                          levelOrder = NULL, plot = TRUE,

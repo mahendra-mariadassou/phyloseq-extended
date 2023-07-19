@@ -20,6 +20,12 @@
 #' @examples
 #' data(food)
 #' lefse <- lefse(food, "FoodType", padj.threshold = 0.001)
+#' @importFrom MASS lda
+#' @importFrom dplyr as_tibble filter left_join pull
+#' @importFrom methods as
+#' @importFrom phyloseq get_variable otu_table prune_taxa sample_data sample_variables taxa_are_rows taxa_names taxa_sums transform_sample_counts
+#' @importFrom stats kruskal.test p.adjust
+#' @importFrom tibble tibble
 lefse <- function(physeq, group, pseudocount = 1, padj.threshold = 0.05) {
   # Remove empty OTUs
   physeq <- prune_taxa(taxa_sums(physeq)>0, physeq)
@@ -65,5 +71,3 @@ lefse <- function(physeq, group, pseudocount = 1, padj.threshold = 0.05) {
                    by = "OTU")
 
 }
-
-

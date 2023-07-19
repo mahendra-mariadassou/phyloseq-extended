@@ -9,6 +9,8 @@
 #' @examples
 #' data(food)
 #' phylodiv(food)
+#' @importFrom methods as
+#' @importFrom phyloseq otu_table phy_tree sample_data taxa_are_rows transform_sample_counts
 phylodiv <- function(physeq, theta = 0) {
     count_to_prop <- function(x) {x/sum(x)}
     physeq <- transform_sample_counts(physeq, count_to_prop)
@@ -59,6 +61,10 @@ phylodiv <- function(physeq, theta = 0) {
 #' @examples
 #' data(food)
 #' ggpdrare(food, se = FALSE, step = 100, color = "EnvType")
+#' @importFrom ggplot2 aes_string geom_line geom_ribbon geom_text ggplot labs scale_x_log10
+#' @importFrom methods as
+#' @importFrom parallel mclapply
+#' @importFrom phyloseq otu_table phy_tree sample_data taxa_are_rows
 ggpdrare <- function(physeq, step = 10, label = NULL, color = NULL,
                      log = TRUE,
                      replace = FALSE, se = TRUE, plot = TRUE, parallel = FALSE) {
