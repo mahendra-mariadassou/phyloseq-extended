@@ -108,31 +108,36 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
   tax <- as(tax_table(physeq), "matrix")
   tax[is.na(tax) | tax %in% bad_empty] <- "Unknown"
   ## create groups
-  tax <- tax[ , ranks, drop = FALSE] %>%
+  tax <- tax[, ranks, drop = FALSE] %>%
     dplyr::as_tibble(tax, .name_repair = "minimal") %>%
-    dplyr::mutate(Abundance = taxa_sums(physeq),
-                  archetype = taxa_names(physeq)) %>%
+    dplyr::mutate(
+      Abundance = taxa_sums(physeq),
+      archetype = taxa_names(physeq)
+    ) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(ranks))) %>%
     dplyr::mutate(group = cur_group_id())
   ## create new_taxonomy
   new_tax <- tax %>%
     dplyr::arrange(desc(Abundance)) %>%
-    dplyr::slice(1) %>% dplyr::arrange(group) %>%
+    dplyr::slice(1) %>%
+    dplyr::arrange(group) %>%
     dplyr::select(-group, -Abundance) %>%
-    tibble::column_to_rownames(var = "archetype") %>% as.matrix()
+    tibble::column_to_rownames(var = "archetype") %>%
+    as.matrix()
   ## create new count table
   otutab <- otu_table(physeq)
-  if (!taxa_are_rows(physeq)) otutab  <- t(otutab)
+  if (!taxa_are_rows(physeq)) otutab <- t(otutab)
   otutab <- rowsum(otutab, group = tax$group, reorder = TRUE)
   rownames(otutab) <- rownames(new_tax)
   ## create new refseq
   seqs <- access(physeq, "refseq")
   if (!is.null(seqs)) seqs <- seqs[rownames(new_tax)]
   ## return merged phyloseq
-  phyloseq(sample_data(physeq),
-           tax_table(new_tax),
-           otu_table(otutab, taxa_are_rows = TRUE),
-           seqs
+  phyloseq(
+    sample_data(physeq),
+    tax_table(new_tax),
+    otu_table(otutab, taxa_are_rows = TRUE),
+    seqs
   )
 }
 
@@ -154,7 +159,7 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
 #' @examples
 #' data(food)
 #' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> phyloseq::tax_table()
-#' staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum")  |> phyloseq::tax_table()
+#' staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum") |> phyloseq::tax_table()
 staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
   taxa_index <- matrix(FALSE, nrow = ntaxa(physeq), ncol = length(rank_names(physeq)))
   taxa_index[] <- tax_table(physeq) %in% atomic_taxa
@@ -163,7 +168,8 @@ staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
   }
   preserved_ranks <- which(colSums(taxa_index) > 0)
   preserved_taxa <- rowSums(taxa_index) == 1
-  min_rank <- min(preserved_ranks); max_rank <- max(preserved_ranks)
+  min_rank <- min(preserved_ranks)
+  max_rank <- max(preserved_ranks)
   glom_rank <- which(rank_names(physeq) == taxrank)
   if (min_rank < glom_rank) {
     stop("The agglomeration rank conflicts with some of the taxa. Choose a higher rank.")
@@ -184,7 +190,9 @@ staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
   ## pad ranks for other taxonomic levels
   # if (min_rank == max_rank) {
   ## manage rank names in other_taxa
-  preserved_glom <- tax_table(preserved_taxa)[, glom_rank] %>% unique() %>% as.character()
+  preserved_glom <- tax_table(preserved_taxa)[, glom_rank] %>%
+    unique() %>%
+    as.character()
   srank <- tax_table(other_taxa)[, glom_rank] %>% as.character()
   tax_table(other_taxa)[, glom_rank] <- if_else(
     srank %in% preserved_glom,
@@ -194,7 +202,7 @@ staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
   # }
   res <- merge_phyloseq(other_taxa, preserved_taxa) %>%
     tax_spread(explicit = FALSE)
-  tax_table(res)[ , glom_rank] <- stringr::str_remove(tax_table(res)[ , glom_rank], "^Other ")
+  tax_table(res)[, glom_rank] <- stringr::str_remove(tax_table(res)[, glom_rank], "^Other ")
   res
 }
 
@@ -226,7 +234,6 @@ staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
 #' @importFrom phyloseq get_variable nsamples otu_table sample_data sample_variables taxa_are_rows transform_sample_counts
 #' @importFrom tidyr crossing pivot_longer
 extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold = 0.5) {
-
   # Build grouping factor
   if (is.null(group)) {
     group <- rep(1, phyloseq::nsamples(physeq))
@@ -245,24 +252,29 @@ extract_core <- function(physeq, group = NULL, ab_threshold = 0, prev_threshold 
 
   # Melt count table and add grouping information
   cdf <- physeq %>%
-    phyloseq::transform_sample_counts(function(x) { x / sum(x)}) %>%
+    phyloseq::transform_sample_counts(function(x) {
+      x / sum(x)
+    }) %>%
     phyloseq::otu_table() %>%
     as("matrix")
   if (taxa_are_rows(physeq)) cdf <- t(cdf)
-  cdf %>% dplyr::as_tibble(rownames = "Sample") %>%
+  cdf %>%
+    dplyr::as_tibble(rownames = "Sample") %>%
     dplyr::mutate(group = group) %>%
     tidyr::pivot_longer(cols = -c(Sample, group), names_to = "OTU", values_to = "freq") %>%
     tidyr::crossing(ab_threshold = ab_threshold) %>%
     dplyr::group_by(OTU, group, ab_threshold) %>%
-    dplyr::summarise(prevalence = mean(freq > 0),
-                     abundance  = mean(freq),
-                     coreness   = mean(freq > ab_threshold)
-                     ) %>%
+    dplyr::summarise(
+      prevalence = mean(freq > 0),
+      abundance = mean(freq),
+      coreness = mean(freq > ab_threshold)
+    ) %>%
     dplyr::mutate(is_core = coreness >= prev_threshold) %>%
     dplyr::group_by(OTU) %>%
     dplyr::mutate(any_core = any(is_core)) %>%
     dplyr::ungroup() %>%
-    dplyr::filter(any_core) %>% dplyr::select(-any_core)
+    dplyr::filter(any_core) %>%
+    dplyr::select(-any_core)
 }
 
 #' clr transformation

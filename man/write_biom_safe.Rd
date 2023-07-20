@@ -12,8 +12,10 @@ Works for biom data with only one column (sample), unlike the original version.
 \examples{
 library(phyloseq)
 data(food)
-small_food <- food |> subset_samples(EnvType=="DesLardons") |> subset_taxa(Genus=="Serratia")
-small_biom <- small_food |>  phyloseq_to_biom()
+small_food <- food |>
+  subset_samples(EnvType == "DesLardons") |>
+  subset_taxa(Genus == "Serratia")
+small_biom <- small_food |> phyloseq_to_biom()
 tmp_biom <- tempfile()
 write_biom_safe(small_biom, tmp_biom)
 readLines(tmp_biom, warn = FALSE)

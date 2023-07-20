@@ -46,13 +46,15 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
   biom_format <- match.arg(biom_format)
   correct_taxonomy <- function(x) {
     ## Unhappy path
-    if (is.null(tdf)) return(x)
+    if (is.null(tdf)) {
+      return(x)
+    }
     ## Happy path
     current_taxonomy <- unname(tdf[x$id, ])
     if (all(is.na(current_taxonomy))) current_taxonomy <- NA
     if (!is.list(x$metadata)) x$metadata <- list()
     if (biom_format == "standard") x$metadata$taxonomy <- current_taxonomy
-    if (biom_format == "frogs")    x$metadata$blast_taxonomy <- current_taxonomy
+    if (biom_format == "frogs") x$metadata$blast_taxonomy <- current_taxonomy
     x
   }
   biom@.Data[[10]] <- lapply(biom@.Data[[10]], correct_taxonomy)
@@ -63,8 +65,10 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
   if (matrix_type == "sparse") {
     biom@.Data[[7]] <- "sparse"
     non_zero_index <- which(cdf > 0L, arr.ind = TRUE, useNames = FALSE)
-    sparse_cdf <- cbind(non_zero_index - 1L, ## 0-zero based coordinates in JSON
-                        cdf[non_zero_index])
+    sparse_cdf <- cbind(
+      non_zero_index - 1L, ## 0-zero based coordinates in JSON
+      cdf[non_zero_index]
+    )
     biom@.Data[[12]] <- sparse_cdf
   }
   biom
@@ -104,7 +108,7 @@ write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NUL
   if (!is.null(refseq)) {
     if (is.null(fasta_file)) {
       warning("No fasta file provided, skipping export of refseq() component")
-    } else{
+    } else {
       Biostrings::writeXStringSet(refseq, filepath = fasta_file, format = "fasta")
     }
   }
@@ -113,7 +117,7 @@ write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NUL
   if (!is.null(tree)) {
     if (is.null(tree_file)) {
       warning("No tree file provided, skipping export of phy_seq() component")
-    } else{
+    } else {
       ape::write.tree(phyloseq::phy_tree(physeq), file = tree_file)
     }
   }
@@ -166,8 +170,9 @@ phyloseq_to_tsv <- function(physeq) {
   results <- dplyr::bind_cols(results, dplyr::as_tibble(cdf))
   ## Add prevalence and conditional mean
   results <- dplyr::mutate(results,
-                    prevalence    = rowMeans(cdf > 0),
-                    avg_abundance = rowMeans(cdf) / prevalence)
+    prevalence    = rowMeans(cdf > 0),
+    avg_abundance = rowMeans(cdf) / prevalence
+  )
   results
 }
 
@@ -181,26 +186,30 @@ phyloseq_to_tsv <- function(physeq) {
 #' @examples
 #' library(phyloseq)
 #' data(food)
-#' small_food <- food |> subset_samples(EnvType=="DesLardons") |> subset_taxa(Genus=="Serratia")
-#' small_biom <- small_food |>  phyloseq_to_biom()
+#' small_food <- food |>
+#'   subset_samples(EnvType == "DesLardons") |>
+#'   subset_taxa(Genus == "Serratia")
+#' small_biom <- small_food |> phyloseq_to_biom()
 #' tmp_biom <- tempfile()
 #' write_biom_safe(small_biom, tmp_biom)
 #' readLines(tmp_biom, warn = FALSE)
 ## safe alternative to biomformat::write_biom
 write_biom_safe <- function(x, biom_file) {
-  cat(jsonlite::toJSON(list(
-    id                     = slot(x, ".Data")[[1]],
-    format                 = slot(x, ".Data")[[2]],
-    format_url             = slot(x, ".Data")[[3]],
-    type                   = slot(x, ".Data")[[4]],
-    generated_by           = slot(x, ".Data")[[5]],
-    date                   = slot(x, ".Data")[[6]],
-    matrix_type            = slot(x, ".Data")[[7]],
-    matrix_element_type    = slot(x, ".Data")[[8]],
-    shape                  = slot(x, ".Data")[[9]],
-    rows                   = slot(x, ".Data")[[10]],
-    columns                = slot(x, ".Data")[[11]],
-    data                   = lapply(slot(x, ".Data")[[12]], I)
+  cat(
+    jsonlite::toJSON(list(
+      id                     = slot(x, ".Data")[[1]],
+      format                 = slot(x, ".Data")[[2]],
+      format_url             = slot(x, ".Data")[[3]],
+      type                   = slot(x, ".Data")[[4]],
+      generated_by           = slot(x, ".Data")[[5]],
+      date                   = slot(x, ".Data")[[6]],
+      matrix_type            = slot(x, ".Data")[[7]],
+      matrix_element_type    = slot(x, ".Data")[[8]],
+      shape                  = slot(x, ".Data")[[9]],
+      rows                   = slot(x, ".Data")[[10]],
+      columns                = slot(x, ".Data")[[11]],
+      data                   = lapply(slot(x, ".Data")[[12]], I)
     ), auto_unbox = TRUE),
-    file = biom_file)
+    file = biom_file
+  )
 }

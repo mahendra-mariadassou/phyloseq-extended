@@ -35,49 +35,62 @@
 #' data(food)
 #' estimate_prevalence(food, group = "EnvType", rarefy = TRUE)
 estimate_prevalence <- function(physeq, group, format = c("long", "wide"), rarefy = TRUE) {
-    ## Get grouping factor
-    if (!is.null(phyloseq::sample_data(physeq, FALSE))) {
-        if (class(group) == "character" & length(group) == 1) {
-            x1 <- data.frame(phyloseq::sample_data(physeq))
-            if (!group %in% colnames(x1)) {
-                stop("group not found among sample variable names.")
-            }
-            group <- x1[, group]
-        }
+  ## Get grouping factor
+  if (!is.null(phyloseq::sample_data(physeq, FALSE))) {
+    if (class(group) == "character" & length(group) == 1) {
+      x1 <- data.frame(phyloseq::sample_data(physeq))
+      if (!group %in% colnames(x1)) {
+        stop("group not found among sample variable names.")
+      }
+      group <- x1[, group]
     }
-    if (class(group) != "factor") {
-        group <- factor(group)
-    }
-    ## Rarefy samples
-    if (rarefy) physeq <- phyloseq::rarefy_even_depth(physeq, rngseed = 1121983,
-                                                      trimOTUs = FALSE, verbose = FALSE)
-    ## Construct relative abundances by sample
-    tdf <- as(phyloseq::otu_table(physeq), "matrix")
-    if (!taxa_are_rows(physeq)) { tdf <- t(tdf) }
-    ## abundance
-    tdf[, ] <- apply(tdf, 2, function(x) { x / sum(x) })
-    abund <- t(rowsum(t(tdf), group, reorder = TRUE)) / matrix(rep(table(group), each = nrow(tdf)),
-                                                               nrow = nrow(tdf))
-    tdf <- 0 + (tdf > 0)
-    ## prevalence
-    frac <- t(rowsum(t(tdf), group, reorder = TRUE)) / matrix(rep(table(group), each = nrow(tdf)),
-                                                              nrow = nrow(tdf))
-    ## specificity
-    spec <- t(rowsum(t(tdf), group, reorder = TRUE)) / rowSums(tdf)
-    spec[rowSums(tdf) == 0, ] <- 0
-    format <- match.arg(format)
-    if (format == "wide") {
-        ## Pad colnames
-        colnames(frac) <- paste("prev", colnames(frac), sep = "_")
-        colnames(spec) <- paste("spec", colnames(spec), sep = "_")
-        colnames(abund) <- paste("abund", colnames(abund), sep = "_")
-        ## cbind prevalence, specificity and abundances
-        return(cbind(frac, spec, abund))
-    }
-    ## Melt and join tables
-    dplyr::as_tibble(frac, rownames = "otu") %>% tidyr::gather(key = "group", value = "prevalence", -otu) %>%
-        dplyr::inner_join(dplyr::as_tibble(spec, rownames = "otu") %>% pivot_longer(cols = -otu, values_to = "specificity", names_to = "group"),
-                          by = c("otu", "group")) %>%
-        dplyr::inner_join(dplyr::as_tibble(abund, rownames = "otu") %>% pivot_longer(cols = -otu, values_to = "abundance", names_to = "group"),
-                          by = c("otu", "group"))
+  }
+  if (class(group) != "factor") {
+    group <- factor(group)
+  }
+  ## Rarefy samples
+  if (rarefy) {
+    physeq <- phyloseq::rarefy_even_depth(physeq,
+      rngseed = 1121983,
+      trimOTUs = FALSE, verbose = FALSE
+    )
+  }
+  ## Construct relative abundances by sample
+  tdf <- as(phyloseq::otu_table(physeq), "matrix")
+  if (!taxa_are_rows(physeq)) {
+    tdf <- t(tdf)
+  }
+  ## abundance
+  tdf[, ] <- apply(tdf, 2, function(x) {
+    x / sum(x)
+  })
+  abund <- t(rowsum(t(tdf), group, reorder = TRUE)) / matrix(rep(table(group), each = nrow(tdf)),
+    nrow = nrow(tdf)
+  )
+  tdf <- 0 + (tdf > 0)
+  ## prevalence
+  frac <- t(rowsum(t(tdf), group, reorder = TRUE)) / matrix(rep(table(group), each = nrow(tdf)),
+    nrow = nrow(tdf)
+  )
+  ## specificity
+  spec <- t(rowsum(t(tdf), group, reorder = TRUE)) / rowSums(tdf)
+  spec[rowSums(tdf) == 0, ] <- 0
+  format <- match.arg(format)
+  if (format == "wide") {
+    ## Pad colnames
+    colnames(frac) <- paste("prev", colnames(frac), sep = "_")
+    colnames(spec) <- paste("spec", colnames(spec), sep = "_")
+    colnames(abund) <- paste("abund", colnames(abund), sep = "_")
+    ## cbind prevalence, specificity and abundances
+    return(cbind(frac, spec, abund))
+  }
+  ## Melt and join tables
+  dplyr::as_tibble(frac, rownames = "otu") %>%
+    tidyr::gather(key = "group", value = "prevalence", -otu) %>%
+    dplyr::inner_join(dplyr::as_tibble(spec, rownames = "otu") %>% pivot_longer(cols = -otu, values_to = "specificity", names_to = "group"),
+      by = c("otu", "group")
+    ) %>%
+    dplyr::inner_join(dplyr::as_tibble(abund, rownames = "otu") %>% pivot_longer(cols = -otu, values_to = "abundance", names_to = "group"),
+      by = c("otu", "group")
+    )
 }

@@ -29,7 +29,9 @@
 ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
                    plot = TRUE, parallel = FALSE, se = TRUE, verbose = TRUE) {
   x <- as(otu_table(physeq), "matrix")
-  if (taxa_are_rows(physeq)) { x <- t(x) }
+  if (taxa_are_rows(physeq)) {
+    x <- t(x)
+  }
 
   ## This script is adapted from vegan `rarecurve` function
   tot <- rowSums(x)
@@ -42,7 +44,7 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
     if (n[length(n)] != tot[i]) {
       n <- c(n, tot[i])
     }
-    y <- rarefy(x[i, ,drop = FALSE], n, se = se)
+    y <- rarefy(x[i, , drop = FALSE], n, se = se)
     if (nrow(y) != 1) {
       rownames(y) <- c(".S", ".se")
       return(data.frame(t(y), Size = n, Sample = rownames(x)[i]))
@@ -70,8 +72,10 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
   if (!is.null(color)) p <- p + aes(color = !!sym(color), fill = !!sym(color))
   p <- p + labs(x = "Sample Size", y = "Species Richness")
   if (!is.null(label)) {
-    p <- p + geom_text(data = labels, aes(x = x, y = y, label = !!sym(label)),
-                       size = 4, hjust = 0)
+    p <- p + geom_text(
+      data = labels, aes(x = x, y = y, label = !!sym(label)),
+      size = 4, hjust = 0
+    )
   }
   p <- p + geom_line()
 
@@ -110,10 +114,10 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' @examples
 #' data(food)
 #' plot_composition(food, "Kingdom", "Bacteria", "Phylum", facet_grid = "~EnvType")
-#' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType", spread = TRUE)
+#' plot_composition(food, taxaRank1 = "Family", taxaSet1 = "Flavobacteriaceae", taxaRank2 = "Species", facet_grid = "~EnvType", spread = TRUE)
 #' ## Contrast with
-#' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType")
-#' plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', fill = "Phylum", facet_grid = "~EnvType")
+#' plot_composition(food, taxaRank1 = "Family", taxaSet1 = "Flavobacteriaceae", taxaRank2 = "Species", facet_grid = "~EnvType")
+#' plot_composition(food, taxaRank1 = "Family", taxaSet1 = "Flavobacteriaceae", taxaRank2 = "Species", fill = "Phylum", facet_grid = "~EnvType")
 #' ## Change taxa ordering
 #' plot_composition(food, "Kingdom", "Bacteria", "Phylum", taxaOrder = "name", facet_grid = "~EnvType")
 #' @importFrom ggplot2 aes aes_string element_blank element_text expansion facet_grid geom_bar ggplot ggtitle labs scale_color_manual scale_fill_manual scale_y_continuous theme theme_bw
@@ -139,69 +143,77 @@ plot_composition <- function(physeq,
   }
   if (is.null(taxaRank1) || is.null(taxaSet1)) {
     taxaRank1 <- rank_names(physeq)[1]
-    taxaSet1  <- NULL
+    taxaSet1 <- NULL
   }
   if (is.null(fill)) {
     fill <- taxaRank2
   }
   if (fill %in% c("OTU", "ASV")) fill <- "OTU_rank"
 
-  ggdata <- ggformat(physeq, taxaRank1, taxaSet1, taxaRank2,
-                     fill, numberOfTaxa, startFrom, taxaOrder, spread) %>% droplevels()
+  ggdata <- ggformat(
+    physeq, taxaRank1, taxaSet1, taxaRank2,
+    fill, numberOfTaxa, startFrom, taxaOrder, spread
+  ) %>% droplevels()
   if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
 
-  p <- ggplot(ggdata,
-              aes_string(x = x, y = y, fill = fill, group = "Sample"))
+  p <- ggplot(
+    ggdata,
+    aes_string(x = x, y = y, fill = fill, group = "Sample")
+  )
   ## Manually change color scale to assign grey to "Unknown" (if any)
   if (!is.null(fill) && any(c("Unknown", "Other") %in% levels(ggdata[[fill]]))) {
-      levels <- levels(ggdata[[fill]])
-      proper_levels <- setdiff(levels, c("Multi-affiliation", "Unknown", "Other"))
+    levels <- levels(ggdata[[fill]])
+    proper_levels <- setdiff(levels, c("Multi-affiliation", "Unknown", "Other"))
 
-      if (length(proper_levels) > 12) {
-        warning("Too many taxa: reverting from Brewer 'Paired' scale to a hue scale.\nThe human eye has trouble picking more than 12 colors, consider showing a smaller number of taxa.")
-        fill_cols <- scales::hue_pal()(length(proper_levels))
-      } else {
-        fill_cols <- scales::brewer_pal(palette = "Paired")(length(proper_levels))
-      }
+    if (length(proper_levels) > 12) {
+      warning("Too many taxa: reverting from Brewer 'Paired' scale to a hue scale.\nThe human eye has trouble picking more than 12 colors, consider showing a smaller number of taxa.")
+      fill_cols <- scales::hue_pal()(length(proper_levels))
+    } else {
+      fill_cols <- scales::brewer_pal(palette = "Paired")(length(proper_levels))
+    }
 
-      colvals <- c(
-        setNames(fill_cols, proper_levels),
-        "Multi-affiliation" = "grey75",
-        "Unknown"           = "grey45",
-        "Other"             = "black"
-      )
-      colvals <- colvals[levels]
-      ## Now add the manually re-scaled layer with Unassigned as grey
+    colvals <- c(
+      setNames(fill_cols, proper_levels),
+      "Multi-affiliation" = "grey75",
+      "Unknown"           = "grey45",
+      "Other"             = "black"
+    )
+    colvals <- colvals[levels]
+    ## Now add the manually re-scaled layer with Unassigned as grey
+    p <- p +
+      scale_fill_manual(values = colvals)
+
+    if (fill != taxaRank2) {
+      colvals[] <- "grey20"
       p <- p +
-        scale_fill_manual(values = colvals)
-
-      if (fill != taxaRank2) {
-        colvals[] <- "grey20"
-        p <- p +
-          aes(color = .data[[fill]]) +
-          scale_color_manual(values = colvals) +
-          labs(subtitle = paste("Grey boxes correspond to", taxaRank2, "within the same", fill))
-      }
+        aes(color = .data[[fill]]) +
+        scale_color_manual(values = colvals) +
+        labs(subtitle = paste("Grey boxes correspond to", taxaRank2, "within the same", fill))
+    }
   }
 
   p <- p + geom_bar(stat = "identity", position = "stack", ...)
-  if ( !is.null(facet_grid)) {
+  if (!is.null(facet_grid)) {
     p <- p + facet_grid(facet_grid, scales = "free_x")
   }
   p <- p +
     scale_y_continuous(expand = expansion(0, 0)) +
-    ggtitle(paste0("Composition",
-                   ## Filter or not
-                   ifelse(!is.null(taxaSet1),
-                          paste0(" within ", paste0(taxaSet1, collapse = ", ")),
-                          ""),
-                   ## number of taxa represented on the plot
-                   " (", taxaRank2, " ", startFrom, " to ",
-                   startFrom + numberOfTaxa - 1, ")")
-    ) +
+    ggtitle(paste0(
+      "Composition",
+      ## Filter or not
+      ifelse(!is.null(taxaSet1),
+        paste0(" within ", paste0(taxaSet1, collapse = ", ")),
+        ""
+      ),
+      ## number of taxa represented on the plot
+      " (", taxaRank2, " ", startFrom, " to ",
+      startFrom + numberOfTaxa - 1, ")"
+    )) +
     theme_bw() +
-    theme(axis.text.x=element_text(angle = 90),
-                 axis.title.x=element_blank()) +
+    theme(
+      axis.text.x = element_text(angle = 90),
+      axis.title.x = element_blank()
+    ) +
     NULL
   p
 }
@@ -211,42 +223,44 @@ plot_composition <- function(physeq,
 #' @importFrom phyloseq get_variable tax_table
 correct_levels <- function(physeq, DF, map.var) {
   oldLevels <- character(0)
-  if (any(DF[ , map.var] == "samples", na.rm = TRUE)) {
-    oldLevels <- unique(tax_table(physeq)[ , map.var])
+  if (any(DF[, map.var] == "samples", na.rm = TRUE)) {
+    oldLevels <- unique(tax_table(physeq)[, map.var])
   }
-  if (any(DF[ , map.var] == "taxa", na.rm = TRUE)) {
+  if (any(DF[, map.var] == "taxa", na.rm = TRUE)) {
     oldLevels <- levels(get_variable(physeq, map.var))
   }
   allLevels <- unique(c(as.character(DF[, map.var]), oldLevels))
   allLevels <- allLevels[!is.na(allLevels)]
-  DF[ , map.var] <- factor(DF[ , map.var], levels = allLevels)
+  DF[, map.var] <- factor(DF[, map.var], levels = allLevels)
   return(DF)
 }
 
 
 #' @importFrom methods as
 #' @importFrom phyloseq otu_table tax_table taxa_are_rows
-top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
-    ## Args:
-    ## - physeq: phyloseq class object
-    ## - raw: (Required). Defaults to 'FALSE', logical. Should abundances be transformed to
-    ##        frequencies before sorting otus from most to less abundant.
-    ## - numberOfTaxa: number of (top) taxa to keep
-    ##
-    ## Returns:
-    ## - x: Data frame with numberOfTaxa rows (one per final otu) and column 'Abundance' standing
-    ##      for  total counts (if raw = TRUE) or average frequency
-    ##      in samples of physeq. Rownames of x are either otus' names (if taxaRank = NULL) or names
-    ##      corresponding to taxonomic rank 'TaxaRank'. All NA ranks are assigned to 'Unassigned'.
+top_taxa_abundance <- function(physeq, numberOfTaxa = 9, raw = FALSE) {
+  ## Args:
+  ## - physeq: phyloseq class object
+  ## - raw: (Required). Defaults to 'FALSE', logical. Should abundances be transformed to
+  ##        frequencies before sorting otus from most to less abundant.
+  ## - numberOfTaxa: number of (top) taxa to keep
+  ##
+  ## Returns:
+  ## - x: Data frame with numberOfTaxa rows (one per final otu) and column 'Abundance' standing
+  ##      for  total counts (if raw = TRUE) or average frequency
+  ##      in samples of physeq. Rownames of x are either otus' names (if taxaRank = NULL) or names
+  ##      corresponding to taxonomic rank 'TaxaRank'. All NA ranks are assigned to 'Unassigned'.
   stopifnot(!is.null(tax_table(physeq, FALSE)))
   otutab <- otu_table(physeq)
-  if ( !taxa_are_rows(otutab) ) {otutab = t(otutab)}
+  if (!taxa_are_rows(otutab)) {
+    otutab <- t(otutab)
+  }
   otutab <- as(otutab, "matrix")
   if (raw) {
-      Abundance <- rowSums(otutab)
+    Abundance <- rowSums(otutab)
   } else {
-      otutab <- apply(otutab, 2, function(x) x / sum(x))
-      Abundance <- rowMeans(otutab)
+    otutab <- apply(otutab, 2, function(x) x / sum(x))
+    Abundance <- rowMeans(otutab)
   }
   ## Get top taxa
   mdf <- data.frame(OTU = names(Abundance), Abundance = Abundance)
@@ -256,7 +270,7 @@ top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
   mdf <- merge(mdf, tax, by.x = "OTU")
   ## Keep only numberOfTaxa top taxa
   topTaxa <- names(sort(Abundance, decreasing = TRUE))[1:numberOfTaxa]
-  mdf <- mdf[ match(topTaxa, mdf$OTU), ]
+  mdf <- mdf[match(topTaxa, mdf$OTU), ]
   mdf$OTU <- factor(mdf$OTU, levels = unique(mdf$OTU))
   return(mdf)
 }
@@ -278,12 +292,17 @@ top_taxa_abundance<- function(physeq, numberOfTaxa = 9, raw = FALSE) {
 #' @importFrom phyloseq ntaxa rank_names tax_table taxa_names taxa_sums transform_sample_counts
 #' @importFrom utils head
 top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
-  if (is.null(taxaRank)) {taxaRank <- "OTU"}
+  if (is.null(taxaRank)) {
+    taxaRank <- "OTU"
+  }
   tax_table(physeq) <- cbind(as(tax_table(physeq), "matrix"),
-                             OTU = taxa_names(physeq))
+    OTU = taxa_names(physeq)
+  )
   ## Normalize counts and aggregate at level taxaRank
   physeq <- physeq %>%
-    transform_sample_counts(function(x) {x / sum(x)})
+    transform_sample_counts(function(x) {
+      x / sum(x)
+    })
   ## Manual tax glom
   if (taxaRank != "OTU") {
     physeq <- fast_tax_glom(physeq, taxrank = taxaRank)
@@ -294,7 +313,7 @@ top_taxa <- function(physeq, taxaRank = NULL, numberOfTaxa = 9) {
     head(n = min(numberOfTaxa, ntaxa(physeq))) %>%
     names()
   ## Corresponding names
-  tax_table(physeq)[top_taxa, 1:match(taxaRank, rank_names(physeq))] %>% as('matrix')
+  tax_table(physeq)[top_taxa, 1:match(taxaRank, rank_names(physeq))] %>% as("matrix")
 }
 
 
@@ -328,49 +347,55 @@ replicate_means <- function(DF, replicate) {
 #' @importFrom methods as
 #' @importFrom phyloseq otu_table plot_ordination taxa_names taxa_sums
 #' @importFrom plyr is.discrete
-plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicate = color,
+plot_biplot <- function(physeq, ordination, axes = c(1, 2), color = NULL, replicate = color,
                         shape = NULL, label = NULL, title = NULL, outlier = NULL) {
   DF <- plot_ordination(physeq, ordination, "biplot", axes, color, shape, label, title, TRUE)
   ## Retrieve correct levels
-  if(!is.null(shape)) { DF <- correct_levels(physeq, DF, shape) }
-  if(!is.null(color)) { DF <- correct_levels(physeq, DF, color) }
+  if (!is.null(shape)) {
+    DF <- correct_levels(physeq, DF, shape)
+  }
+  if (!is.null(color)) {
+    DF <- correct_levels(physeq, DF, color)
+  }
   ## Keep only top 9 shapes
-  if (!is.null(shape) & length(levels(DF[ ,shape])) > (9+1)) {
-    if ( !"taxa" %in% levels(DF[, shape])) {
-      DF[ , shape] <- factor(DF[ ,shape], levels = c(top_taxa(physeq, shape), "samples"))
+  if (!is.null(shape) & length(levels(DF[, shape])) > (9 + 1)) {
+    if (!"taxa" %in% levels(DF[, shape])) {
+      DF[, shape] <- factor(DF[, shape], levels = c(top_taxa(physeq, shape), "samples"))
     } else {
-      DF[ , shape] <- factor(DF[ ,shape], levels = c(top_conditions(physeq, shape), "taxa"))
+      DF[, shape] <- factor(DF[, shape], levels = c(top_conditions(physeq, shape), "taxa"))
     }
   }
   ## Name dimensions
   x <- colnames(DF)[1]
   y <- colnames(DF)[2]
   ## label outliers
-  if ( !is.null(outlier) ) {
+  if (!is.null(outlier)) {
     outliers <- taxa_names(physeq)[taxa_sums(physeq) > sum(otu_table(physeq)) * outlier]
   }
   ## Get mean of each batch of replicate
-  if (!is.null(replicate)) { sampleCoordinates <- replicate_means(DF, replicate) }
+  if (!is.null(replicate)) {
+    sampleCoordinates <- replicate_means(DF, replicate)
+  }
   ## Mapping section
   p <- ggplot(DF, aes_string(x = x, y = y))
   ## Plot building (do not include aes in main figure, allows displays of further layers)
-  if ( is.null(color) ) {
+  if (is.null(color)) {
     ## Rename color title in legend
     p <- p + geom_point(aes_string(color = "id.type", shape = shape), na.rm = TRUE)
     p <- update_labels(p, list(colour = "type"))
   } else {
     p <- p + geom_point(aes_string(size = "id.type", color = color, shape = shape), na.rm = TRUE)
     ## Check if variable is discrete
-    if( is.discrete(DF[, color]) ){
+    if (is.discrete(DF[, color])) {
       colvals <- gg_color_hue(length(levels(as(DF[, color], "factor"))))
       names(colvals) <- levels(as(DF[, color], "factor"))
       ## Now make the taxa or samples dark grey
       colvals[names(colvals) %in% c("samples", "taxa")] <- "grey45"
       ## Now add the manually re-scaled layer with taxa/samples as grey
-      p <- p + scale_colour_manual(values=colvals)
+      p <- p + scale_colour_manual(values = colvals)
     }
     ## Adjust size so that samples are bigger than taxa by default.
-    p <- p + scale_size_manual("type", values=c(samples=5, taxa=2))
+    p <- p + scale_size_manual("type", values = c(samples = 5, taxa = 2))
   }
 
   ## Adjust shape scale
@@ -381,51 +406,59 @@ plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicat
   p <- p + scale_shape_manual(values = shape.scale)
 
   ## Add the text labels
-  if( !is.null(label) ){
-    label_map <- aes_string(x=x, y=y, color = color, label=label, na.rm=TRUE)
-    p <- p + geom_text(label_map, data=DF[ !is.na(DF[ , label]), ],
-                       size=3, vjust=1.5, na.rm=TRUE)
+  if (!is.null(label)) {
+    label_map <- aes_string(x = x, y = y, color = color, label = label, na.rm = TRUE)
+    p <- p + geom_text(label_map,
+      data = DF[!is.na(DF[, label]), ],
+      size = 3, vjust = 1.5, na.rm = TRUE
+    )
   }
 
   ## Add replicates
-  if( !is.null(replicate) ){
-    rep_map <- aes_string(x=x, y=y, label=replicate, na.rm=TRUE)
+  if (!is.null(replicate)) {
+    rep_map <- aes_string(x = x, y = y, label = replicate, na.rm = TRUE)
     if (replicate == color) {
-      repcols <- colvals[sampleCoordinates[ , replicate]]
+      repcols <- colvals[sampleCoordinates[, replicate]]
     } else {
       repcols <- "black"
     }
-    p <- p + geom_text(rep_map, data = sampleCoordinates,
-                       colour = repcols,
-                       size=4, vjust=1.5, na.rm=TRUE)
+    p <- p + geom_text(rep_map,
+      data = sampleCoordinates,
+      colour = repcols,
+      size = 4, vjust = 1.5, na.rm = TRUE
+    )
   }
 
   ## Optionally add a title to the plot
-  if( !is.null(title) ){
+  if (!is.null(title)) {
     p <- p + ggtitle(title)
   }
 
   ## Add fraction variability to axis labels, if available
-  if( length(extract_eigenvalue(ordination)[axes]) > 0 ){
-      ## Only attempt to add fraction variability
-      ## if extract_eigenvalue returns something
-      eigvec = extract_eigenvalue(ordination)
-      ## Fraction variability, fracvar
-      fracvar = eigvec[axes] / sum(eigvec)
-      ## Percent variability, percvar
-      percvar = round(100*fracvar, 1)
-      ## The string to add to each axis label, strivar
-      ## Start with the curent axis labels in the plot
-      strivar = as(c(p$label$x, p$label$y), "character")
-      ## paste the percent variability string at the end
-      strivar = paste0(strivar, "   [", percvar, "%]")
-      ## Update the x-label and y-label
-      p = p + xlab(strivar[1]) + ylab(strivar[2])
+  if (length(extract_eigenvalue(ordination)[axes]) > 0) {
+    ## Only attempt to add fraction variability
+    ## if extract_eigenvalue returns something
+    eigvec <- extract_eigenvalue(ordination)
+    ## Fraction variability, fracvar
+    fracvar <- eigvec[axes] / sum(eigvec)
+    ## Percent variability, percvar
+    percvar <- round(100 * fracvar, 1)
+    ## The string to add to each axis label, strivar
+    ## Start with the curent axis labels in the plot
+    strivar <- as(c(p$label$x, p$label$y), "character")
+    ## paste the percent variability string at the end
+    strivar <- paste0(strivar, "   [", percvar, "%]")
+    ## Update the x-label and y-label
+    p <- p + xlab(strivar[1]) + ylab(strivar[2])
   }
 
   ## Add outliers attribute
-  if ( !is.null(outlier) ) {attr(p, "outliers") <- outliers}
-  if ( !is.null(replicate) ) {attr(p, "repcols") <- repcols}
+  if (!is.null(outlier)) {
+    attr(p, "outliers") <- outliers
+  }
+  if (!is.null(replicate)) {
+    attr(p, "repcols") <- repcols
+  }
 
   ## return the ggplot object
   return(p)
@@ -437,16 +470,19 @@ plot_biplot <- function(physeq, ordination, axes=c(1, 2), color = NULL, replicat
 #' @importFrom ggplot2 aes_string geom_point geom_text ggplot ggtitle xlab ylab
 #' @importFrom methods as
 #' @importFrom phyloseq plot_ordination
-plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
+plot_samples <- function(physeq, ordination, axes = c(1, 2), color = NULL,
                          replicate = color,
                          shape = NULL, label = NULL, title = NULL) {
   DF <- plot_ordination(physeq, ordination, "samples", axes, color, shape, label, title, TRUE)
   ## Retrieve correct levels
-  if(!is.null(shape)) { DF <- correct_levels(physeq, DF, shape) }
-  if(!is.null(color) & !is.null(replicate)) {
+  if (!is.null(shape)) {
+    DF <- correct_levels(physeq, DF, shape)
+  }
+  if (!is.null(color) & !is.null(replicate)) {
     if (replicate == color) {
-      if (is.numeric(DF[, color]))
+      if (is.numeric(DF[, color])) {
         message("Using quantitative variable as grouping variable, try setting 'replicate = NULL' for better results.")
+      }
       DF <- correct_levels(physeq, DF, color)
     }
   }
@@ -454,51 +490,57 @@ plot_samples <- function(physeq, ordination, axes=c(1, 2), color = NULL,
   x <- colnames(DF)[1]
   y <- colnames(DF)[2]
   ## Get mean of each batch of replicate
-  if (!is.null(replicate)) { sampleCoordinates <- replicate_means(DF, replicate) }
+  if (!is.null(replicate)) {
+    sampleCoordinates <- replicate_means(DF, replicate)
+  }
   ## Mapping section
   p <- ggplot(DF, aes_string(x = x, y = y, color = color, shape = shape))
   ## Plot building
   p <- p + geom_point(na.rm = TRUE)
 
   ## Add the text labels
-  if( !is.null(label) ){
-    label_map <- aes_string(x=x, y=y, label=label, color = color)
-    p <- p + geom_text(label_map, data=DF[!is.na(DF[ , label]) , ],
-                       size=3, vjust=1.5, na.rm=TRUE)
+  if (!is.null(label)) {
+    label_map <- aes_string(x = x, y = y, label = label, color = color)
+    p <- p + geom_text(label_map,
+      data = DF[!is.na(DF[, label]), ],
+      size = 3, vjust = 1.5, na.rm = TRUE
+    )
   }
 
   ## Add replicates
-  if( !is.null(replicate) ){
+  if (!is.null(replicate)) {
     if (color == replicate) { ## map color to replicate if color and replicate grouping agree
-      rep_map <- aes_string(x=x, y=y, label=replicate, color = replicate, shape = NULL)
+      rep_map <- aes_string(x = x, y = y, label = replicate, color = replicate, shape = NULL)
     } else { ## don't set color aes
-      rep_map <- aes_string(x=x, y=y, label=replicate, color = NULL, shape = NULL)
+      rep_map <- aes_string(x = x, y = y, label = replicate, color = NULL, shape = NULL)
     }
-    p <- p + geom_text(rep_map, data = sampleCoordinates,
-                       size=4, vjust=1.5)
+    p <- p + geom_text(rep_map,
+      data = sampleCoordinates,
+      size = 4, vjust = 1.5
+    )
   }
 
   ## Optionally add a title to the plot
-  if( !is.null(title) ){
+  if (!is.null(title)) {
     p <- p + ggtitle(title)
   }
 
   ## Add fraction variability to axis labels, if available
-  if( length(extract_eigenvalue(ordination)[axes]) > 0 ){
-      ## Only attempt to add fraction variability
-      ## if extract_eigenvalue returns something
-      eigvec = extract_eigenvalue(ordination)
-      ## Fraction variability, fracvar
-      fracvar = eigvec[axes] / sum(eigvec)
-      ## Percent variability, percvar
-      percvar = round(100*fracvar, 1)
-      ## The string to add to each axis label, strivar
-      ## Start with the curent axis labels in the plot
-      strivar = as(c(p$label$x, p$label$y), "character")
-      ## paste the percent variability string at the end
-      strivar = paste0(strivar, "   [", percvar, "%]")
-      ## Update the x-label and y-label
-      p = p + xlab(strivar[1]) + ylab(strivar[2])
+  if (length(extract_eigenvalue(ordination)[axes]) > 0) {
+    ## Only attempt to add fraction variability
+    ## if extract_eigenvalue returns something
+    eigvec <- extract_eigenvalue(ordination)
+    ## Fraction variability, fracvar
+    fracvar <- eigvec[axes] / sum(eigvec)
+    ## Percent variability, percvar
+    percvar <- round(100 * fracvar, 1)
+    ## The string to add to each axis label, strivar
+    ## Start with the curent axis labels in the plot
+    strivar <- as(c(p$label$x, p$label$y), "character")
+    ## paste the percent variability string at the end
+    strivar <- paste0(strivar, "   [", percvar, "%]")
+    ## Update the x-label and y-label
+    p <- p + xlab(strivar[1]) + ylab(strivar[2])
   }
 
   ## return the ggplot object
@@ -532,186 +574,216 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                      numberOfTaxa = 9, startFrom = 1,
                      taxaOrder = c("abundance", "name"),
                      spread = FALSE) {
-    ## Enforce orientation and transform count to relative abundances
-    stopifnot(!is.null(sample_data(physeq, FALSE)),
-              !is.null(tax_table(physeq, FALSE)))
+  ## Enforce orientation and transform count to relative abundances
+  stopifnot(
+    !is.null(sample_data(physeq, FALSE)),
+    !is.null(tax_table(physeq, FALSE))
+  )
 
-    count_to_prop <- function(x) { x / sum(x) }
-    ## Transform to proportions (if not already)
-    if (any(sample_sums(physeq) > 1)) {
-      physeq <- transform_sample_counts(physeq, count_to_prop)
+  count_to_prop <- function(x) {
+    x / sum(x)
+  }
+  ## Transform to proportions (if not already)
+  if (any(sample_sums(physeq) > 1)) {
+    physeq <- transform_sample_counts(physeq, count_to_prop)
+  }
+
+  ## Check that taxaranks and fill are propers ranks
+  if (is.null(fill)) {
+    fill <- taxaRank2
+  }
+  if (is.null(taxaRank1)) {
+    taxaRank1 <- rank_names(physeq)[1]
+    taxaSet1 <- NULL
+  }
+  stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU_rank")))
+  ranks <- find_upper_ranks(physeq, c(taxaRank1, taxaRank2, fill))
+
+  ## Subset at TaxaRank1
+  if (!is.null(taxaSet1)) {
+    physeq <- prune_taxa(tax_table(physeq)[, taxaRank1] %in% taxaSet1, physeq)
+    if (ntaxa(physeq) == 0) {
+      stop(paste(
+        "No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
+        "at taxonomic level", taxaRank1
+      ))
     }
+  }
 
-    ## Check that taxaranks and fill are propers ranks
-    if (is.null(fill)) { fill <- taxaRank2 }
-    if (is.null(taxaRank1)) { taxaRank1 <- rank_names(physeq)[1]; taxaSet1 <- NULL }
-    stopifnot(all(c(taxaRank1, taxaRank2, fill) %in% c(rank_names(physeq), "OTU_rank")))
-    ranks <- find_upper_ranks(physeq, c(taxaRank1, taxaRank2, fill))
+  ## Spread affiliations
+  if (spread) {
+    physeq <- tax_spread(physeq)
+  }
 
-    ## Subset at TaxaRank1
-    if (!is.null(taxaSet1)) {
-      physeq <- prune_taxa(tax_table(physeq)[ , taxaRank1] %in% taxaSet1, physeq)
-      if (ntaxa(physeq) == 0) {
-        stop(paste("No otu belongs to", paste(taxaSet1, collapse = ","), "\n",
-                   "at taxonomic level", taxaRank1))
-      }
-    }
+  ## Correct taxonomy
+  tax <- as(tax_table(physeq), "matrix")
+  tax <- cbind(tax, OTU_rank = taxa_names(physeq))
+  if (!spread) {
+    tax[is.na(tax)] <- "Unknown"
+    tax[grepl("unknown", tax)] <- "Unknown"
+    tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
+  }
+  tax_table(physeq) <- tax
 
-    ## Spread affiliations
-    if (spread) {
-      physeq <- tax_spread(physeq)
-    }
-
-    ## Correct taxonomy
-    tax <- as(tax_table(physeq), "matrix")
-    tax <- cbind(tax, OTU_rank = taxa_names(physeq))
-    if (!spread) {
-      tax[is.na(tax)] <- "Unknown"
-      tax[grepl("unknown", tax)] <- "Unknown"
-      tax[tax %in% c("", "unclassified", "Unclassified", "NA")] <- "Unknown"
-    }
-    tax_table(physeq) <- tax
-
-    ## agglomerate at TaxaRank2
-    if (taxaRank2 != "OTU_rank") {
-      physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
-    } else {
-      ranks <- c(ranks, "OTU_rank")
-    }
-
-    ## Sort taxa by abundance, remove unwanted taxa and remove affiliation of least abundant taxa
-    last_levels <- c("Multi-affiliation", "Unknown", "Other")
-    topTaxa <- data.frame(abundance = taxa_sums(physeq),
-                          taxa      = taxa_names(physeq),
-                          stringsAsFactors = FALSE) %>%
-      bind_cols(as(tax_table(physeq), "matrix")[ , ranks, drop = F] %>% as_tibble()) %>%
-      arrange(desc(abundance)) %>%
-      mutate(
-        rank = row_number(),
-        status = case_when(
-          row_number() < startFrom-1              ~ "filtered out",
-          row_number() < startFrom + numberOfTaxa ~ "conserved",
-          TRUE                                    ~ "aggregated"
-        )) %>%
-      ## remove unwanted taxa
-      filter(status != "filtered out") %>%
-      ## propagate Other / Multi-affiliation / Unknown across all ranks in least abundant taxa
-      mutate(across(all_of(ranks), ~ case_when(
-        status == "conserved"                                        ~ .x,
-        status == "aggregated" & .data[[taxaRank2]] %in% last_levels ~ .data[[taxaRank2]],
-        TRUE                                                         ~ "Other"
-      )))
-
-
-    ## Warning if no taxa remains
-    if (nrow(topTaxa) == 0) {
-      stop(paste0("Not enough taxa to show. Consider decreasing `startFrom` to a lower value."))
-    }
-
-    ### Check that final names of most abundant taxa are unique; if not print a warning message and sanitize them.
-    res <- topTaxa %>% filter(status == "conserved") %>% pull(taxaRank2)
-    if (length(res) < numberOfTaxa) {
-      warning(paste0("Not enough taxa to show and/or all remaining taxa have unknown affiliation at rank ",
-        taxaRank2, ". Consider using a smaller value."))
-    }
-    problematic_taxa <- duplicated(res) | res %in% last_levels
-    if (any(problematic_taxa)) {
-      warning(paste("Some of the most abundant taxa are unknown or have the same name at rank", taxaRank2, "but not at upper ranks.\nUsing suffix '_x' to distinguish them. See table for further details."))
-      cat("Problematic taxa", sep = "\n")
-      topTaxa %>% filter(status == "conserved", .data[[taxaRank2]] %in% res[problematic_taxa]) %>%
-        select(-abundance, -status) %>% print()
-      .f <- function(status, x) {
-        if (length(x) == 1) return(x)
-        if_else(status == "conserved", paste(x, seq_along(x), sep = "_"), x)
-      }
-      topTaxa <- topTaxa %>%
-        group_by(.data[[taxaRank2]]) %>%
-        mutate({{taxaRank2}} := .f(status, .data[[taxaRank2]])) %>%
-        ungroup()
-    }
-
-    ## Change taxaRank2/fill to ordered levels and sort topTaxa
-    taxaOrder <- match.arg(taxaOrder)
-    taxa_levels <- topTaxa %>% filter(status == "conserved") %>% pull(taxaRank2)
-    if (taxaOrder == "name") {
-      taxa_levels <- sort(taxa_levels)
-    }
-    taxa_levels <- c(taxa_levels, last_levels) %>% unique()
-
-    topTaxa <- topTaxa %>%
-      mutate({{taxaRank2}} := factor(.data[[taxaRank2]], levels = taxa_levels)) %>%
-      arrange(.data[[taxaRank2]])
-
-    if (taxaRank2 != fill) {
-      fill_levels <- topTaxa %>% filter(status == "conserved") %>% pull(fill) %>% unique()
-      if (taxaOrder == "name") {
-        fill_levels <- sort(fill_levels)
-      }
-      fill_levels <- c(fill_levels, last_levels)
-      topTaxa <- topTaxa %>%
-        mutate({{fill}} := factor(.data[[fill]], levels = fill_levels))
-    } else {
-      fill_levels <- taxa_levels
-    }
-
-    ## Compact and simplify physeq object
-    physeq <- prune_taxa(topTaxa$taxa, physeq)
-    tax_table(physeq) <- topTaxa %>%
-      tibble::remove_rownames() %>%
-      select(all_of(c("taxa", ranks))) %>%
-      column_to_rownames(var = "taxa") %>% as.matrix()
+  ## agglomerate at TaxaRank2
+  if (taxaRank2 != "OTU_rank") {
     physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
+  } else {
+    ranks <- c(ranks, "OTU_rank")
+  }
 
-    tdf <- psmelt(physeq) %>%
-      mutate({{taxaRank2}} := factor(.data[[taxaRank2]], levels = taxa_levels),
-             {{fill}} := factor(.data[[fill]], levels = fill_levels)) %>%
-      arrange(desc(.data[[fill]]), Abundance)
+  ## Sort taxa by abundance, remove unwanted taxa and remove affiliation of least abundant taxa
+  last_levels <- c("Multi-affiliation", "Unknown", "Other")
+  topTaxa <- data.frame(
+    abundance = taxa_sums(physeq),
+    taxa = taxa_names(physeq),
+    stringsAsFactors = FALSE
+  ) %>%
+    bind_cols(as(tax_table(physeq), "matrix")[, ranks, drop = F] %>% as_tibble()) %>%
+    arrange(desc(abundance)) %>%
+    mutate(
+      rank = row_number(),
+      status = case_when(
+        row_number() < startFrom - 1 ~ "filtered out",
+        row_number() < startFrom + numberOfTaxa ~ "conserved",
+        TRUE ~ "aggregated"
+      )
+    ) %>%
+    ## remove unwanted taxa
+    filter(status != "filtered out") %>%
+    ## propagate Other / Multi-affiliation / Unknown across all ranks in least abundant taxa
+    mutate(across(all_of(ranks), ~ case_when(
+      status == "conserved" ~ .x,
+      status == "aggregated" & .data[[taxaRank2]] %in% last_levels ~ .data[[taxaRank2]],
+      TRUE ~ "Other"
+    )))
 
-    return(tdf)
-    # ## Bind with undefined taxa and propagate Unknown / Multi-affiliation / Other across all ranks
-    # topTaxa <- bind_rows(topTaxa, topTaxa_undefined) %>%
-    #   mutate(across(all_of(ranks), ~ if_else(.data[[taxaRank2]] %in% last_levels, .data[[taxaRank2]], .x)))
+
+  ## Warning if no taxa remains
+  if (nrow(topTaxa) == 0) {
+    stop(paste0("Not enough taxa to show. Consider decreasing `startFrom` to a lower value."))
+  }
+
+  ### Check that final names of most abundant taxa are unique; if not print a warning message and sanitize them.
+  res <- topTaxa %>%
+    filter(status == "conserved") %>%
+    pull(taxaRank2)
+  if (length(res) < numberOfTaxa) {
+    warning(paste0(
+      "Not enough taxa to show and/or all remaining taxa have unknown affiliation at rank ",
+      taxaRank2, ". Consider using a smaller value."
+    ))
+  }
+  problematic_taxa <- duplicated(res) | res %in% last_levels
+  if (any(problematic_taxa)) {
+    warning(paste("Some of the most abundant taxa are unknown or have the same name at rank", taxaRank2, "but not at upper ranks.\nUsing suffix '_x' to distinguish them. See table for further details."))
+    cat("Problematic taxa", sep = "\n")
+    topTaxa %>%
+      filter(status == "conserved", .data[[taxaRank2]] %in% res[problematic_taxa]) %>%
+      select(-abundance, -status) %>%
+      print()
+    .f <- function(status, x) {
+      if (length(x) == 1) {
+        return(x)
+      }
+      if_else(status == "conserved", paste(x, seq_along(x), sep = "_"), x)
+    }
+    topTaxa <- topTaxa %>%
+      group_by(.data[[taxaRank2]]) %>%
+      mutate({{ taxaRank2 }} := .f(status, .data[[taxaRank2]])) %>%
+      ungroup()
+  }
+
+  ## Change taxaRank2/fill to ordered levels and sort topTaxa
+  taxaOrder <- match.arg(taxaOrder)
+  taxa_levels <- topTaxa %>%
+    filter(status == "conserved") %>%
+    pull(taxaRank2)
+  if (taxaOrder == "name") {
+    taxa_levels <- sort(taxa_levels)
+  }
+  taxa_levels <- c(taxa_levels, last_levels) %>% unique()
+
+  topTaxa <- topTaxa %>%
+    mutate({{ taxaRank2 }} := factor(.data[[taxaRank2]], levels = taxa_levels)) %>%
+    arrange(.data[[taxaRank2]])
+
+  if (taxaRank2 != fill) {
+    fill_levels <- topTaxa %>%
+      filter(status == "conserved") %>%
+      pull(fill) %>%
+      unique()
+    if (taxaOrder == "name") {
+      fill_levels <- sort(fill_levels)
+    }
+    fill_levels <- c(fill_levels, last_levels)
+    topTaxa <- topTaxa %>%
+      mutate({{ fill }} := factor(.data[[fill]], levels = fill_levels))
+  } else {
+    fill_levels <- taxa_levels
+  }
+
+  ## Compact and simplify physeq object
+  physeq <- prune_taxa(topTaxa$taxa, physeq)
+  tax_table(physeq) <- topTaxa %>%
+    tibble::remove_rownames() %>%
+    select(all_of(c("taxa", ranks))) %>%
+    column_to_rownames(var = "taxa") %>%
+    as.matrix()
+  physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
+
+  tdf <- psmelt(physeq) %>%
+    mutate(
+      {{ taxaRank2 }} := factor(.data[[taxaRank2]], levels = taxa_levels),
+      {{ fill }} := factor(.data[[fill]], levels = fill_levels)
+    ) %>%
+    arrange(desc(.data[[fill]]), Abundance)
+
+  return(tdf)
+  # ## Bind with undefined taxa and propagate Unknown / Multi-affiliation / Other across all ranks
+  # topTaxa <- bind_rows(topTaxa, topTaxa_undefined) %>%
+  #   mutate(across(all_of(ranks), ~ if_else(.data[[taxaRank2]] %in% last_levels, .data[[taxaRank2]], .x)))
 
 
 
-    #
-    #
-    # ## TOD0: change taxaRank2 and fill directly to factors in topTaxa.
-    # ## Change to character and correct taxonomic levels
-    # correct_taxonomy <- function(x) {
-    #   last_levels <- c("Multi-affiliation", "Unknown", "Other")
-    #   res <- c(setdiff(x, last_levels), last_levels)
-    #   if (any(duplicated(res))) {
-    #     warning(paste("Please check upper ranks of", res[duplicated(res)], "as they may have typos.\n"))
-    #     res <- unique(res)
-    #   }
-    #   res
-    # }
+  #
+  #
+  # ## TOD0: change taxaRank2 and fill directly to factors in topTaxa.
+  # ## Change to character and correct taxonomic levels
+  # correct_taxonomy <- function(x) {
+  #   last_levels <- c("Multi-affiliation", "Unknown", "Other")
+  #   res <- c(setdiff(x, last_levels), last_levels)
+  #   if (any(duplicated(res))) {
+  #     warning(paste("Please check upper ranks of", res[duplicated(res)], "as they may have typos.\n"))
+  #     res <- unique(res)
+  #   }
+  #   res
+  # }
 
-    # ## Replace all levels in taxonomy of non-top / non-unknown taxa to Other
-    # tax <- as(tax_table(physeq), "matrix")
-    # ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
-    # tax[!ii, ] <- "Other"
-    # tax_table(physeq) <- tax
-    # archetype <- taxa_names(physeq)[!ii][1]
-    # physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = archetype)
-    # taxa_names(physeq)[taxa_names(physeq) == archetype] <- "Other"
-    # # physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
-    #
-    # tdf <- psmelt(physeq)
-    # tdf[, taxaRank2] <- factor(tdf[, taxaRank2], levels = correct_taxonomy(topTaxa[[taxaRank2]]))
-    #
-    # ## Create correct order for the filling variable (if different from taxaRank2)
-    # if (fill != taxaRank2) {
-    #   fill_order <- count(topTaxa, .data[[fill]], wt = abundance, sort = TRUE) %>%
-    #     pull(fill)
-    #   tdf[, fill] <- factor(tdf[, fill], levels = correct_taxonomy(fill_order)) %>%
-    #     droplevels()
-    # }
-    #
-    # tdf <- tdf %>% arrange(desc(.data[[fill]]), desc(Abundance))
-    #
-    # return(tdf)
+  # ## Replace all levels in taxonomy of non-top / non-unknown taxa to Other
+  # tax <- as(tax_table(physeq), "matrix")
+  # ii <- (tax[ , taxaRank2] == "Unknown") | (taxa_names(physeq) %in% topTaxa$taxa)
+  # tax[!ii, ] <- "Other"
+  # tax_table(physeq) <- tax
+  # archetype <- taxa_names(physeq)[!ii][1]
+  # physeq <- merge_taxa(physeq, eqtaxa = which(!ii), archetype = archetype)
+  # taxa_names(physeq)[taxa_names(physeq) == archetype] <- "Other"
+  # # physeq <- fast_tax_glom(physeq, taxrank = taxaRank2)
+  #
+  # tdf <- psmelt(physeq)
+  # tdf[, taxaRank2] <- factor(tdf[, taxaRank2], levels = correct_taxonomy(topTaxa[[taxaRank2]]))
+  #
+  # ## Create correct order for the filling variable (if different from taxaRank2)
+  # if (fill != taxaRank2) {
+  #   fill_order <- count(topTaxa, .data[[fill]], wt = abundance, sort = TRUE) %>%
+  #     pull(fill)
+  #   tdf[, fill] <- factor(tdf[, fill], levels = correct_taxonomy(fill_order)) %>%
+  #     droplevels()
+  # }
+  #
+  # tdf <- tdf %>% arrange(desc(.data[[fill]]), desc(Abundance))
+  #
+  # return(tdf)
 }
 
 #' Plot a distance matrix as a heatmap
@@ -746,13 +818,18 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
     data$x <- factor(data$x, levels = order)
     data$y <- factor(data$y, levels = order)
   }
-  p <- ggplot(data, aes(x = x, y = y, fill = distance)) + geom_tile()
-  p <- p + theme(axis.title.x = element_blank(),
-                 axis.title.y = element_blank(),
-                 axis.text.x = element_text(angle = 90))
+  p <- ggplot(data, aes(x = x, y = y, fill = distance)) +
+    geom_tile()
+  p <- p + theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.x = element_text(angle = 90)
+  )
   if (!show.names) {
-    p <- p + theme(axis.text.x = element_blank(),
-                   axis.text.y = element_blank())
+    p <- p + theme(
+      axis.text.x = element_blank(),
+      axis.text.y = element_blank()
+    )
   }
   p <- p + scale_fill_gradient(low = low, high = high)
   if (!is.null(title)) {
@@ -806,8 +883,8 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   color_levels <- levels(color_var)
   ## compute distance
   if (is.character(dist)) {
-   dist <- dist[1]
-   dist <- phyloseq::distance(physeq, method = dist)
+    dist <- dist[1]
+    dist <- phyloseq::distance(physeq, method = dist)
   }
   ## automatic color palette: one color per different sample type
   if (is.null(palette)) {
@@ -830,7 +907,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ## plot clustering tree
   ggtree::`%<+%`(ggtree::ggtree(clust), meta) +
     ggtree::layout_dendrogram() +
-    ggtree::geom_tippoint(aes(color= .data[[color]])) +
+    ggtree::geom_tippoint(aes(color = .data[[color]])) +
     ## as_ylab permet d'afficher les labels comme des axis.tick
     ggtree::geom_tiplab(as_ylab = TRUE, aes(label = .data[[label]])) +
     scale_color_manual(values = color_palette) +
@@ -841,7 +918,7 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
 
 ## Extract legend from a ggplot object
 #' @importFrom ggplot2 ggplot_build ggplot_gtable
-g_legend <- function(a.gplot){
+g_legend <- function(a.gplot) {
   tmp <- ggplot_gtable(ggplot_build(a.gplot))
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
   legend <- tmp$grobs[[leg]]

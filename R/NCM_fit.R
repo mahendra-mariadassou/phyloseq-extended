@@ -24,46 +24,52 @@
 #' @importFrom phyloseq nsamples otu_table sample_sums taxa_are_rows
 #' @importFrom tibble tibble
 ncm_fit <- function(physeq, threshold, absolute.threshold = 1) {
-    abundances <- otu_table(physeq)
-    ## Extract species count
-    if (!taxa_are_rows(physeq)) {
-        abundances <- t(abundances)
-    }
-    n_samples <- phyloseq::nsamples(physeq)
-    depths <- phyloseq::sample_sums(physeq)
-    if (!is.null(absolute.threshold)) {
-     threshold <- absolute.threshold / depths
-    }
-    ## Fit NCM model to the data and extract estimated migration rate
-    m_hat <- ncm_mle_fit(abundances, threshold, absolute.threshold)$maximum
+  abundances <- otu_table(physeq)
+  ## Extract species count
+  if (!taxa_are_rows(physeq)) {
+    abundances <- t(abundances)
+  }
+  n_samples <- phyloseq::nsamples(physeq)
+  depths <- phyloseq::sample_sums(physeq)
+  if (!is.null(absolute.threshold)) {
+    threshold <- absolute.threshold / depths
+  }
+  ## Fit NCM model to the data and extract estimated migration rate
+  m_hat <- ncm_mle_fit(abundances, threshold, absolute.threshold)$maximum
 
-    ## Compute predicted abundances in regional pool given migration rate m_hat
-    freq <- local_community(abundances, m_hat)
+  ## Compute predicted abundances in regional pool given migration rate m_hat
+  freq <- local_community(abundances, m_hat)
 
-    ncm_curve <- ncm_curve(threshold = threshold, N = depths, m = m_hat)
-    ## Compute frequency occupancy curve on a regular grid
-    freq_occ_ncm <- dplyr::tibble(
-        freq     = 10^(-seq(0, 6, length.out = 100)),
-        occ      = ncm_curve(freq),
-        ci       = wilson_conf_int(p = occ, n = n_samples)
+  ncm_curve <- ncm_curve(threshold = threshold, N = depths, m = m_hat)
+  ## Compute frequency occupancy curve on a regular grid
+  freq_occ_ncm <- dplyr::tibble(
+    freq     = 10^(-seq(0, 6, length.out = 100)),
+    occ      = ncm_curve(freq),
+    ci       = wilson_conf_int(p = occ, n = n_samples)
+  ) %>%
+    dplyr::mutate(occ_lower = ci[, "lower"], occ_upper = ci[, "upper"]) %>%
+    dplyr::select(-ci)
+
+  freq_occ_obs <- dplyr::tibble(
+    otu = names(freq),
+    freq = freq,
+    occ = ncm_curve(freq),
+    occ_obs = apply(abundances, 1, function(x) {
+      mean(x > threshold)
+    }),
+    ci = wilson_conf_int(p = occ, n = n_samples)
+  ) %>%
+    dplyr::mutate(
+      occ_lower = ci[, "lower"], occ_upper = ci[, "upper"],
+      neutral = dplyr::if_else(occ_obs <= occ_upper & occ_obs >= occ_lower, TRUE, FALSE)
     ) %>%
-        dplyr::mutate(occ_lower = ci[, "lower"], occ_upper = ci[, "upper"]) %>% dplyr::select(-ci)
+    dplyr::select(-ci)
 
-    freq_occ_obs <- dplyr::tibble(
-        otu     = names(freq),
-        freq    = freq,
-        occ     = ncm_curve(freq),
-        occ_obs = apply(abundances, 1, function(x) { mean(x > threshold) }),
-        ci      = wilson_conf_int(p = occ, n = n_samples)
-    ) %>%
-        dplyr::mutate(occ_lower = ci[, "lower"], occ_upper = ci[, "upper"],
-                      neutral   = dplyr::if_else(occ_obs <= occ_upper & occ_obs >= occ_lower, TRUE, FALSE)) %>%
-        dplyr::select(-ci)
-
-    return(list(ncm_prediction = freq_occ_ncm,
-                observations = freq_occ_obs,
-                fit = list(m = m_hat, ncm_curve = ncm_curve)))
-
+  return(list(
+    ncm_prediction = freq_occ_ncm,
+    observations = freq_occ_obs,
+    fit = list(m = m_hat, ncm_curve = ncm_curve)
+  ))
 }
 
 #' Plot a ncm_fit result
@@ -79,14 +85,14 @@ ncm_fit <- function(physeq, threshold, absolute.threshold = 1) {
 #' plot_ncm(model)
 #' @importFrom ggplot2 aes geom_line geom_point geom_ribbon ggplot scale_x_log10
 plot_ncm <- function(ncm.fit) {
-    ggplot(data = ncm.fit$observations, aes(x = freq, y = occ)) +
-        geom_ribbon(data = ncm.fit$ncm_prediction, aes(ymin = occ_lower, ymax = occ_upper), alpha = 0.1) +
-        geom_line(data = ncm.fit$ncm_prediction, group = 1) +
-        geom_line(data = ncm.fit$ncm_prediction, aes(y = occ_lower), linetype = 2, group = 1) +
-        geom_line(data = ncm.fit$ncm_prediction, aes(y = occ_upper), linetype = 2, group = 1) +
-        geom_point(aes(y = occ_obs, color = neutral), alpha = 0.5) +
-        scale_x_log10() +
-        NULL
+  ggplot(data = ncm.fit$observations, aes(x = freq, y = occ)) +
+    geom_ribbon(data = ncm.fit$ncm_prediction, aes(ymin = occ_lower, ymax = occ_upper), alpha = 0.1) +
+    geom_line(data = ncm.fit$ncm_prediction, group = 1) +
+    geom_line(data = ncm.fit$ncm_prediction, aes(y = occ_lower), linetype = 2, group = 1) +
+    geom_line(data = ncm.fit$ncm_prediction, aes(y = occ_upper), linetype = 2, group = 1) +
+    geom_point(aes(y = occ_obs, color = neutral), alpha = 0.5) +
+    scale_x_log10() +
+    NULL
 }
 
 ## fitting function for neutral community model of Sloan et al. (2006).
@@ -110,37 +116,43 @@ plot_ncm <- function(ncm.fit) {
 #' ncm_loglik(phyloseq::otu_table(food), absolute.threshold = 1)
 #' @importFrom stats pbeta
 ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute.threshold = NULL) {
-    Nt <- colSums(abundances)
-    ## regional pool species composition
-    local.abundances <- local_community(abundances, migration)
-    ## compute the log-probability of appearance at a given threshold of an OTU given Nt,
-    ## relative abundances in the local pool and the detection threshold
-    .local <- function(pi, N, lower.tail = FALSE) {
-        ## Parameters of the beta distributions
-        alpha <-  migration*N*pi
-        beta <-  migration*N*(1-pi)
-        if (is.null(absolute.threshold)) {
-            pbeta(threshold, shape1 = alpha, shape2 = beta,
-                  lower.tail = lower.tail, log.p = TRUE)
-        } else {
-            pbeta(absolute.threshold/N, shape1 = alpha, shape2 = beta,
-                  lower.tail = lower.tail, log.p = TRUE)
-        }
+  Nt <- colSums(abundances)
+  ## regional pool species composition
+  local.abundances <- local_community(abundances, migration)
+  ## compute the log-probability of appearance at a given threshold of an OTU given Nt,
+  ## relative abundances in the local pool and the detection threshold
+  .local <- function(pi, N, lower.tail = FALSE) {
+    ## Parameters of the beta distributions
+    alpha <- migration * N * pi
+    beta <- migration * N * (1 - pi)
+    if (is.null(absolute.threshold)) {
+      pbeta(threshold,
+        shape1 = alpha, shape2 = beta,
+        lower.tail = lower.tail, log.p = TRUE
+      )
+    } else {
+      pbeta(absolute.threshold / N,
+        shape1 = alpha, shape2 = beta,
+        lower.tail = lower.tail, log.p = TRUE
+      )
     }
-    ## Matrix of log-probability of appearance of each species in each community
-    lprobs.presence <- outer(local.abundances, Nt, .local)
-    lprobs.absence <- outer(local.abundances, Nt, .local, lower.tail = TRUE)
-    ## Log-likelihood of the occupancy data
-    loglik <- sum(ifelse(abundances > 0, lprobs.presence, lprobs.absence))
-    return(loglik)
+  }
+  ## Matrix of log-probability of appearance of each species in each community
+  lprobs.presence <- outer(local.abundances, Nt, .local)
+  lprobs.absence <- outer(local.abundances, Nt, .local, lower.tail = TRUE)
+  ## Log-likelihood of the occupancy data
+  loglik <- sum(ifelse(abundances > 0, lprobs.presence, lprobs.absence))
+  return(loglik)
 }
 
 ## MLE of migration rate m in NCM
 #' @importFrom stats optimize
 ncm_mle_fit <- function(abundances, threshold, absolute.threshold = NULL) {
-    optim.function <- function(m) { ncm_loglik(abundances, m, threshold, absolute.threshold) }
-    solution <- optimize(optim.function, interval = c(1e-10, 1), maximum = TRUE)
-    return(solution)
+  optim.function <- function(m) {
+    ncm_loglik(abundances, m, threshold, absolute.threshold)
+  }
+  solution <- optimize(optim.function, interval = c(1e-10, 1), maximum = TRUE)
+  return(solution)
 }
 
 
@@ -150,42 +162,43 @@ ncm_mle_fit <- function(abundances, threshold, absolute.threshold = NULL) {
 ## N and threshold if there are multiple sites (in which the function returns the mean across sites)
 #' @importFrom stats pbeta
 ncm_curve <- function(threshold, N, m) {
-    if (length(threshold) == 1) {
-        if (threshold >= 1) {
-            threshold <- threshold / N
-        } else {
-            threshold <- rep(threshold, length(N))
-        }
+  if (length(threshold) == 1) {
+    if (threshold >= 1) {
+      threshold <- threshold / N
+    } else {
+      threshold <- rep(threshold, length(N))
     }
-    curve <- function(pi) {
-        proba_sample <- matrix(NA, nrow = length(pi), ncol = length(N))
-        for (i in seq_along(N)) {
-            proba_sample[, i] <- pbeta(threshold[i],
-                                     shape1 = N[i]*m*pi,
-                                     shape2 = N[i]*m*(1-pi),
-                                     lower.tail = FALSE)
-        }
-        return(rowMeans(proba_sample))
+  }
+  curve <- function(pi) {
+    proba_sample <- matrix(NA, nrow = length(pi), ncol = length(N))
+    for (i in seq_along(N)) {
+      proba_sample[, i] <- pbeta(threshold[i],
+        shape1 = N[i] * m * pi,
+        shape2 = N[i] * m * (1 - pi),
+        lower.tail = FALSE
+      )
     }
-    return(curve)
+    return(rowMeans(proba_sample))
+  }
+  return(curve)
 }
 
 ## Wilson confidence interval for mean of sum of independent bernoulli (with different parameters)
 #' @importFrom stats qnorm
-wilson_conf_int <- function(p, alpha  = 0.05, n) {
-    z <- qnorm(1 - alpha/2)
-    center <- (p + z^2 / (2*n)) / (1 + z^2 / n)
-    dev    <- z / (1 + z^2 / n) * sqrt(p*(1-p)/n + z^2/(4*n^2))
-    return(cbind(lower = center - dev, upper = center + dev))
+wilson_conf_int <- function(p, alpha = 0.05, n) {
+  z <- qnorm(1 - alpha / 2)
+  center <- (p + z^2 / (2 * n)) / (1 + z^2 / n)
+  dev <- z / (1 + z^2 / n) * sqrt(p * (1 - p) / n + z^2 / (4 * n^2))
+  return(cbind(lower = center - dev, upper = center + dev))
 }
 
 ## Estimate regional pool species composition using BLUE estimates under a NCM with migration rate m
 local_community <- function(abundances, migration = 0.1) {
-    Nt <- colSums(abundances)
-    weights <- (Nt * migration + 1)
-    weights <- weights / ( Nt * sum(weights) )
-    ## estimates of local abundances, using BLUE estimates of the proportions
-    weights.matrix <- matrix( rep(weights, each = nrow(abundances)) , ncol = ncol (abundances))
-    local.abundances <- rowSums( abundances * weights.matrix ) ## pi
-    return(local.abundances)
+  Nt <- colSums(abundances)
+  weights <- (Nt * migration + 1)
+  weights <- weights / (Nt * sum(weights))
+  ## estimates of local abundances, using BLUE estimates of the proportions
+  weights.matrix <- matrix(rep(weights, each = nrow(abundances)), ncol = ncol(abundances))
+  local.abundances <- rowSums(abundances * weights.matrix) ## pi
+  return(local.abundances)
 }

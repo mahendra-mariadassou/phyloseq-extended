@@ -17,91 +17,92 @@
 #' @seealso \code{\link{sample_copy_number}}
 #' @importFrom stats rnorm
 sample_copy_number_internal <- function(level, dispersion = FALSE) {
-    known.levels <- c("Acidobacteria", "Actinobacteria", "Aquificae", "Bacteroidetes", "Caldiserica",
-                      "Chlamydiae", "Chlorobi", "Chloroflexi", "Cyanobacteria", "Defferibacteres",
-                      "Deinoccocus-Thermus", "Dyctioglomi", "Elusimicrobia", "Fibrobacteres",
-                      "Firmicutes", "Fusobacteria", "Gemmatimonadetes", "Ignavibacteria",
-                      "Nitrospirae", "Planctomycetes", "Alphaproteobacteria", "Betaproteobacteria",
-                      "Deltaproteobacteria", "Epsilonproteobacteria", "Gammaproteobacteria",
-                      "Spirochaetes", "Synergistetes", "Tenericutes", "Thermodelsufobacteria",
-                      "Thermotogae", "Verrucomicrobia")
-    if (level %in% known.levels) {
-        if (dispersion) {
-            copy.number <- switch(level,
-                                  "Acidobacteria" = rnorm(1, 1, 0),
-                                  "Actinobacteria" = rnorm(1, 3.1, 1.7),
-                                  "Aquificae" = rnorm(1, 2, 0.6),
-                                  "Bacteroidetes" = rnorm(1, 3.5, 1.5),
-                                  "Caldiserica" = rnorm(1, 1, 0),
-                                  "Chlamydiae" = rnorm(1, 1.4, 0.5),
-                                  "Chlorobi" = rnorm(1, 1.7, 0.7),
-                                  "Chloroflexi" = rnorm(1, 2.2, 1.2),
-                                  "Cyanobacteria" = rnorm(1, 2.3, 1.2),
-                                  "Defferibacteres" = rnorm(1, 2, 0),
-                                  "Deinoccocus-Thermus" = rnorm(1, 2.7, 1),
-                                  "Dyctioglomi" = rnorm(1, 2, 0),
-                                  "Elusimicrobia" = rnorm(1, 1, 0),
-                                  "Fibrobacteres" = rnorm(1, 3, 0),
-                                  "Firmicutes" = rnorm(1, 5.8, 2.8),
-                                  "Fusobacteria" = rnorm(1, 5, 0.7),
-                                  "Gemmatimonadetes" = rnorm(1, 1, 0),
-                                  "Ignavibacteria" = rnorm(1, 1, 0),
-                                  "Nitrospirae" = rnorm(1, 2, 1.4),
-                                  "Planctomycetes" = rnorm(1, 1.7, 0.8),
-                                  "Alphaproteobacteria" = rnorm(1, 2.2, 1.3),
-                                  "Betaproteobacteria" = rnorm(1, 3.3, 1.6),
-                                  "Deltaproteobacteria" = rnorm(1, 2.7, 1.4),
-                                  "Epsilonproteobacteria" = rnorm(1, 3, 1.1),
-                                  "Gammaproteobacteria" = rnorm(1, 5.8, 2.8),
-                                  "Spirochaetes" = rnorm(1, 2.4, 1),
-                                  "Synergistetes" = rnorm(1, 2.5, 1),
-                                  "Tenericutes" = rnorm(1, 1.6, 0.5),
-                                  "Thermodelsufobacteria" = rnorm(1, 2, 0),
-                                  "Thermotogae" = rnorm(1, 1.8, 1),
-                                  "Verrucomicrobia" = rnorm(1, 1.8, 1)
-                                  )
-        } else {
-            copy.number <- switch(level,
-                                  "Acidobacteria" = 1,
-                                  "Actinobacteria" = 3.1,
-                                  "Aquificae" = 2,
-                                  "Bacteroidetes" = 3.5,
-                                  "Caldiserica" = 1,
-                                  "Chlamydiae" = 1.4,
-                                  "Chlorobi" = 1.7,
-                                  "Chloroflexi" = 2.2,
-                                  "Cyanobacteria" = 2.3,
-                                  "Defferibacteres" = 2,
-                                  "Deinoccocus-Thermus" = 2.7,
-                                  "Dyctioglomi" = 2,
-                                  "Elusimicrobia" = 1,
-                                  "Fibrobacteres" = 3,
-                                  "Firmicutes" = 5.8,
-                                  "Fusobacteria" = 5,
-                                  "Gemmatimonadetes" = 1,
-                                  "Ignavibacteria" = 1,
-                                  "Nitrospirae" = 2,
-                                  "Planctomycetes" = 1.7,
-                                  "Alphaproteobacteria" = 2.2,
-                                  "Betaproteobacteria" = 3.3,
-                                  "Deltaproteobacteria" = 2.7,
-                                  "Epsilonproteobacteria" = 3,
-                                  "Gammaproteobacteria" = 5.8,
-                                  "Spirochaetes" = 2.4,
-                                  "Synergistetes" = 2.5,
-                                  "Tenericutes" = 1.6,
-                                  "Thermodelsufobacteria" = 2,
-                                  "Thermotogae" = 1.8,
-                                  "Verrucomicrobia" = 1.8
-                                  )
-
-        }
+  known.levels <- c(
+    "Acidobacteria", "Actinobacteria", "Aquificae", "Bacteroidetes", "Caldiserica",
+    "Chlamydiae", "Chlorobi", "Chloroflexi", "Cyanobacteria", "Defferibacteres",
+    "Deinoccocus-Thermus", "Dyctioglomi", "Elusimicrobia", "Fibrobacteres",
+    "Firmicutes", "Fusobacteria", "Gemmatimonadetes", "Ignavibacteria",
+    "Nitrospirae", "Planctomycetes", "Alphaproteobacteria", "Betaproteobacteria",
+    "Deltaproteobacteria", "Epsilonproteobacteria", "Gammaproteobacteria",
+    "Spirochaetes", "Synergistetes", "Tenericutes", "Thermodelsufobacteria",
+    "Thermotogae", "Verrucomicrobia"
+  )
+  if (level %in% known.levels) {
+    if (dispersion) {
+      copy.number <- switch(level,
+        "Acidobacteria" = rnorm(1, 1, 0),
+        "Actinobacteria" = rnorm(1, 3.1, 1.7),
+        "Aquificae" = rnorm(1, 2, 0.6),
+        "Bacteroidetes" = rnorm(1, 3.5, 1.5),
+        "Caldiserica" = rnorm(1, 1, 0),
+        "Chlamydiae" = rnorm(1, 1.4, 0.5),
+        "Chlorobi" = rnorm(1, 1.7, 0.7),
+        "Chloroflexi" = rnorm(1, 2.2, 1.2),
+        "Cyanobacteria" = rnorm(1, 2.3, 1.2),
+        "Defferibacteres" = rnorm(1, 2, 0),
+        "Deinoccocus-Thermus" = rnorm(1, 2.7, 1),
+        "Dyctioglomi" = rnorm(1, 2, 0),
+        "Elusimicrobia" = rnorm(1, 1, 0),
+        "Fibrobacteres" = rnorm(1, 3, 0),
+        "Firmicutes" = rnorm(1, 5.8, 2.8),
+        "Fusobacteria" = rnorm(1, 5, 0.7),
+        "Gemmatimonadetes" = rnorm(1, 1, 0),
+        "Ignavibacteria" = rnorm(1, 1, 0),
+        "Nitrospirae" = rnorm(1, 2, 1.4),
+        "Planctomycetes" = rnorm(1, 1.7, 0.8),
+        "Alphaproteobacteria" = rnorm(1, 2.2, 1.3),
+        "Betaproteobacteria" = rnorm(1, 3.3, 1.6),
+        "Deltaproteobacteria" = rnorm(1, 2.7, 1.4),
+        "Epsilonproteobacteria" = rnorm(1, 3, 1.1),
+        "Gammaproteobacteria" = rnorm(1, 5.8, 2.8),
+        "Spirochaetes" = rnorm(1, 2.4, 1),
+        "Synergistetes" = rnorm(1, 2.5, 1),
+        "Tenericutes" = rnorm(1, 1.6, 0.5),
+        "Thermodelsufobacteria" = rnorm(1, 2, 0),
+        "Thermotogae" = rnorm(1, 1.8, 1),
+        "Verrucomicrobia" = rnorm(1, 1.8, 1)
+      )
     } else {
-        copy.number <- ifelse(dispersion, rnorm(1, 4.2, 2.7), 4.2)
+      copy.number <- switch(level,
+        "Acidobacteria" = 1,
+        "Actinobacteria" = 3.1,
+        "Aquificae" = 2,
+        "Bacteroidetes" = 3.5,
+        "Caldiserica" = 1,
+        "Chlamydiae" = 1.4,
+        "Chlorobi" = 1.7,
+        "Chloroflexi" = 2.2,
+        "Cyanobacteria" = 2.3,
+        "Defferibacteres" = 2,
+        "Deinoccocus-Thermus" = 2.7,
+        "Dyctioglomi" = 2,
+        "Elusimicrobia" = 1,
+        "Fibrobacteres" = 3,
+        "Firmicutes" = 5.8,
+        "Fusobacteria" = 5,
+        "Gemmatimonadetes" = 1,
+        "Ignavibacteria" = 1,
+        "Nitrospirae" = 2,
+        "Planctomycetes" = 1.7,
+        "Alphaproteobacteria" = 2.2,
+        "Betaproteobacteria" = 3.3,
+        "Deltaproteobacteria" = 2.7,
+        "Epsilonproteobacteria" = 3,
+        "Gammaproteobacteria" = 5.8,
+        "Spirochaetes" = 2.4,
+        "Synergistetes" = 2.5,
+        "Tenericutes" = 1.6,
+        "Thermodelsufobacteria" = 2,
+        "Thermotogae" = 1.8,
+        "Verrucomicrobia" = 1.8
+      )
     }
-    copy.number <- min(15, copy.number)
-    copy.number <- max(1, copy.number)
-    return(copy.number)
+  } else {
+    copy.number <- ifelse(dispersion, rnorm(1, 4.2, 2.7), 4.2)
+  }
+  copy.number <- min(15, copy.number)
+  copy.number <- max(1, copy.number)
+  return(copy.number)
 }
 
 #' Use information from Vetroský and Baldrian (2013) to correct for 16S rRNA copy number variation.
@@ -136,9 +137,9 @@ sample_copy_number <- Vectorize(sample_copy_number_internal, "level")
 #' @seealso \code{\link{sample_copy_number}}
 #' @importFrom phyloseq tax_table
 extract_level <- function(physeq) {
-    res <- tax_table(physeq)[, "Phylum"]
-    res[ res %in% "Proteobacteria" ] <- tax_table(physeq)[res %in% "Proteobacteria", "Class"]
-    return(res)
+  res <- tax_table(physeq)[, "Phylum"]
+  res[res %in% "Proteobacteria"] <- tax_table(physeq)[res %in% "Proteobacteria", "Class"]
+  return(res)
 }
 
 #' Scale sample counts from a \code{\link{phyloseq}} class object according to a
@@ -171,22 +172,22 @@ extract_level <- function(physeq) {
 #' @importFrom phyloseq ntaxa transform_sample_counts
 #' @importFrom scales rescale
 scale_sample_counts <- function(physeq, scaling = "Phylum", dispersion = FALSE) {
-    ## Test scaling and reconstruct it if needed
-    if (length(scaling) == 1 && scaling == "Abundance") {
-        scaling_function <- function(x) {
-            index <- (x > 0)
-            x[index] <- x[index] / rescale(x[index], to = c(1, 15))
-            return(x)
-        }
-    } else {
-        if (length(scaling) == 1 && scaling == "Phylum") {
-            scaling <- sample_copy_number(extract_level(physeq), dispersion = dispersion)
-        } else {
-            stopifnot(is.numeric(scaling), length(scaling) == ntaxa(physeq))
-        }
-        scaling_function <- function(x, x.scaling = scaling) {
-            return(x / x.scaling[1:length(x)])
-        }
+  ## Test scaling and reconstruct it if needed
+  if (length(scaling) == 1 && scaling == "Abundance") {
+    scaling_function <- function(x) {
+      index <- (x > 0)
+      x[index] <- x[index] / rescale(x[index], to = c(1, 15))
+      return(x)
     }
-    return(transform_sample_counts(physeq, scaling_function))
+  } else {
+    if (length(scaling) == 1 && scaling == "Phylum") {
+      scaling <- sample_copy_number(extract_level(physeq), dispersion = dispersion)
+    } else {
+      stopifnot(is.numeric(scaling), length(scaling) == ntaxa(physeq))
+    }
+    scaling_function <- function(x, x.scaling = scaling) {
+      return(x / x.scaling[1:length(x)])
+    }
+  }
+  return(transform_sample_counts(physeq, scaling_function))
 }

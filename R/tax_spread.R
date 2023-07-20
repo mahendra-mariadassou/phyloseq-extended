@@ -15,8 +15,10 @@
 #'
 #' @examples
 #' library(phyloseq)
-#' physeq <- phyloseq(otu_table(matrix(1:4, 2, 2), taxa_are_rows = TRUE),
-#' tax_table(matrix(c("Firmicutes", "Firmicutes", "Unknown", "Bacilli", NA, "Lactobacillales"), 2, 3)))
+#' physeq <- phyloseq(
+#'   otu_table(matrix(1:4, 2, 2), taxa_are_rows = TRUE),
+#'   tax_table(matrix(c("Firmicutes", "Firmicutes", "Unknown", "Bacilli", NA, "Lactobacillales"), 2, 3))
+#' )
 #' tax_spread(physeq) |> tax_table()
 #' tax_spread(physeq, explicit = FALSE) |> tax_table()
 tax_spread <- function(physeq,
@@ -35,6 +37,9 @@ tax_spread <- function(physeq,
       x
     )
   }
-  tax_table(physeq) <- tax_table(physeq) %>% apply(MARGIN = 1, .spread) %>% t() %>% `colnames<-`(ranks)
+  tax_table(physeq) <- tax_table(physeq) %>%
+    apply(MARGIN = 1, .spread) %>%
+    t() %>%
+    `colnames<-`(ranks)
   return(physeq)
 }
