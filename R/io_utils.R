@@ -92,7 +92,9 @@ phyloseq_to_biom <- function(physeq, biom_format = c("frogs", "standard"), rows_
 #' tmp_tree <- tempfile()
 #' write_phyloseq(food, biom_file = tmp_biom, tree_file = tmp_tree, matrix_type = "sparse")
 #' ## The output biom can be read again as a phyloseq object
+#' \dontrun{
 #' import_frogs(tmp_biom, tmp_tree)
+#' }
 write_phyloseq <- function(physeq, biom_file, tree_file = NULL, fasta_file = NULL, biom_format = c("frogs", "standard"), ...) {
   biom <- phyloseq_to_biom(physeq, biom_format = match.arg(biom_format), ...)
   ## Write biom using a safe copy of biomformat::write_biom()
@@ -172,17 +174,18 @@ phyloseq_to_tsv <- function(physeq) {
 #' Safe replacement of [biomformat::write_biom()]
 #'
 #' @description Works for biom data with only one column (sample), unlike the original version.
-#'
+#' @export
 #' @importFrom jsonlite toJSON
 #' @importFrom methods slot
 #'
 #' @examples
+#' library(phyloseq)
 #' data(food)
-#' small_food <- food %>% prune_samples(sample_names(.)[1], . ) %>% prune_taxa(taxa_names(.)[1:5], .)
-#' small_biom <- small_food %>% phyloseq_to_biom()
+#' small_food <- food |> subset_samples(EnvType=="DesLardons") |> subset_taxa(Genus=="Serratia")
+#' small_biom <- small_food |>  phyloseq_to_biom()
 #' tmp_biom <- tempfile()
 #' write_biom_safe(small_biom, tmp_biom)
-#' readLines(tmp_biom)
+#' readLines(tmp_biom, warn = FALSE)
 ## safe alternative to biomformat::write_biom
 write_biom_safe <- function(x, biom_file) {
   cat(jsonlite::toJSON(list(

@@ -10,10 +10,11 @@ write_biom_safe(x, biom_file)
 Works for biom data with only one column (sample), unlike the original version.
 }
 \examples{
+library(phyloseq)
 data(food)
-small_food <- food \%>\% prune_samples(sample_names(.)[1], . ) \%>\% prune_taxa(taxa_names(.)[1:5], .)
-small_biom <- small_food \%>\% phyloseq_to_biom()
+small_food <- food |> subset_samples(EnvType=="DesLardons") |> subset_taxa(Genus=="Serratia")
+small_biom <- small_food |>  phyloseq_to_biom()
 tmp_biom <- tempfile()
 write_biom_safe(small_biom, tmp_biom)
-readLines(tmp_biom)
+readLines(tmp_biom, warn = FALSE)
 }

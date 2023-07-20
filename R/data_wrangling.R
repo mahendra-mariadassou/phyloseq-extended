@@ -17,7 +17,7 @@
 #' mg <- merge_group(food, "EnvType")
 #' mg
 #' ## Note that sample data are preserved
-#' sample_data(mg)
+#' phyloseq::sample_data(mg)
 #' @importFrom methods as
 #' @importFrom phyloseq get_variable otu_table sample_data sample_names sample_variables taxa_are_rows
 merge_group <- function(physeq, group, fun = c("sum", "mean"), update.names = TRUE) {
@@ -153,8 +153,8 @@ fast_tax_glom <- function(physeq, taxrank = rank_names(physeq)[1], bad_empty = c
 #'
 #' @examples
 #' data(food)
-#' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> tax_table()
-#' staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum")  |> tax_table()
+#' staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> phyloseq::tax_table()
+#' staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum")  |> phyloseq::tax_table()
 staggered_tax_glom <- function(physeq, atomic_taxa, taxrank) {
   taxa_index <- matrix(FALSE, nrow = ntaxa(physeq), ncol = length(rank_names(physeq)))
   taxa_index[] <- tax_table(physeq) %in% atomic_taxa

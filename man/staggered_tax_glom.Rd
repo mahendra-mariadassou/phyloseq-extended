@@ -24,6 +24,6 @@ staggered_tax_glom differs from \code{\link[=fast_tax_glom]{fast_tax_glom()}} by
 }
 \examples{
 data(food)
-staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> tax_table()
-staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum")  |> tax_table()
+staggered_tax_glom(food, atomic_taxa = "BS11 gut group", taxrank = "Phylum") |> phyloseq::tax_table()
+staggered_tax_glom(food, atomic_taxa = c("BS11 gut group", "Serratia"), taxrank = "Phylum")  |> phyloseq::tax_table()
 }

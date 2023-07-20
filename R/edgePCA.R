@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' data(food)
-#' incidence_matrix(phy_tree(food))
+#' incidence_matrix(phyloseq::phy_tree(food))
 #' @importFrom ape is.rooted prop.part
 incidence_matrix <- function(phy) {
     if (!ape::is.rooted(phy)) {

@@ -41,5 +41,5 @@ Apply prevalence and abundance based filters to a \link{phyloseq} class object. 
 data(food) ## 507 taxa
 ## Taxa with prevalence > 25\% in any food type and abundance > 1\% in at least one sample.
 taxa_to_keep <- filter_phyloseq(food, 0.25, 0.01, group = "EnvType")
-prune_taxa(taxa_to_keep, food) ## 217 taxa
+phyloseq::prune_taxa(taxa_to_keep, food) ## 217 taxa
 }

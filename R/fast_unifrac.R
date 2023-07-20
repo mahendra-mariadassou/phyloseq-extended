@@ -14,7 +14,7 @@
 #'
 #' @examples
 #' data(food)
-#' unifrac(food)
+#' UniFrac(food)
 UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, parallel = FALSE) {
   tree <- phyloseq::access(physeq, "phy_tree")
   if (is.null(tree)) {

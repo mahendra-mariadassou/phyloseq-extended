@@ -36,7 +36,8 @@ rarecurve2(
 Warning, this function is deprecated and will be phased out at some point.
 }
 \examples{
+\dontrun{
 data(food)
-rarecurve2(food)
-
+rarecurve2(food, step = 100)
+}
 }

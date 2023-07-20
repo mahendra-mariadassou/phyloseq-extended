@@ -28,7 +28,7 @@ Compute the log-likelihood of community data under Sloan et al. (2006) Neutral C
 }
 \examples{
 data(food)
-ncm_loglik(otu_table(food), absolute.threshold = 1)
+ncm_loglik(phyloseq::otu_table(food), absolute.threshold = 1)
 }
 \references{
 Sloan, W.T. and Lunn, M. and Woodcock, S. and Head, I.M. and Nee, S. and Curtis, T.P. (2006). Quantifying the roles of immigration and chance in shaping prokaryote community structure. Environmental Microbiology. 8:732–740. doi:10.1111/j.1462-2920.2005.00956.x.

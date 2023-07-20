@@ -40,8 +40,8 @@ Wrapper around hclust to represent clustering tree with leaves colored according
 }
 \examples{
 data(food)
-Basic plot
+# Basic plot
 plot_clust(food, dist = "unifrac", color = "EnvType")
-Slightly better plot
-plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
+# Slightly better plot
+plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + ggplot2::theme(legend.position = "none")
 }

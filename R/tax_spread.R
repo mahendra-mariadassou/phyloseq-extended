@@ -14,10 +14,11 @@
 #' @export
 #'
 #' @examples
+#' library(phyloseq)
 #' physeq <- phyloseq(otu_table(matrix(1:4, 2, 2), taxa_are_rows = TRUE),
 #' tax_table(matrix(c("Firmicutes", "Firmicutes", "Unknown", "Bacilli", NA, "Lactobacillales"), 2, 3)))
-#' tax_spread(physeq) %>% tax_table()
-#' tax_spread(physeq, explicit = FALSE) %>% tax_table
+#' tax_spread(physeq) |> tax_table()
+#' tax_spread(physeq, explicit = FALSE) |> tax_table()
 tax_spread <- function(physeq,
                        pattern = "^NA$|Multi-affiliation|Unknown",
                        explicit = TRUE) {

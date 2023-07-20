@@ -107,7 +107,7 @@ plot_ncm <- function(ncm.fit) {
 #'
 #' @examples
 #' data(food)
-#' ncm_loglik(otu_table(food), absolute.threshold = 1)
+#' ncm_loglik(phyloseq::otu_table(food), absolute.threshold = 1)
 #' @importFrom stats pbeta
 ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute.threshold = NULL) {
     Nt <- colSums(abundances)

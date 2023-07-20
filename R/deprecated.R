@@ -18,9 +18,10 @@
 #' @importFrom stats approx
 #' @importFrom vegan ordilabel rarefy specnumber
 #' @examples
+#' \dontrun{
 #' data(food)
-#' rarecurve2(food)
-#'
+#' rarecurve2(food, step = 100)
+#' }
 rarecurve2 <- function (physeq, step = 1, sample, xlab = "Sample Size", ylab = "Number of species", label = TRUE, col = "black", ...)
 {
   x <- as(otu_table(physeq), "matrix")

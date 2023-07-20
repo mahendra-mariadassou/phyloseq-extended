@@ -26,7 +26,7 @@ data(food)
 mg <- merge_group(food, "EnvType")
 mg
 ## Note that sample data are preserved
-sample_data(mg)
+phyloseq::sample_data(mg)
 }
 \seealso{
 \code{\link{merge_samples}}

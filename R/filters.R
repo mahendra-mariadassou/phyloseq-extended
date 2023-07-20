@@ -26,7 +26,7 @@ filter_abundance <- function(physeq, frac = 0.001, A = 0.05 * nsamples(physeq)) 
 #' data(food) ## 507 taxa
 #' ## Taxa with prevalence > 25% in any food type and abundance > 1% in at least one sample.
 #' taxa_to_keep <- filter_phyloseq(food, 0.25, 0.01, group = "EnvType")
-#' prune_taxa(taxa_to_keep, food) ## 217 taxa
+#' phyloseq::prune_taxa(taxa_to_keep, food) ## 217 taxa
 #' @importFrom dplyr filter group_by summarise
 #' @importFrom phyloseq genefilter_sample nsamples rarefy_even_depth taxa_names
 filter_phyloseq <- function(physeq, prev.thresh = 0.5, abund.thresh = 0.001, group = rep(1, nsamples(physeq)),

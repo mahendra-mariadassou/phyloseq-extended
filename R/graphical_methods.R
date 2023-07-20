@@ -732,7 +732,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
 #' @importFrom tidyr pivot_longer
 #' @examples
 #' data(food)
-#' dist.bc <- distance(food, "bray")
+#' dist.bc <- phyloseq::distance(food, "bray")
 #' plot_dist_as_heatmap(dist.bc)
 plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
                                  low = "#B1F756", high = "#132B13",
@@ -779,10 +779,10 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #'
 #' @examples
 #' data(food)
-#' Basic plot
+#' # Basic plot
 #' plot_clust(food, dist = "unifrac", color = "EnvType")
-#' Slightly better plot
-#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
+#' # Slightly better plot
+#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + ggplot2::theme(legend.position = "none")
 #' @importFrom ape as.phylo
 #' @importFrom dplyr as_tibble mutate
 #' @importFrom ggplot2 aes labs scale_color_manual theme

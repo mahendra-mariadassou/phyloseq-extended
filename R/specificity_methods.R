@@ -444,7 +444,7 @@ expected_robust_specificity <- function(group,
 #'
 #' @examples
 #' data(food)
-#' test_specificity(food, group = "EnvType", index = "shannon", se = FALSE)
+#' test_specificity(food, group = "EnvType", index = "shannon")
 test_specificity <- function(physeq, group,
                              index = c("shannon", "simpson", "yanai", "indspec"),
                              freq = TRUE, replace = FALSE,
@@ -541,7 +541,7 @@ test_specificity <- function(physeq, group,
 #'
 #' @examples
 #' data(food)
-#' test_local_specificity(food, group = "EnvType", index = "indspec", se = FALSE)
+#' test_local_specificity(food, group = "EnvType", index = "indspec")
 test_local_specificity <- function(physeq, group,
                              index = c("fraction", "indspec"),
                              freq = TRUE, replace = FALSE, type = c("local", "global"),
