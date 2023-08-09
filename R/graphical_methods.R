@@ -795,7 +795,8 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
     ggtree::geom_tiplab(as_ylab = TRUE, aes(label = .data[[label]])) +
     scale_color_manual(values = color_palette) +
     ## Pour changer la couleur, il faut donc passer par theme()
-    theme(axis.text.x = element_text(color = meta$tip_color, hjust = 1, vjust = 0.5, ...))
+    theme(axis.text.x = element_text(color = meta$tip_color, hjust = 1, vjust = 0.5, ...)) +
+    labs(title = title)
 }
 
 ## Extract legend from a ggplot object
