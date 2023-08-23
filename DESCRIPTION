@@ -18,6 +18,7 @@ Imports:
     Biostrings,
     dplyr,
     ggplot2,
+    ggtext,
     ggtree,
     grid,
     gridBase,
