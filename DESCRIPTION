@@ -18,6 +18,8 @@ Imports:
     Biostrings,
     dplyr,
     ggplot2,
+    ggtext,
+    ggtree,
     grid,
     gridBase,
     jsonlite,
@@ -36,4 +38,4 @@ biocViews:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.2
+RoxygenNote: 7.2.3

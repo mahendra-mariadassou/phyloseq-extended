@@ -9,9 +9,10 @@ plot_clust(
   dist,
   method = "ward.D2",
   color = NULL,
-  label = NULL,
+  label = "label",
   title = paste(method, "linkage clustering tree"),
-  palette = NULL
+  palette = NULL,
+  ...
 )
 }
 \arguments{
@@ -23,11 +24,13 @@ plot_clust(
 
 \item{color}{(character) variable name used to color tree leaves. Defaults to NULL}
 
-\item{label}{(character) variable name used to label tree leaves. Defaults to NULL}
+\item{label}{(character) variable name used to label tree leaves. Defaults to "label" for sample names.}
 
 \item{title}{(character) optional. Plot title, defaults to "method" clustering tree.}
 
 \item{palette}{(named color vector) optional. Manual color palette}
+
+\item{...}{(optional) additional parameters passed on to theme(axis.text.x = element_text(...)) to control label size, justification, ...}
 }
 \value{
 Nothing, used for its plotting side effect
@@ -37,5 +40,8 @@ Wrapper around hclust to represent clustering tree with leaves colored according
 }
 \examples{
 data(food)
+Basic plot
 plot_clust(food, dist = "unifrac", color = "EnvType")
+Slightly better plot
+plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
 }

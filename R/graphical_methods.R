@@ -731,35 +731,39 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 
 ## Wrapper around hclust to represent clustering tree
 ## with leaves colored according to some variables
-## TODO update using ggtree syntax
 #' Wrapper around hclust to represent clustering tree with leaves colored according to a factor.
 #'
 #' @param physeq phyloseq class object
 #' @param dist distance matrix (dist class) or character to be used in phyloseq::distance function
 #' @param method (character) linkage method used in hclust, defaults to "ward.D2"
 #' @param color (character) variable name used to color tree leaves. Defaults to NULL
-#' @param label (character) variable name used to label tree leaves. Defaults to NULL
+#' @param label (character) variable name used to label tree leaves. Defaults to "label" for sample names.
 #' @param title (character) optional. Plot title, defaults to "method" clustering tree.
 #' @param palette (named color vector) optional. Manual color palette
+#' @param ... (optional) additional parameters passed on to theme(axis.text.x = element_text(...)) to control label size, justification, ...
 #'
 #' @return Nothing, used for its plotting side effect
 #' @export
 #'
 #' @examples
 #' data(food)
+#' Basic plot
 #' plot_clust(food, dist = "unifrac", color = "EnvType")
+#' Slightly better plot
+#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
-                       label = NULL,
+                       label = "label",
                        title = paste(method, "linkage clustering tree"),
-                       palette = NULL) {
+                       palette = NULL, ...) {
   if (is.character(color)) {
     legend.title <- NULL
-    color <- phyloseq::get_variable(physeq, color)
+    color_var <- phyloseq::get_variable(physeq, color)
   } else {
     legend.title <- NULL
-    color <- rep("black", nsamples(physeq))
+    color_var <- rep("black", nsamples(physeq))
   }
-  color <- as.factor(color)
+  color_var <- as.factor(color_var)
+  color_levels <- levels(color_var)
   ## compute distance
   if (is.character(dist)) {
    dist <- dist[1]
@@ -767,28 +771,32 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   }
   ## automatic color palette: one color per different sample type
   if (is.null(palette)) {
-    palette <- hue_pal()(length(levels(color)))
+    color_palette <- hue_pal()(length(color_levels))
   } else {
-    palette <- palette[levels(color)]
+    color_palette <- palette[color_levels]
   }
-  tipColor = col_factor(palette, levels = levels(color))(color)
   ## Change hclust object to phylo object and plot
   clust <- as.phylo(hclust(dist, method = method))
   ## change tip label if needed
-  if (!is.null(label)) {
-    tip.dict <- setNames(as.character(phyloseq::get_variable(physeq, label)),
-                         sample_names(physeq))
-    clust$tip.label <- tip.dict[clust$tip.label]
-  }
+  # if (!is.null(label)) {
+  #   tip.dict <- setNames(as.character(phyloseq::get_variable(physeq, label)),
+  #                        sample_names(physeq))
+  #   clust$tip.label <- tip.dict[clust$tip.label]
+  # }
+  ## extract metadata
+  meta <- phyloseq::sample_data(physeq) %>%
+    dplyr::as_tibble(rownames = "label") %>%
+    dplyr::mutate(tip_color = scales::col_factor(color_palette, levels = color_levels)(.data[[color]]))
   ## plot clustering tree
-  plot(clust,
-       tip.color = tipColor,
-       direction = "downwards",
-       main = title)
-  ## add legend (at figure bottom, over 4 columns)
-  legend("bottom", legend = levels(color) , xpd=NA,
-         fill = palette, border = palette,cex=0.8, bty="n",
-         ncol=4,  inset = c(0,-0.05))
+  ggtree::`%<+%`(ggtree::ggtree(clust), meta) +
+    ggtree::layout_dendrogram() +
+    ggtree::geom_tippoint(aes(color= .data[[color]])) +
+    ## as_ylab permet d'afficher les labels comme des axis.tick
+    ggtree::geom_tiplab(as_ylab = TRUE, aes(label = .data[[label]])) +
+    scale_color_manual(values = color_palette) +
+    ## Pour changer la couleur, il faut donc passer par theme()
+    theme(axis.text.x = ggtext::element_markdown(color = meta$tip_color, hjust = 1, vjust = 0.5, ...)) +
+    labs(title = title)
 }
 
 ## Extract legend from a ggplot object
