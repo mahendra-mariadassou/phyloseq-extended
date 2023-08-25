@@ -858,20 +858,25 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #' data(food)
 #' # Basic plot
 #' plot_clust(food, dist = "unifrac", color = "EnvType")
-#' # Slightly better plot
-#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + ggplot2::theme(legend.position = "none")
+#' Slightly better plot
+#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
 #' @importFrom ape as.phylo
 #' @importFrom dplyr as_tibble mutate
 #' @importFrom ggplot2 aes labs scale_color_manual theme
 #' @importFrom ggtext element_markdown
 #' @importFrom ggtree geom_tiplab geom_tippoint ggtree layout_dendrogram
-#' @importFrom phyloseq distance get_variable nsamples sample_data
+#' @importFrom phyloseq distance get_variable nsamples sample_data sample_variables
 #' @importFrom scales col_factor hue_pal
 #' @importFrom stats hclust
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
                        label = "label",
                        title = paste(method, "linkage clustering tree"),
                        palette = NULL, ...) {
+  # label
+  if (is.null(label) || !is.character(label) || !(label %in% sample_variables(physeq, errorIfNULL = FALSE))) {
+    label <- "label"
+  }
+  # color
   if (is.character(color)) {
     legend.title <- NULL
     color_var <- phyloseq::get_variable(physeq, color)
@@ -888,7 +893,11 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   }
   ## automatic color palette: one color per different sample type
   if (is.null(palette)) {
-    color_palette <- hue_pal()(length(color_levels))
+    if (length(color_levels) == 1) {
+      color_palette <- "black"
+    } else {
+      color_palette <- hue_pal()(length(color_levels))
+    }
   } else {
     color_palette <- palette[color_levels]
   }
@@ -902,12 +911,16 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   # }
   ## extract metadata
   meta <- phyloseq::sample_data(physeq) %>%
-    dplyr::as_tibble(rownames = "label") %>%
-    dplyr::mutate(tip_color = scales::col_factor(color_palette, levels = color_levels)(.data[[color]]))
+    dplyr::as_tibble(rownames = "label")
+  if (!is.null(color)) {
+    meta <- dplyr::mutate(meta, tip_color = scales::col_factor(color_palette, levels = color_levels)(.data[[color]]))
+  } else {
+    meta <- dplyr::mutate(meta, tip_color = "black")
+  }
   ## plot clustering tree
   ggtree::`%<+%`(ggtree::ggtree(clust), meta) +
     ggtree::layout_dendrogram() +
-    ggtree::geom_tippoint(aes(color = .data[[color]])) +
+    ggtree::geom_tippoint(if (!is.null(color)) aes(color = .data[[color]])) +
     ## as_ylab permet d'afficher les labels comme des axis.tick
     ggtree::geom_tiplab(as_ylab = TRUE, aes(label = .data[[label]])) +
     scale_color_manual(values = color_palette) +
