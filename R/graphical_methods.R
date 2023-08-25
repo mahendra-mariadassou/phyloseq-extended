@@ -845,8 +845,8 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #' @param physeq phyloseq class object
 #' @param dist distance matrix (dist class) or character to be used in phyloseq::distance function
 #' @param method (character) linkage method used in hclust, defaults to "ward.D2"
-#' @param color (character) variable name used to color tree leaves. Defaults to NULL
-#' @param label (character) variable name used to label tree leaves. Defaults to "label" for sample names.
+#' @param color (character) variable name used to color tree leaves. Defaults to NULL for black leaves
+#' @param label (character) variable name used to label tree leaves. Defaults to NULL for sample names.
 #' @param title (character) optional. Plot title, defaults to "method" clustering tree.
 #' @param palette (named color vector) optional. Manual color palette
 #' @param ... (optional) additional parameters passed on to theme(axis.text.x = element_text(...)) to control label size, justification, ...
@@ -856,9 +856,10 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #'
 #' @examples
 #' data(food)
-#' # Basic plot
+#' ## Basic plot
+#' plot_clust(food, dist = "unifrac")
 #' plot_clust(food, dist = "unifrac", color = "EnvType")
-#' Slightly better plot
+#' ## Slightly better plot
 #' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
 #' @importFrom ape as.phylo
 #' @importFrom dplyr as_tibble mutate
@@ -869,7 +870,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #' @importFrom scales col_factor hue_pal
 #' @importFrom stats hclust
 plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
-                       label = "label",
+                       label = NULL,
                        title = paste(method, "linkage clustering tree"),
                        palette = NULL, ...) {
   # label
@@ -921,10 +922,10 @@ plot_clust <- function(physeq, dist, method = "ward.D2", color = NULL,
   ggtree::`%<+%`(ggtree::ggtree(clust), meta) +
     ggtree::layout_dendrogram() +
     ggtree::geom_tippoint(if (!is.null(color)) aes(color = .data[[color]])) +
-    ## as_ylab permet d'afficher les labels comme des axis.tick
+    ## as_ylab allows to print tip labels as axis.tick
     ggtree::geom_tiplab(as_ylab = TRUE, aes(label = .data[[label]])) +
     scale_color_manual(values = color_palette) +
-    ## Pour changer la couleur, il faut donc passer par theme()
+    ## the color of which can be changed via theme()
     theme(axis.text.x = ggtext::element_markdown(color = meta$tip_color, hjust = 1, vjust = 0.5, ...)) +
     labs(title = title)
 }
