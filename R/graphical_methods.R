@@ -1,4 +1,4 @@
-## Set of graphical methods for phyloseq objects (mainly related to ordination, and library size after normalisation)
+# Set of graphical methods for phyloseq objects (mainly related to ordination, and library size after normalisation)
 
 
 #' Rarefaction curves, ggplot styles
