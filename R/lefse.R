@@ -20,9 +20,15 @@
 #' @examples
 #' data(food)
 #' lefse <- lefse(food, "FoodType", padj.threshold = 0.001)
+#' @importFrom MASS lda
+#' @importFrom dplyr as_tibble filter left_join pull
+#' @importFrom methods as
+#' @importFrom phyloseq get_variable otu_table prune_taxa sample_data sample_variables taxa_are_rows taxa_names taxa_sums transform_sample_counts
+#' @importFrom stats kruskal.test p.adjust
+#' @importFrom tibble tibble
 lefse <- function(physeq, group, pseudocount = 1, padj.threshold = 0.05) {
   # Remove empty OTUs
-  physeq <- prune_taxa(taxa_sums(physeq)>0, physeq)
+  physeq <- prune_taxa(taxa_sums(physeq) > 0, physeq)
 
   # Build grouping factor
   if (!is.null(sample_data(physeq, FALSE))) {
@@ -42,13 +48,17 @@ lefse <- function(physeq, group, pseudocount = 1, padj.threshold = 0.05) {
     pseudocount <- 0
     warning("All counts are in (0, 1), suggesting you're working with proportions. Pseudocount automatically set to 0.")
   }
-  physeq <- transform_sample_counts(physeq, function(x) {clr(x + pseudocount)})
+  physeq <- transform_sample_counts(physeq, function(x) {
+    clr(x + pseudocount)
+  })
 
   ## Robust Kruskall-Wallis test
   counts <- otu_table(physeq) %>% as("matrix")
   if (!taxa_are_rows(physeq)) counts <- t(counts)
-  res <- dplyr::tibble(OTU     = taxa_names(physeq),
-                       padj    = p.adjust(apply(counts, 1, function(x) kruskal.test(x, g = group)$p.value), method = "BH"))
+  res <- dplyr::tibble(
+    OTU = taxa_names(physeq),
+    padj = p.adjust(apply(counts, 1, function(x) kruskal.test(x, g = group)$p.value), method = "BH")
+  )
 
   ## LDA on differential taxa
   da_otus <- dplyr::filter(res, padj <= padj.threshold) %>%
@@ -61,9 +71,7 @@ lefse <- function(physeq, group, pseudocount = 1, padj.threshold = 0.05) {
 
   ## Join with kruskal-Wallis p-values
   dplyr::left_join(res,
-                   lda$scaling %>% as_tibble(rownames = "OTU"),
-                   by = "OTU")
-
+    lda$scaling %>% as_tibble(rownames = "OTU"),
+    by = "OTU"
+  )
 }
-
-

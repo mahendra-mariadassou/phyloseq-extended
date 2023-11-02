@@ -6,15 +6,15 @@
 #' @return A distance matrix
 #' @export
 #'
-#' @importFrom phyloseq access taxa_sums prune_taxa
 #' @importFrom ape is.rooted
+#' @importFrom phyloseq access prune_taxa taxa_sums
 #'
 #' @details Support for parallel computations was removed as it proved to
 #'          be much lower sequential computations on benchmark data, due to very high overhead.
 #'
 #' @examples
 #' data(food)
-#' unifrac(food)
+#' UniFrac(food)
 UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, parallel = FALSE) {
   tree <- phyloseq::access(physeq, "phy_tree")
   if (is.null(tree)) {
@@ -34,41 +34,48 @@ UniFrac <- function(physeq, weighted = FALSE, normalized = TRUE, parallel = FALS
 }
 
 
-#' @importFrom phyloseq phy_tree nsamples sample_names taxa_are_rows otu_table
 #' @importFrom ape reorder.phylo
+#' @importFrom methods as
+#' @importFrom phyloseq nsamples otu_table phy_tree sample_names taxa_are_rows
+#' @importFrom stats as.dist dist
 #'
 fastUniFrac <- function(physeq, weighted, normalized, parallel) {
   ## Extract components and order in pruning wise order
-  tree    <- phyloseq::phy_tree(physeq) %>% ape::reorder.phylo("postorder")
-  n_tips  <- length(tree$tip.label)
+  tree <- phyloseq::phy_tree(physeq) %>% ape::reorder.phylo("postorder")
+  n_tips <- length(tree$tip.label)
   n_nodes <- tree$Nnode
 
   ## Create counts matrix (samples in line, taxa in columns)
-  counts <- matrix(data = 0,
-                   nrow = phyloseq::nsamples(physeq), ncol = n_tips + n_nodes,
-                   dimnames = list(phyloseq::sample_names(physeq)))
+  counts <- matrix(
+    data = 0,
+    nrow = phyloseq::nsamples(physeq), ncol = n_tips + n_nodes,
+    dimnames = list(phyloseq::sample_names(physeq))
+  )
 
   ## Fill `counts` with counts descending from terminal branches
   if (phyloseq::taxa_are_rows(physeq)) {
     counts[, 1:n_tips] <- phyloseq::otu_table(physeq) %>%
-      as("matrix") %>% t() %>% `[`(, tree$tip.label)
+      as("matrix") %>%
+      t() %>%
+      `[`(, tree$tip.label)
   } else {
     counts[, 1:n_tips] <- phyloseq::otu_table(physeq) %>%
-      as("matrix") %>% `[`(, tree$tip.label)
+      as("matrix") %>%
+      `[`(, tree$tip.label)
   }
   ## Change counts to fractions
   counts[, ] <- counts / rowSums(counts)
   ## Compute fractions descending from inner branches using pruning algorithm
   for (i in 1:nrow(tree$edge)) {
     parent <- tree$edge[i, 1]
-    child  <- tree$edge[i, 2]
+    child <- tree$edge[i, 2]
     counts[, parent] <- counts[, parent] + counts[, child]
   }
   ## reorder counts to be in the same order as tree$edge.length
   ## using the fact that the root branch (first branch) corresponds to node n_tips + 1
   counts[, ] <- counts[, c(n_tips + 1, tree$edge[, 2])]
   if (!weighted) {
-   counts[ , ] <- 0.0 + (counts > 0)
+    counts[, ] <- 0.0 + (counts > 0)
   }
 
   ## Weight the fractions by corresponding branch lengths,
@@ -76,7 +83,7 @@ fastUniFrac <- function(physeq, weighted, normalized, parallel) {
   edge_length <- c(0, tree$edge.length)
   ## equivalent to but faster than `counts %*% diag(edge_length)`
   ## Multiply each row (fractions) by edge lengthes
-  counts[ , ] <- counts * edge_length[col(counts)]
+  counts[, ] <- counts * edge_length[col(counts)]
 
   ## Unnormalized unifrac distance is then simply the Manhattan distance
   ## between the modified vectors of all samples
@@ -86,7 +93,9 @@ fastUniFrac <- function(physeq, weighted, normalized, parallel) {
   }
   if (!parallel) {
     raw_unifrac <- dist(counts, method = "manhattan")
-    if (!normalized) return(raw_unifrac)
+    if (!normalized) {
+      return(raw_unifrac)
+    }
   } # else {
   ## VERY slow
   # raw_unifrac <- foreach::foreach(i = 1:ncol(counts), .inorder = FALSE, .combine = "+") %dopar% {
@@ -118,8 +127,7 @@ fastUniFrac <- function(physeq, weighted, normalized, parallel) {
     ## then total length covered by samples 1 and 2 is
     ## d = a + b - (a + b - c)/2 = (a + b + c)/2
     stl <- rowSums(counts)
-    max_unifrac <- (as.dist(outer(stl, stl, FUN = "+")) + raw_unifrac)/2
+    max_unifrac <- (as.dist(outer(stl, stl, FUN = "+")) + raw_unifrac) / 2
     return(raw_unifrac / max_unifrac)
   }
-
 }

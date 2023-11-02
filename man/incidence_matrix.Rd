@@ -22,5 +22,5 @@ it at an arbitrary taxa (taxa 1).
 }
 \examples{
 data(food)
-incidence_matrix(phy_tree(food))
+incidence_matrix(phyloseq::phy_tree(food))
 }

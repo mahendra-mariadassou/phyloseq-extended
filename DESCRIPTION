@@ -9,28 +9,36 @@ Description: Adds severals additional functions to phyloseq (rarefaction
     curves, phylogenetic diversities, specificity and prevalence indices,
     nice composition plots, etc). Mostly used for personal use and during
     training sessions.
-License: GPL-3
+License: GPL-3 + file LICENSE
 Depends:
     R (>= 3.4.0)
 Imports: 
     ape,
+    Biobase,
     biomformat,
     Biostrings,
     dplyr,
     ggplot2,
     ggtext,
     ggtree,
+    graphics,
     grid,
     gridBase,
     jsonlite,
     MASS,
+    methods,
     parallel,
     phyloseq,
+    plyr,
     purrr,
+    reshape2,
+    rlang,
     scales,
+    stats,
     stringr,
     tibble,
     tidyr,
+    utils,
     vegan
 Suggests: 
     testthat (>= 2.1.0)

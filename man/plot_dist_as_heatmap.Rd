@@ -35,6 +35,6 @@ Plot a distance matrix as a heatmap
 }
 \examples{
 data(food)
-dist.bc <- distance(food, "bray")
+dist.bc <- phyloseq::distance(food, "bray")
 plot_dist_as_heatmap(dist.bc)
 }

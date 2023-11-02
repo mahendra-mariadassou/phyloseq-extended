@@ -51,7 +51,7 @@ Assess significance of observed specificities using permutation tests
 }
 \examples{
 data(food)
-test_specificity(food, group = "EnvType", index = "shannon", se = FALSE)
+test_specificity(food, group = "EnvType", index = "shannon")
 }
 \seealso{
 \code{\link[=estimate_specificity]{estimate_specificity()}}, \code{\link[=estimate_local_specificity]{estimate_local_specificity()}}, \code{\link[=test_local_specificity]{test_local_specificity()}}

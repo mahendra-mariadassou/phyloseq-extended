@@ -63,10 +63,10 @@ Allows the user to restrict the plot to taxa in the set \code{taxaSet1} at level
 \examples{
 data(food)
 plot_composition(food, "Kingdom", "Bacteria", "Phylum", facet_grid = "~EnvType")
-plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType", spread = TRUE)
+plot_composition(food, taxaRank1 = "Family", taxaSet1 = "Flavobacteriaceae", taxaRank2 = "Species", facet_grid = "~EnvType", spread = TRUE)
 ## Contrast with
-plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', facet_grid = "~EnvType")
-plot_composition(food, taxaRank1 = 'Family', taxaSet1 = 'Flavobacteriaceae', taxaRank2 = 'Species', fill = "Phylum", facet_grid = "~EnvType")
+plot_composition(food, taxaRank1 = "Family", taxaSet1 = "Flavobacteriaceae", taxaRank2 = "Species", facet_grid = "~EnvType")
+plot_composition(food, taxaRank1 = "Family", taxaSet1 = "Flavobacteriaceae", taxaRank2 = "Species", fill = "Phylum", facet_grid = "~EnvType")
 ## Change taxa ordering
 plot_composition(food, "Kingdom", "Bacteria", "Phylum", taxaOrder = "name", facet_grid = "~EnvType")
 }

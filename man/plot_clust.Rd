@@ -44,5 +44,5 @@ data(food)
 plot_clust(food, dist = "unifrac")
 plot_clust(food, dist = "unifrac", color = "EnvType")
 ## Slightly better plot
-plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
+plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + ggplot2::theme(legend.position = "none")
 }

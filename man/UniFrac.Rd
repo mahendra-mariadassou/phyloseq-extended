@@ -44,5 +44,5 @@ be much lower sequential computations on benchmark data, due to very high overhe
 }
 \examples{
 data(food)
-unifrac(food)
+UniFrac(food)
 }
