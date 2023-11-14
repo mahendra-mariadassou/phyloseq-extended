@@ -860,7 +860,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #' plot_clust(food, dist = "unifrac")
 #' plot_clust(food, dist = "unifrac", color = "EnvType")
 #' ## Slightly better plot
-#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
+#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + ggplot2::theme(legend.position = "none")
 #' @importFrom ape as.phylo
 #' @importFrom dplyr as_tibble mutate
 #' @importFrom ggplot2 aes labs scale_color_manual theme
