@@ -106,6 +106,8 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' @param spread If `TRUE` spread taxonomy from top to bottom using [tax_spread()] to avoid Unknown, Multi-affiliation and NA from showing up in the plot.
 #' @param ... Additional arguments passed on to geom_bar
 #'
+#' @inheritParams ggplot2::facet_grid
+#'
 #' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
 #'
 #' @return a ggplot2 graphic
@@ -136,6 +138,8 @@ plot_composition <- function(physeq,
                              sampleOrder = NULL,
                              taxaOrder = "abundance",
                              facet_grid = NULL,
+                             scales = "free_x",
+                             space = "fixed",
                              spread = FALSE,
                              ...) {
   if (is.null(taxaRank2) || taxaRank2 %in% c("OTU", "ASV")) {
@@ -194,7 +198,7 @@ plot_composition <- function(physeq,
 
   p <- p + geom_bar(stat = "identity", position = "stack", ...)
   if (!is.null(facet_grid)) {
-    p <- p + facet_grid(facet_grid, scales = "free_x")
+    p <- p + facet_grid(facet_grid, scales = scales, space = space)
   }
   p <- p +
     scale_y_continuous(expand = expansion(0, 0)) +
@@ -860,7 +864,7 @@ plot_dist_as_heatmap <- function(dist, order = NULL, title = NULL,
 #' plot_clust(food, dist = "unifrac")
 #' plot_clust(food, dist = "unifrac", color = "EnvType")
 #' ## Slightly better plot
-#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + theme(legend.position = "none")
+#' plot_clust(food, dist = "unifrac", color = "EnvType", label = "EnvType", size = 8) + ggplot2::theme(legend.position = "none")
 #' @importFrom ape as.phylo
 #' @importFrom dplyr as_tibble mutate
 #' @importFrom ggplot2 aes labs scale_color_manual theme
