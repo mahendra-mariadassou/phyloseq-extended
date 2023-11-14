@@ -17,6 +17,8 @@ plot_composition(
   sampleOrder = NULL,
   taxaOrder = "abundance",
   facet_grid = NULL,
+  scales = "free_x",
+  space = "fixed",
   spread = FALSE,
   ...
 )
@@ -46,6 +48,16 @@ selecting the \code{numberOfTaxa} most abundant taxa.}
 \item{taxaOrder}{Taxa order, either "abundance" (default) or "name" (alphabetical order)}
 
 \item{facet_grid}{variable used for faceting.}
+
+\item{scales}{Are scales shared across all facets (the default,
+\code{"fixed"}), or do they vary across rows (\code{"free_x"}),
+columns (\code{"free_y"}), or both rows and columns (\code{"free"})?}
+
+\item{space}{If \code{"fixed"}, the default, all panels have the same size.
+If \code{"free_y"} their height will be proportional to the length of the
+y scale; if \code{"free_x"} their width will be proportional to the
+length of the x scale; or if \code{"free"} both height and width will
+vary.  This setting has no effect unless the appropriate scales also vary.}
 
 \item{spread}{If \code{TRUE} spread taxonomy from top to bottom using \code{\link[=tax_spread]{tax_spread()}} to avoid Unknown, Multi-affiliation and NA from showing up in the plot.}
 
