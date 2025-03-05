@@ -13,7 +13,8 @@ ggformat(
   numberOfTaxa = 9,
   startFrom = 1,
   taxaOrder = c("abundance", "name"),
-  spread = FALSE
+  spread = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ selecting the \code{numberOfTaxa} most abundant taxa.}
 \item{taxaOrder}{Taxa order, either "abundance" (default) or "name" (alphabetical order)}
 
 \item{spread}{If \code{TRUE} spread taxonomy from top to bottom using \code{\link[=tax_spread]{tax_spread()}} to avoid Unknown, Multi-affiliation and NA from showing up in the plot.}
+
+\item{verbose}{If \code{TRUE}, show problematic taxa in console.}
 }
 \value{
 A ggplot friendly data frame with the relative abundance of the top \code{NumberOfTaxa} OTUs (starting from the \code{startFrom}th most abundant) at the taxaRank2 level within taxaSet1 at taxaRank1 level

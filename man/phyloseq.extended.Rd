@@ -2,5 +2,18 @@
 % Please edit documentation in R/phyloseq-extended.R
 \docType{package}
 \name{phyloseq.extended}
+\alias{phyloseq.extended-package}
 \alias{phyloseq.extended}
 \title{This package extends phyloseq by providing several useful additional functions}
+\description{
+Adds severals additional functions to phyloseq (rarefaction curves, phylogenetic diversities, specificity and prevalence indices, nice composition plots, etc). Mostly used for personal use and during training sessions.
+}
+\author{
+\strong{Maintainer}: Mahendra Mariadassou \email{mahendra.mariadassou@inrae.fr}
+
+Other contributors:
+\itemize{
+  \item Cédric Midoux \email{cedric.midoux@inrae.fr} [contributor]
+}
+
+}

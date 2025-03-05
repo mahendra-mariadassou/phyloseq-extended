@@ -20,6 +20,7 @@ plot_composition(
   scales = "free_x",
   space = "fixed",
   spread = FALSE,
+  verbose = TRUE,
   ...
 )
 }
@@ -49,17 +50,9 @@ selecting the \code{numberOfTaxa} most abundant taxa.}
 
 \item{facet_grid}{variable used for faceting.}
 
-\item{scales}{Are scales shared across all facets (the default,
-\code{"fixed"}), or do they vary across rows (\code{"free_x"}),
-columns (\code{"free_y"}), or both rows and columns (\code{"free"})?}
-
-\item{space}{If \code{"fixed"}, the default, all panels have the same size.
-If \code{"free_y"} their height will be proportional to the length of the
-y scale; if \code{"free_x"} their width will be proportional to the
-length of the x scale; or if \code{"free"} both height and width will
-vary.  This setting has no effect unless the appropriate scales also vary.}
-
 \item{spread}{If \code{TRUE} spread taxonomy from top to bottom using \code{\link[=tax_spread]{tax_spread()}} to avoid Unknown, Multi-affiliation and NA from showing up in the plot.}
+
+\item{verbose}{If \code{TRUE}, show problematic taxa in console.}
 
 \item{...}{Additional arguments passed on to geom_bar}
 }
@@ -70,7 +63,7 @@ a ggplot2 graphic
 Versatile function for plotting compositions graphs
 }
 \details{
-Allows the user to restrict the plot to taxa in the set \code{taxaSet1} at level \code{taxaRank1} and aggregate taxa at level \code{taxaRank2} in the plot. The plot is limited to \code{numberOfTaxa} taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
+Allows the user to restrict the plot to taxa in the set \code{taxaSet1} at level \code{taxaRank1} and aggregate taxa at level \code{taxaRank2} in the plot. The plot is limited to \code{numberOfTaxa} taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category. If aggregation results in contradictory results (e.g. taxa with the same genus but from different phyla different ), the set of problematic taxa is shown in the console unless \code{verbose} is set to \code{FALSE}.
 }
 \examples{
 data(food)
