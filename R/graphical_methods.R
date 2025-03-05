@@ -104,11 +104,10 @@ ggrare <- function(physeq, step = 10, label = NULL, color = NULL,
 #' @param sampleOrder Sample order (ignored if \code{x} is different from "Samples")
 #' @param taxaOrder Taxa order, either "abundance" (default) or "name" (alphabetical order)
 #' @param spread If `TRUE` spread taxonomy from top to bottom using [tax_spread()] to avoid Unknown, Multi-affiliation and NA from showing up in the plot.
+#' @param verbose If `TRUE`, show problematic taxa in console.
 #' @param ... Additional arguments passed on to geom_bar
 #'
-#' @inheritParams ggplot2::facet_grid
-#'
-#' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category.
+#' @details Allows the user to restrict the plot to taxa in the set `taxaSet1` at level `taxaRank1` and aggregate taxa at level `taxaRank2` in the plot. The plot is limited to `numberOfTaxa` taxa (defaults to 9) and other taxa are automatically lumped in the "Other" category. If aggregation results in contradictory results (e.g. taxa with the same genus but from different phyla different ), the set of problematic taxa is shown in the console unless `verbose` is set to `FALSE`.
 #'
 #' @return a ggplot2 graphic
 #' @export
@@ -141,6 +140,7 @@ plot_composition <- function(physeq,
                              scales = "free_x",
                              space = "fixed",
                              spread = FALSE,
+                             verbose = TRUE,
                              ...) {
   if (is.null(taxaRank2) || taxaRank2 %in% c("OTU", "ASV")) {
     taxaRank2 <- "OTU_rank"
@@ -156,7 +156,8 @@ plot_composition <- function(physeq,
 
   ggdata <- ggformat(
     physeq, taxaRank1, taxaSet1, taxaRank2,
-    fill, numberOfTaxa, startFrom, taxaOrder, spread
+    fill, numberOfTaxa, startFrom, taxaOrder,
+    spread, verbose
   ) %>% droplevels()
   if (!is.null(sampleOrder)) ggdata$Sample <- factor(ggdata$Sample, levels = sampleOrder)
 
@@ -577,7 +578,7 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
                      taxaRank2 = "Family", fill = NULL,
                      numberOfTaxa = 9, startFrom = 1,
                      taxaOrder = c("abundance", "name"),
-                     spread = FALSE) {
+                     spread = FALSE, verbose = FALSE) {
   ## Enforce orientation and transform count to relative abundances
   stopifnot(
     !is.null(sample_data(physeq, FALSE)),
@@ -681,11 +682,13 @@ ggformat <- function(physeq, taxaRank1 = "Phylum", taxaSet1 = "Proteobacteria",
   problematic_taxa <- duplicated(res) | res %in% last_levels
   if (any(problematic_taxa)) {
     warning(paste("Some of the most abundant taxa are unknown or have the same name at rank", taxaRank2, "but not at upper ranks.\nUsing suffix '_x' to distinguish them. See table for further details."))
-    cat("Problematic taxa", sep = "\n")
-    topTaxa %>%
-      filter(status == "conserved", .data[[taxaRank2]] %in% res[problematic_taxa]) %>%
-      select(-abundance, -status) %>%
-      print()
+    if (verbose) {
+      warning("Problematic taxa", sep = "\n")
+      topTaxa %>%
+        filter(status == "conserved", .data[[taxaRank2]] %in% res[problematic_taxa]) %>%
+        select(-abundance, -status) %>%
+        print()
+    }
     .f <- function(status, x) {
       if (length(x) == 1) {
         return(x)
