@@ -23,7 +23,7 @@
 #' @importFrom dplyr if_else mutate select
 #' @importFrom phyloseq nsamples otu_table sample_sums taxa_are_rows
 #' @importFrom tibble tibble
-ncm_fit <- function(physeq, threshold, absolute.threshold = 1) {
+ncm_fit <- function(physeq, threshold, absolute_threshold = 1) {
   abundances <- otu_table(physeq)
   ## Extract species count
   if (!taxa_are_rows(physeq)) {
@@ -31,11 +31,11 @@ ncm_fit <- function(physeq, threshold, absolute.threshold = 1) {
   }
   n_samples <- phyloseq::nsamples(physeq)
   depths <- phyloseq::sample_sums(physeq)
-  if (!is.null(absolute.threshold)) {
-    threshold <- absolute.threshold / depths
+  if (!is.null(absolute_threshold)) {
+    threshold <- absolute_threshold / depths
   }
   ## Fit NCM model to the data and extract estimated migration rate
-  m_hat <- ncm_mle_fit(abundances, threshold, absolute.threshold)$maximum
+  m_hat <- ncm_mle_fit(abundances, threshold, absolute_threshold)$maximum
 
   ## Compute predicted abundances in regional pool given migration rate m_hat
   freq <- local_community(abundances, m_hat)
@@ -84,12 +84,12 @@ ncm_fit <- function(physeq, threshold, absolute.threshold = 1) {
 #' model <- ncm_fit(food)
 #' plot_ncm(model)
 #' @importFrom ggplot2 aes geom_line geom_point geom_ribbon ggplot scale_x_log10
-plot_ncm <- function(ncm.fit) {
-  ggplot(data = ncm.fit$observations, aes(x = freq, y = occ)) +
-    geom_ribbon(data = ncm.fit$ncm_prediction, aes(ymin = occ_lower, ymax = occ_upper), alpha = 0.1) +
-    geom_line(data = ncm.fit$ncm_prediction, group = 1) +
-    geom_line(data = ncm.fit$ncm_prediction, aes(y = occ_lower), linetype = 2, group = 1) +
-    geom_line(data = ncm.fit$ncm_prediction, aes(y = occ_upper), linetype = 2, group = 1) +
+plot_ncm <- function(ncm_fit) {
+  ggplot(data = ncm_fit$observations, aes(x = freq, y = occ)) +
+    geom_ribbon(data = ncm_fit$ncm_prediction, aes(ymin = occ_lower, ymax = occ_upper), alpha = 0.1) +
+    geom_line(data = ncm_fit$ncm_prediction, group = 1) +
+    geom_line(data = ncm_fit$ncm_prediction, aes(y = occ_lower), linetype = 2, group = 1) +
+    geom_line(data = ncm_fit$ncm_prediction, aes(y = occ_upper), linetype = 2, group = 1) +
     geom_point(aes(y = occ_obs, color = neutral), alpha = 0.5) +
     scale_x_log10() +
     NULL
@@ -102,9 +102,9 @@ plot_ncm <- function(ncm.fit) {
 #' Compute the log-likelihood of community data under Sloan et al. (2006) Neutral Community Model
 #'
 #' @param abundances Required. Community data (count data matrix)
-#' @param migration  Numeric. Migration rate (in [0, 1]) of the NCM
-#' @param threshold  Numeric. Detection threshold (in [0, 1]): minimum relative abundance required to detect a species in a sample. Ignored if `absolute_threshold` is not `NULL`
-#' @param absolute.threshold Integer. Minimum count required to detect a species in a sample.
+#' @param migration  Numeric. Migration rate (in `[0, 1]`) of the NCM
+#' @param threshold  Numeric. Detection threshold (in `[0, 1]`): minimum relative abundance required to detect a species in a sample. Ignored if `absolute_threshold` is not `NULL`
+#' @param absolute_threshold Integer. Minimum count required to detect a species in a sample.
 #'
 #' @return A numeric value, the log-likelihood of the observed data under the NCM model.
 #' @export
@@ -113,9 +113,9 @@ plot_ncm <- function(ncm.fit) {
 #'
 #' @examples
 #' data(food)
-#' ncm_loglik(phyloseq::otu_table(food), absolute.threshold = 1)
+#' ncm_loglik(phyloseq::otu_table(food), absolute_threshold = 1)
 #' @importFrom stats pbeta
-ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute.threshold = NULL) {
+ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute_threshold = NULL) {
   Nt <- colSums(abundances)
   ## regional pool species composition
   local.abundances <- local_community(abundances, migration)
@@ -125,13 +125,13 @@ ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute.t
     ## Parameters of the beta distributions
     alpha <- migration * N * pi
     beta <- migration * N * (1 - pi)
-    if (is.null(absolute.threshold)) {
+    if (is.null(absolute_threshold)) {
       pbeta(threshold,
         shape1 = alpha, shape2 = beta,
         lower.tail = lower.tail, log.p = TRUE
       )
     } else {
-      pbeta(absolute.threshold / N,
+      pbeta(absolute_threshold / N,
         shape1 = alpha, shape2 = beta,
         lower.tail = lower.tail, log.p = TRUE
       )
@@ -147,9 +147,9 @@ ncm_loglik <- function(abundances, migration = 0.1, threshold = 0.01, absolute.t
 
 ## MLE of migration rate m in NCM
 #' @importFrom stats optimize
-ncm_mle_fit <- function(abundances, threshold, absolute.threshold = NULL) {
+ncm_mle_fit <- function(abundances, threshold, absolute_threshold = NULL) {
   optim.function <- function(m) {
-    ncm_loglik(abundances, m, threshold, absolute.threshold)
+    ncm_loglik(abundances, m, threshold, absolute_threshold)
   }
   solution <- optimize(optim.function, interval = c(1e-10, 1), maximum = TRUE)
   return(solution)
