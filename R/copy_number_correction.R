@@ -4,11 +4,11 @@
 #'
 #' @title sample_copy_number_internal
 #' @param level Required. Character. Taxonomic level for which the CN is required.
-#' @param dispersion. Optional. Logical. Should the returned CN be the average within
+#' @param dispersion Optional. Logical. Should the returned CN be the average within
 #'                    the level or sampled according to the distribution within that level.
 #'                    Distribution is approximated by a normal with mean and sd set to those
 #'                    observed in the sample database. Defaults to FALSE.
-#' @note The copy number is truncated to the [1, 15] range observed in the database. Levels
+#' @note The copy number is truncated to the `[1, 15]` range observed in the database. Levels
 #'       not observed in the database have CN set to 4.2 or sample from \code{rnorm(1, 4.2, 2.7)}
 #'       which correspond to the global mean and sd in the database.
 #' @return A numeric value corresponding to imputed CN.
@@ -115,7 +115,7 @@ sample_copy_number_internal <- function(level, dispersion = FALSE) {
 #'                    the level or sampled according to the distribution within that level.
 #'                    Distribution is approximated by a normal with mean and sd set to those
 #'                    observed in the sample database. Defaults to FALSE.
-#' @note The copy number is truncated to the [1, 15] range observed in the database. Levels
+#' @note The copy number is truncated to the `[1, 15]` range observed in the database. Levels
 #'       not observed in the database have CN set to 4.2 or sample from \code{rnorm(1, 4.2, 2.7)}
 #'       which correspond to the global mean and sd in the database.
 #' @return A numeric vector corresponding to imputed CN.
@@ -158,7 +158,7 @@ extract_level <- function(physeq) {
 #'                   Distribution is approximated by a normal with mean and sd set to those
 #'                   observed in the sample database. Defaults to FALSE.
 #' @return a \code{\link{phyloseq}} class objet with scaled \code{otu_table} slot.
-#' @note The copy number inferred under "Phylum" scaling is truncated to the [1, 15] range observed
+#' @note The copy number inferred under "Phylum" scaling is truncated to the `[1, 15]` range observed
 #'       in the database. Levels not observed in the database have CN set to 4.2 or sample from
 #'       \code{rnorm(1, 4.2, 2.7)} which correspond to the global mean and sd in the database.
 #'       Under "Abundance" scaling, counts are moderated within each sample by assuming that the most

@@ -9,7 +9,7 @@ sample_copy_number_internal(level, dispersion = FALSE)
 \arguments{
 \item{level}{Required. Character. Taxonomic level for which the CN is required.}
 
-\item{dispersion.}{Optional. Logical. Should the returned CN be the average within
+\item{dispersion}{Optional. Logical. Should the returned CN be the average within
 the level or sampled according to the distribution within that level.
 Distribution is approximated by a normal with mean and sd set to those
 observed in the sample database. Defaults to FALSE.}
@@ -23,7 +23,7 @@ Given a taxonomic level (Phylum or Class within Proteobacteria), returns the ave
 (CN) within that level in the database constructed by the authors.
 }
 \note{
-The copy number is truncated to the \link{1, 15} range observed in the database. Levels
+The copy number is truncated to the \verb{[1, 15]} range observed in the database. Levels
 not observed in the database have CN set to 4.2 or sample from \code{rnorm(1, 4.2, 2.7)}
 which correspond to the global mean and sd in the database.
 }

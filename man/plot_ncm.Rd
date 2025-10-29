@@ -4,7 +4,7 @@
 \alias{plot_ncm}
 \title{Plot a ncm_fit result}
 \usage{
-plot_ncm(ncm.fit)
+plot_ncm(ncm_fit)
 }
 \arguments{
 \item{ncm.fit}{scnm fit, as produced by \code{\link[=ncm_fit]{ncm_fit()}}}

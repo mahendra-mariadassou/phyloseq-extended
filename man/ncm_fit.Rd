@@ -4,14 +4,14 @@
 \alias{ncm_fit}
 \title{Fit Sloan et al. (2006) Neutral Community Model and return results}
 \usage{
-ncm_fit(physeq, threshold, absolute.threshold = 1)
+ncm_fit(physeq, threshold, absolute_threshold = 1)
 }
 \arguments{
 \item{physeq}{phyloseq class object}
 
-\item{threshold}{Numeric. Detection threshold (in \link{0, 1}): minimum relative abundance required to detect a species in a sample. Ignored if \code{absolute_threshold} is not \code{NULL}}
+\item{threshold}{Numeric. Detection threshold (in \verb{[0, 1]}): minimum relative abundance required to detect a species in a sample. Ignored if \code{absolute_threshold} is not \code{NULL}}
 
-\item{absolute.threshold}{Integer. Minimum count required to detect a species in a sample.}
+\item{absolute_threshold}{Integer. Minimum count required to detect a species in a sample.}
 }
 \value{
 A list of two tibbles and a list

@@ -8,17 +8,17 @@ ncm_loglik(
   abundances,
   migration = 0.1,
   threshold = 0.01,
-  absolute.threshold = NULL
+  absolute_threshold = NULL
 )
 }
 \arguments{
 \item{abundances}{Required. Community data (count data matrix)}
 
-\item{migration}{Numeric. Migration rate (in \link{0, 1}) of the NCM}
+\item{migration}{Numeric. Migration rate (in \verb{[0, 1]}) of the NCM}
 
-\item{threshold}{Numeric. Detection threshold (in \link{0, 1}): minimum relative abundance required to detect a species in a sample. Ignored if \code{absolute_threshold} is not \code{NULL}}
+\item{threshold}{Numeric. Detection threshold (in \verb{[0, 1]}): minimum relative abundance required to detect a species in a sample. Ignored if \code{absolute_threshold} is not \code{NULL}}
 
-\item{absolute.threshold}{Integer. Minimum count required to detect a species in a sample.}
+\item{absolute_threshold}{Integer. Minimum count required to detect a species in a sample.}
 }
 \value{
 A numeric value, the log-likelihood of the observed data under the NCM model.
@@ -28,7 +28,7 @@ Compute the log-likelihood of community data under Sloan et al. (2006) Neutral C
 }
 \examples{
 data(food)
-ncm_loglik(phyloseq::otu_table(food), absolute.threshold = 1)
+ncm_loglik(phyloseq::otu_table(food), absolute_threshold = 1)
 }
 \references{
 Sloan, W.T. and Lunn, M. and Woodcock, S. and Head, I.M. and Nee, S. and Curtis, T.P. (2006). Quantifying the roles of immigration and chance in shaping prokaryote community structure. Environmental Microbiology. 8:732–740. doi:10.1111/j.1462-2920.2005.00956.x.

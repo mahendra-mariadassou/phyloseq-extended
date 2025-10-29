@@ -4,7 +4,7 @@
 \alias{lefse}
 \title{Performs a LefSe analyses on the data set, based on a grouping variable given either as a sample variable or a factor.}
 \usage{
-lefse(physeq, group, pseudocount = 1, padj.threshold = 0.05)
+lefse(physeq, group, pseudocount = 1, p_threshold = 0.05, adjusted = TRUE)
 }
 \arguments{
 \item{physeq}{Required. \code{\link{phyloseq-class}} object}
@@ -13,12 +13,15 @@ lefse(physeq, group, pseudocount = 1, padj.threshold = 0.05)
 
 \item{pseudocount}{Optional. Pseudocount added to all counts, to avoid problems during clr transformation. Defaults to 1 and automatically replaced by 0 if all counts are between 0 and 1.}
 
-\item{padj.threshold}{Optional. Adjusted p-value threshold used to include taxa in the LDA model.Defaults to 0.05}
+\item{p_threshold}{Optional. (Adjusted) p-value threshold used to include taxa in the LDA model. Defaults to 0.05}
+
+\item{adjusted}{Optional. Should the threshold be applied to adjusted or raw p-values. Defaults to FALSE to mimick original LefSE algorithm.}
 }
 \value{
-A data frame with three columns
+A data frame with four columns
 \itemize{
 \item \code{OTU} : taxa name
+\item \code{pval}: p-value of the Kruskall-Wallis test
 \item \code{padj}: adjusted p-value (BH correction) of the Kruskall-Wallis test
 \item \code{LD}  : Matrix or vector of LD scores
 }
@@ -33,5 +36,5 @@ The purpose of this method is to reproduce the lefse code in R. Briefly:
 }
 \examples{
 data(food)
-lefse <- lefse(food, "FoodType", padj.threshold = 0.001)
+lefse <- lefse(food, "FoodType", p_threshold = 0.001, adjusted = TRUE)
 }

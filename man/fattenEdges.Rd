@@ -33,14 +33,14 @@ divided by the mean (relative deviation)}
 \value{
 A list with components
 \itemize{
-\item edge.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+\item \code{edge.width} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 with fattened edge widths
-\item edge.raw.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+\item \code{edge.raw.width} A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 with raw edge widths (untransformed counts, frequencies or deviations)
-\item edge.presence A logical matrix of size nsamples(physeq) x number of edges in
-\code{phy_tree(physeq)}. edge.presence\link{i, j} is TRUE if edge j is found in community i.
-\item tip.presence A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
-tip.presence\link{i, j} is TRUE if taxa j is found in community i.
+\item \code{edge.presence} A logical matrix of size nsamples(physeq) x number of edges in
+\code{phy_tree(physeq)}. \code{edge.presence[i, j]} is \code{TRUE} if edge j is found in community i.
+\item \code{tip.presence} A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
+\code{tip.presence[i, j]} is TRUE if taxa j is found in community i.
 \item pendant.edges A logical vector indicating which edges are pendant (i.e lead to a tip)
 \item legend A named vector featuring edge widths and labels for legend.
 }

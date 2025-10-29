@@ -23,7 +23,7 @@ Given a vector of taxonomic level (Phylum or Class within Proteobacteria), retur
 number (CN) for each level. The average are taken from the database reconstructed by the authors.
 }
 \note{
-The copy number is truncated to the \link{1, 15} range observed in the database. Levels
+The copy number is truncated to the \verb{[1, 15]} range observed in the database. Levels
 not observed in the database have CN set to 4.2 or sample from \code{rnorm(1, 4.2, 2.7)}
 which correspond to the global mean and sd in the database.
 }

@@ -4,4 +4,4 @@
 #' @name phyloseq.extended
 #'
 #' @import dplyr tidyr phyloseq ggplot2 scales vegan
-NULL
+"_PACKAGE"

@@ -18,9 +18,9 @@ write_phyloseq(
 
 \item{biom_file}{(Required). A character string indicating the file location of the biom formatted file.}
 
-\item{tree_file}{(Optional). A character string indicating the file location of the newick formatted file. If \code{NULL} (default), the \code{\link[=phy_tree]{phy_tree()}} component of \code{physeq} is ignored.}
+\item{tree_file}{(Optional). A character string indicating the file location of the newick formatted file. If \code{NULL} (default), the \code{\link[phyloseq:phy_tree-methods]{phyloseq::phy_tree()}} component of \code{physeq} is ignored.}
 
-\item{fasta_file}{(Optional). A character string indicating the file location of the fasta formatted file. If \code{NULL} (default), the \code{\link[=refseq]{refseq()}} component of \code{physeq} is ignored.}
+\item{fasta_file}{(Optional). A character string indicating the file location of the fasta formatted file. If \code{NULL} (default), the \code{\link[phyloseq:refseq-methods]{phyloseq::refseq()}} component of \code{physeq} is ignored.}
 
 \item{biom_format}{(Optional). Either "frogs" (default) or "standard". Controls the way the taxonomy is written in the \link{biom-class} object. \code{biom_format = "frogs"} is intended for later use with \link{import_frogs} and \code{biom_format = "standard"} for later use with \link{import_biom}.}
 

@@ -29,7 +29,7 @@ scaling vector or using the Phylum (or Class within Proteobacteria) average copy
 Average copy number are taken from Vetroský and Baldrian (2013).
 }
 \note{
-The copy number inferred under "Phylum" scaling is truncated to the \link{1, 15} range observed
+The copy number inferred under "Phylum" scaling is truncated to the \verb{[1, 15]} range observed
 in the database. Levels not observed in the database have CN set to 4.2 or sample from
 \code{rnorm(1, 4.2, 2.7)} which correspond to the global mean and sd in the database.
 Under "Abundance" scaling, counts are moderated within each sample by assuming that the most

@@ -21,14 +21,14 @@
 #'       used to scale edges widths. In logarithmic mode, widths are only scaled if they
 #'       go out of the range specified by `width.lim`.
 #' @return A list with components
-#' - edge.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+#' - `edge.width` A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 #'         with fattened edge widths
-#' - edge.raw.width A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
+#' - `edge.raw.width` A matrix of size nsamples(physeq) x number of edges in \code{phy_tree(physeq)}
 #'         with raw edge widths (untransformed counts, frequencies or deviations)
-#' - edge.presence A logical matrix of size nsamples(physeq) x number of edges in
-#'        \code{phy_tree(physeq)}. edge.presence[i, j] is TRUE if edge j is found in community i.
-#' - tip.presence A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
-#'        tip.presence[i, j] is TRUE if taxa j is found in community i.
+#' - `edge.presence` A logical matrix of size nsamples(physeq) x number of edges in
+#'        \code{phy_tree(physeq)}. `edge.presence[i, j]` is `TRUE` if edge j is found in community i.
+#' - `tip.presence` A logical matrix of size nsamples(physeq) x ntaxa(physeq) in
+#'        `tip.presence[i, j]` is TRUE if taxa j is found in community i.
 #' - pendant.edges A logical vector indicating which edges are pendant (i.e lead to a tip)
 #' - legend A named vector featuring edge widths and labels for legend.
 #' @importFrom methods as

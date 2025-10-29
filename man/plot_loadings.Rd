@@ -28,18 +28,18 @@ plot_loadings(
 Defaults to FALSE.}
 
 \item{width.lim}{Optional. Numeric. Minimum and maximal edge after fattening.
-Defaults to c(0.1, 4). Set to c(0, x) for true linear scaling.}
+Defaults to \code{c(0.1, 4)}. Set to \code{c(0, x)} for true linear scaling.}
 
 \item{color}{Optional. Color vector of length 2 used to distinguish positive
-loading edges (color\link{1}) and negative loading edges (color\link{2}).
+loading edges (\code{color[1]}) and negative loading edges (\code{color[2]}).
 Defaults to c("#EF8A62", "#67A9CF")}
 
 \item{color.tip.by}{Optional. Either a single character string matching a variable
 name in the corresponding tax_table of \code{physeq}, or a factor with
-the same length as the number of taxa in \code{physeq}. If NULL, nothing happens.}
+the same length as the number of taxa in \code{physeq}. If \code{NULL}, nothing happens.}
 
 \item{missing.color}{Optional. Color used for tips and edges with 0 loading.
-Defaults to NULL. If NULL, nothing happens. Use "white", "transparent",
+Defaults to \code{NULL}. If \code{NULL}, nothing happens. Use "white", "transparent",
 or par("bg") to remove them from plot.}
 
 \item{...}{Additional arguments passed on to plot.phylo}

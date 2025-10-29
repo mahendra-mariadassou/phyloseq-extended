@@ -10,8 +10,8 @@ incidence_matrix(phy)
 \item{phy}{Required. A \code{phylo} class object}
 }
 \value{
-An incidence matrix M of size nedges(tree) x ntaxa(tree) where
-M\link{i,j} is set to 1 if taxa derives from edge i and 0 otherwise.
+An incidence matrix \code{M} of size nedges(tree) x ntaxa(tree) where
+\code{M[i,j]} is set to 1 if taxa derives from edge i and 0 otherwise.
 }
 \description{
 Compute incidence matrix of a tree

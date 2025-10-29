@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_wrangling.R
 \name{fast_tax_glom}
 \alias{fast_tax_glom}
-\title{Fast alternative to \code{\link[=tax_glom]{tax_glom()}}}
+\title{Fast alternative to \code{\link[phyloseq:tax_glom]{phyloseq::tax_glom()}}}
 \usage{
 fast_tax_glom(
   physeq,
@@ -21,16 +21,16 @@ fast_tax_glom(
 A taxonomically-agglomerated \code{\link{phyloseq-class}} object.
 }
 \description{
-Fast alternative to \code{\link[=tax_glom]{tax_glom()}}
+Fast alternative to \code{\link[phyloseq:tax_glom]{phyloseq::tax_glom()}}
 }
 \details{
-fast_tax_glom differs from \code{\link[=tax_glom]{tax_glom()}} in three important ways:
+fast_tax_glom differs from \code{\link[phyloseq:tax_glom]{phyloseq::tax_glom()}} in three important ways:
 \itemize{
 \item It is based on dplyr function and thus much faster
 \item It does not preserve the phy_tree slot
 \item It only preserves taxonomic ranks up to \code{taxrank} and discard all other ones.
 The "archetype" (OTU name) and sequence for each group are chosen as those from the most abundant taxa
-within that group (for compatibility with \code{\link[=tax_glom]{tax_glom()}})
+within that group (for compatibility with \code{\link[phyloseq:tax_glom]{phyloseq::tax_glom()}})
 }
 }
 \examples{
@@ -38,5 +38,5 @@ data(food)
 fast_tax_glom(food, "Species")
 }
 \seealso{
-\code{\link[=tax_glom]{tax_glom()}}, \code{\link[=merge_taxa]{merge_taxa()}}
+\code{\link[phyloseq:tax_glom]{phyloseq::tax_glom()}}, \code{\link[phyloseq:merge_taxa-methods]{phyloseq::merge_taxa()}}
 }

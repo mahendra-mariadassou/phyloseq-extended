@@ -2,8 +2,8 @@
 #'
 #' @title incidence_matrix
 #' @param phy Required. A \code{phylo} class object
-#' @return An incidence matrix M of size nedges(tree) x ntaxa(tree) where
-#'         M[i,j] is set to 1 if taxa derives from edge i and 0 otherwise.
+#' @return An incidence matrix `M` of size nedges(tree) x ntaxa(tree) where
+#'         `M[i,j]` is set to 1 if taxa derives from edge i and 0 otherwise.
 #' @note incidence_matrix assumes that the tree is rooted. If not, it roots it
 #'       it at an arbitrary taxa (taxa 1).
 #'
@@ -716,19 +716,19 @@ support_taxa <- function(physeq, epca, choices = seq(epca$number.components),
 #' @param epca Required. An \code{\link{edge_pca}} class object
 #' @param choices Required. Ordination axes.
 #' @param width.lim Optional. Numeric. Minimum and maximal edge after fattening.
-#'                  Defaults to c(0.1, 4). Set to c(0, x) for true linear scaling.
+#'                  Defaults to `c(0.1, 4)`. Set to `c(0, x)` for true linear scaling.
 #' @param fatten.edges.by Required. Aesthetics that will be used for fattening.
 #'                        Subset of 'size' and 'alpha'.
 #' @param fatten.tips Optional. Logical. Should tips be fattened like pendant edges.
 #'                    Defaults to FALSE.
 #' @param color Optional. Color vector of length 2 used to distinguish positive
-#'              loading edges (color[1]) and negative loading edges (color[2]).
+#'              loading edges (`color[1]`) and negative loading edges (`color[2]`).
 #'              Defaults to c("#EF8A62", "#67A9CF")
 #' @param color.tip.by Optional. Either a single character string matching a variable
 #'              name in the corresponding tax_table of `physeq`, or a factor with
-#'              the same length as the number of taxa in `physeq`. If NULL, nothing happens.
+#'              the same length as the number of taxa in `physeq`. If `NULL`, nothing happens.
 #' @param missing.color Optional. Color used for tips and edges with 0 loading.
-#'                      Defaults to NULL. If NULL, nothing happens. Use "white", "transparent",
+#'                      Defaults to `NULL`. If `NULL`, nothing happens. Use "white", "transparent",
 #'                      or par("bg") to remove them from plot.
 #' @param ... Additional arguments passed on to plot.phylo
 #' @export
